@@ -264,8 +264,8 @@ body { background-color: #fcd0fe; }
   </div>
 
   <div class="retro-footer">
-    /wired/ — anonymous board // demo mode<br>
-    no accounts ∗ no logs ∗ <span class="blink">∗</span> report rule violations<br>
+    /wired/ — anonymous board<br>
+    no accounts ∗ no logs ∗ <span class="blink">∗</span> rate limited<br>
     Best viewed with Copland OS Navigator
   </div>
 
@@ -277,66 +277,59 @@ body { background-color: #fcd0fe; }
   <div id="thread-detail-inner"></div>
 
   <div class="retro-footer">
-    /wired/ — thread view // demo mode
+    /wired/ — thread view
   </div>
 
 </div>
 
 <script>
-// ── Rate limiting ──
-let lastPostTime = 0;
-const POST_DELAY_MS = 60000;
-function canPost() { return Date.now() - lastPostTime > POST_DELAY_MS; }
+const API = '';  // same-origin; no base URL needed
 
-// ── State ──
-let localThreads = JSON.parse(JSON.stringify(THREADS));
-let nextNo = 1100;
-
-function pad(n) { return String(n).padStart(2,'0'); }
-function nowStr() {
-  const d = new Date();
-  return `${d.getFullYear()}.${pad(d.getMonth()+1)}.${pad(d.getDate())} ${pad(d.getHours())}:${pad(d.getMinutes())}`;
-}
 function esc(s) {
   return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
 }
 function showError(el, msg) { el.textContent = '∗ ' + msg; el.style.display = 'block'; }
+function hideError(el) { el.style.display = 'none'; }
 
 // ── Views ──
 function showBoard() {
   document.getElementById('view-list').style.display = '';
   document.getElementById('view-thread').style.display = 'none';
   document.getElementById('addr-bar').value = 'wired://board/wired/';
-  renderThreadList();
+  loadThreads();
   window.scrollTo(0,0);
 }
 
-function renderThreadList() {
-  // Re-inject counter since innerHTML replaces it
-  const counterEl = document.querySelector('#view-list .retro-counter');
-  if (!counterEl) {
-    // already rendered; skip
+async function loadThreads() {
+  const list = document.getElementById('thread-list');
+  const stats = document.getElementById('stats-bar');
+  list.innerHTML = '<div style="font-family:\'Silkscreen\',monospace;font-size:10px;color:#6a0d91;opacity:0.6;padding:8px 0;">loading...</div>';
+
+  let data;
+  try {
+    const r = await fetch(`${API}/api/board/threads`);
+    if (!r.ok) throw new Error(`${r.status}`);
+    data = await r.json();
+  } catch (e) {
+    list.innerHTML = '<div style="font-family:\'Silkscreen\',monospace;font-size:10px;color:#b30000;padding:8px 0;">∗ could not load threads. try refreshing.</div>';
+    return;
   }
 
-  const pinned = localThreads.filter(t => t.pinned);
-  const rest   = localThreads.filter(t => !t.pinned);
-  const all    = [...pinned, ...rest];
+  const threads = data.threads;
+  const postCount = threads.reduce((a, t) => a + (t.replyCount ?? 0) + 1, 0);
+  stats.textContent = `threads: ${threads.length}  ∗  posts: ${postCount}  ∗  anonymous`;
 
-  document.getElementById('stats-bar').textContent =
-    `threads: ${all.length} / ${BOARD_META.maxThreads}  ∗  posts: ${all.reduce((a,t) => a + t.replies.length + 1, 0)}  ∗  anonymous`;
-
-  document.getElementById('thread-list').innerHTML = all.map(t => `
-    <div class="thread-entry" onclick="showThread(${t.id})">
+  list.innerHTML = threads.map(t => `
+    <div class="thread-entry" onclick="openThread(${t.id})">
       <div class="thread-entry-head">
         <span class="thread-no">No.${t.no}</span>
         ${t.pinned ? '<span class="badge-pin">PIN</span>' : ''}
-        ${t.isNew ? '<span class="badge-new">NEW</span>' : ''}
-        <span style="margin-left:auto;font-family:'Press Start 2P',monospace;font-size:7px;color:#6a0d91;opacity:0.5;">${t.time}</span>
+        <span style="margin-left:auto;font-family:'Press Start 2P',monospace;font-size:7px;color:#6a0d91;opacity:0.5;">${esc(t.time)}</span>
       </div>
       <div class="thread-entry-body">
         <div class="thread-subject">${t.subject ? esc(t.subject) : '<span style="opacity:0.45;font-weight:400;">(no subject)</span>'}</div>
-        <div class="thread-preview">${esc(t.body.split('\n')[0].slice(0,120))}${t.body.length > 120 ? '…' : ''}</div>
-        <div class="thread-meta">[ ${t.replies.length} ${t.replies.length === 1 ? 'reply' : 'replies'} ]  ∗  click to read thread</div>
+        <div class="thread-preview">${esc((t.body || '').split('\n')[0].slice(0,120))}${(t.body || '').length > 120 ? '…' : ''}</div>
+        <div class="thread-meta">[ ${t.replyCount} ${t.replyCount === 1 ? 'reply' : 'replies'} ]  ∗  click to read thread</div>
       </div>
     </div>
     <div class="pixel-hr"></div>
@@ -344,17 +337,34 @@ function renderThreadList() {
 }
 
 // ── Thread detail ──
-function showThread(id) {
-  const t = localThreads.find(x => x.id === id);
-  if (!t) return;
-
+async function openThread(id) {
   document.getElementById('view-list').style.display = 'none';
   document.getElementById('view-thread').style.display = '';
+  document.getElementById('addr-bar').value = 'wired://board/wired/thread/…';
+  document.getElementById('thread-detail-inner').innerHTML =
+    '<div style="font-family:\'Silkscreen\',monospace;font-size:10px;color:#6a0d91;opacity:0.6;padding:16px 0;">loading...</div>';
+  window.scrollTo(0,0);
+
+  let data;
+  try {
+    const r = await fetch(`${API}/api/board/threads/${id}`);
+    if (!r.ok) throw new Error(`${r.status}`);
+    data = await r.json();
+  } catch (e) {
+    document.getElementById('thread-detail-inner').innerHTML =
+      '<div style="font-family:\'Silkscreen\',monospace;font-size:10px;color:#b30000;padding:16px 0;">∗ could not load thread. <a onclick="showBoard()" style="cursor:pointer;text-decoration:underline;">go back</a></div>';
+    return;
+  }
+
+  renderThread(data.thread, data.replies);
+}
+
+function renderThread(t, replies) {
   document.getElementById('addr-bar').value = `wired://board/wired/thread/${t.no}`;
 
   const allPosts = [
     { no: t.no, time: t.time, name: t.name, body: t.body, isOP: true },
-    ...t.replies
+    ...replies
   ];
 
   const postsHtml = allPosts.map(p => `
@@ -363,10 +373,9 @@ function showThread(id) {
         <span class="post-name">${esc(p.name)}</span>
         <span class="post-num">No.${p.no}</span>
         ${p.isOP ? '<span class="badge-pin" style="background:#89ad25;border-color:#5a7a10;">OP</span>' : ''}
-        <span class="post-time">${p.time}</span>
+        <span class="post-time">${esc(p.time)}</span>
         <div class="post-actions">
           <button class="post-action-btn" onclick="quotePost(${p.no})">[ quote ]</button>
-          <button class="post-action-btn" style="color:#b30000;">[ report ]</button>
         </div>
       </div>
       <div class="post-block-body">${renderPostBody(esc(p.body))}</div>
@@ -376,7 +385,7 @@ function showThread(id) {
   document.getElementById('thread-detail-inner').innerHTML = `
     <div class="retro-header" style="margin-bottom:10px;">
       <h1 style="font-size:11px;">${esc(t.subject || '(no subject)')}</h1>
-      <div class="subtitle">/wired/ No.${t.no}  ∗  ${t.replies.length} replies</div>
+      <div class="subtitle">/wired/ No.${t.no}  ∗  ${replies.length} ${replies.length === 1 ? 'reply' : 'replies'}</div>
     </div>
 
     <div class="retro-nav">
@@ -402,8 +411,6 @@ function showThread(id) {
 
     ${sparkles(['★','∗','☆','∗','★','∗','☆','∗'])}
   `;
-
-  window.scrollTo(0,0);
 }
 
 function renderPostBody(html) {
@@ -419,58 +426,67 @@ function quotePost(no) {
 }
 
 // ── Submit thread ──
-function submitThread() {
+async function submitThread() {
   const body    = document.getElementById('nt-body').value.trim();
   const subject = document.getElementById('nt-subject').value.trim();
-  const name    = document.getElementById('nt-name').value.trim() || 'Anonymous';
+  const name    = document.getElementById('nt-name').value.trim();
   const err     = document.getElementById('nt-error');
 
   if (!body) { showError(err, 'Post body is required.'); return; }
-  if (!canPost()) {
-    const wait = Math.ceil((POST_DELAY_MS - (Date.now() - lastPostTime)) / 1000);
-    showError(err, `Please wait ${wait}s before posting again.`);
-    return;
+  hideError(err);
+
+  const btn = document.querySelector('.post-form-box .post-btn');
+  btn.disabled = true;
+
+  try {
+    const r = await fetch(`${API}/api/board/threads`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ name: name || undefined, subject: subject || undefined, body }),
+    });
+    const data = await r.json();
+    if (!r.ok) { showError(err, data.error || `error ${r.status}`); return; }
+
+    document.getElementById('nt-body').value = '';
+    document.getElementById('nt-subject').value = '';
+    document.getElementById('nt-name').value = '';
+    loadThreads();
+  } catch (e) {
+    showError(err, 'network error — try again');
+  } finally {
+    btn.disabled = false;
   }
-
-  localThreads.unshift({
-    id: Date.now(), no: nextNo++, time: nowStr(), name,
-    subject: subject || null, body, img: null,
-    replies: [], isNew: true, pinned: false,
-  });
-
-  if (localThreads.length > BOARD_META.maxThreads) {
-    const pinned = localThreads.filter(x => x.pinned);
-    const rest   = localThreads.filter(x => !x.pinned);
-    localThreads = [...pinned, ...rest.slice(0, BOARD_META.maxThreads - pinned.length)];
-  }
-
-  lastPostTime = Date.now();
-  document.getElementById('nt-body').value = '';
-  document.getElementById('nt-subject').value = '';
-  document.getElementById('nt-name').value = '';
-  err.style.display = 'none';
-  renderThreadList();
 }
 
 // ── Submit reply ──
-function submitReply(threadId) {
+async function submitReply(threadId) {
   const body = document.getElementById('reply-body').value.trim();
-  const name = document.getElementById('reply-name').value.trim() || 'Anonymous';
+  const name = document.getElementById('reply-name').value.trim();
   const err  = document.getElementById('reply-error');
 
   if (!body) { showError(err, 'Reply body is required.'); return; }
-  if (!canPost()) {
-    const wait = Math.ceil((POST_DELAY_MS - (Date.now() - lastPostTime)) / 1000);
-    showError(err, `Please wait ${wait}s before posting again.`);
-    return;
+  hideError(err);
+
+  const btn = document.querySelector('.reply-box .post-btn');
+  btn.disabled = true;
+
+  try {
+    const r = await fetch(`${API}/api/board/threads/${threadId}/reply`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ name: name || undefined, body }),
+    });
+    const data = await r.json();
+    if (!r.ok) { showError(err, data.error || `error ${r.status}`); return; }
+
+    document.getElementById('reply-body').value = '';
+    document.getElementById('reply-name').value = '';
+    openThread(threadId);
+  } catch (e) {
+    showError(err, 'network error — try again');
+  } finally {
+    btn.disabled = false;
   }
-
-  const t = localThreads.find(x => x.id === threadId);
-  if (!t) return;
-
-  t.replies.push({ no: nextNo++, time: nowStr(), name, body });
-  lastPostTime = Date.now();
-  showThread(threadId);
 }
 
 // ── Navigation ──
@@ -486,7 +502,7 @@ function goBack() {
 
 // ── Init ──
 document.getElementById('counter-slot').innerHTML = counter();
-renderThreadList();
+loadThreads();
 </script>
 </body>
 </html>

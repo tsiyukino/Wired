@@ -29,6 +29,20 @@ app.use((req, res, next) => {
   next();
 });
 
+// Root → entry point
+app.get('/', (req, res) => res.sendFile(path.join(ROOT, 'copland-os.html')));
+
+// Clean URLs — /foo serves /foo.html, /foo/bar serves /foo/bar.html
+// Skips paths that already have an extension, API routes, and WS upgrades.
+app.use((req, res, next) => {
+  if (req.path.includes('.') || req.path.startsWith('/api') || req.path.startsWith('/ws')) {
+    return next();
+  }
+  res.sendFile(path.join(ROOT, req.path + '.html'), err => {
+    if (err) next();
+  });
+});
+
 // Static files — serve the project root (minus the excluded paths above)
 app.use(express.static(ROOT));
 

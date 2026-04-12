@@ -194,7 +194,7 @@ html, body { height: 100%; overflow: hidden; }
   <div id="lobby-header">
     <div>
       <div class="lobby-title">∗ WIRED LOBBY ∗</div>
-      <div class="lobby-sub">anonymous instant messaging // no logs kept // demo mode</div>
+      <div class="lobby-sub">anonymous instant messaging // no logs kept</div>
     </div>
     <div class="online-pill" id="online-pill">● 1 online</div>
   </div>
@@ -223,45 +223,43 @@ html, body { height: 100%; overflow: hidden; }
 </div>
 
 <script>
-let lastSendTime = 0;
-const SEND_DELAY_MS = 3000;
-let myColor = ANON_COLORS[Math.floor(Math.random() * ANON_COLORS.length)];
-let msgId = SEED_MESSAGES.length + 1;
-let onlineCount = Math.floor(Math.random() * 8) + 3;
+const API = '';
+const WS_URL = (location.protocol === 'https:' ? 'wss://' : 'ws://') + location.host + '/ws/lobby';
+const MAX_VISIBLE = 120;  // trim message history in DOM
+
+let ws = null;
 let msgCount = 0;
 
-const msgArea   = document.getElementById('msg-area');
-const chatInput = document.getElementById('chat-input');
-const chatName  = document.getElementById('chat-name');
-const rateMsg   = document.getElementById('rate-msg');
+const msgArea    = document.getElementById('msg-area');
+const chatInput  = document.getElementById('chat-input');
+const chatName   = document.getElementById('chat-name');
+const rateMsg    = document.getElementById('rate-msg');
 const onlinePill = document.getElementById('online-pill');
 
 function esc(s) {
   return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
 }
+function pad(n) { return String(n).padStart(2,'0'); }
 function nowTime() {
   const d = new Date();
   return pad(d.getHours()) + ':' + pad(d.getMinutes());
 }
-function pad(n) { return String(n).padStart(2,'0'); }
 
 function renderMsg(m, isSystem) {
   const row = document.createElement('div');
   row.className = 'msg-row' + (isSystem ? ' sys-row' : '');
-
   const textHtml = isSystem
     ? `<span class="msg-text sys-text">${esc(m.text)}</span>`
     : `<span class="msg-text">${renderText(esc(m.text))}</span>`;
-
   row.innerHTML = `
-    <span class="msg-time">${m.time}</span>
-    <span class="msg-name" style="color:${m.color}">${esc(m.name)}</span>
+    <span class="msg-time">${esc(m.time)}</span>
+    <span class="msg-name" style="color:${esc(m.color)}">${esc(m.name)}</span>
     ${textHtml}
   `;
   msgArea.appendChild(row);
   msgArea.scrollTop = msgArea.scrollHeight;
   msgCount++;
-  if (msgCount > LOBBY_META.maxHistory + 20) {
+  if (msgCount > MAX_VISIBLE) {
     msgArea.firstChild && msgArea.removeChild(msgArea.firstChild);
   }
 }
@@ -280,65 +278,64 @@ function addHr() {
   msgArea.appendChild(hr);
 }
 
-function loadSeed() {
-  SEED_MESSAGES.forEach(m => renderMsg(m, false));
+// ── Load history then open WebSocket ──
+async function initLobby() {
+  try {
+    const r = await fetch(`${API}/api/lobby/history`);
+    if (r.ok) {
+      const { messages } = await r.json();
+      messages.forEach(m => renderMsg(m, false));
+    }
+  } catch {}
   addHr();
-  sysMsg('You have joined the lobby. Say something.');
+  connectWs();
 }
 
+// ── WebSocket ──
+let reconnectDelay = 2000;
+
+function connectWs() {
+  ws = new WebSocket(WS_URL);
+
+  ws.addEventListener('open', () => {
+    onlinePill.textContent = '● CONNECTED';
+    sysMsg('connected to the wired. say something.');
+    reconnectDelay = 2000;
+  });
+
+  ws.addEventListener('message', (event) => {
+    let msg;
+    try { msg = JSON.parse(event.data); } catch { return; }
+    renderMsg(msg, false);
+  });
+
+  ws.addEventListener('close', () => {
+    onlinePill.textContent = '○ DISCONNECTED';
+    sysMsg(`signal lost. reconnecting in ${reconnectDelay / 1000}s…`);
+    setTimeout(() => {
+      reconnectDelay = Math.min(reconnectDelay * 2, 30000);
+      connectWs();
+    }, reconnectDelay);
+  });
+
+  ws.addEventListener('error', () => ws.close());
+}
+
+// ── Send ──
 function sendMessage() {
   const text = chatInput.value.trim();
   if (!text) return;
+  if (text.length > 500) { rateMsg.textContent = '∗ too long (max 500 chars)'; return; }
 
-  if (Date.now() - lastSendTime < SEND_DELAY_MS) {
-    const wait = Math.ceil((SEND_DELAY_MS - (Date.now() - lastSendTime)) / 1000);
-    rateMsg.textContent = `∗ slow down — wait ${wait}s`;
+  if (!ws || ws.readyState !== WebSocket.OPEN) {
+    rateMsg.textContent = '∗ not connected';
     return;
   }
-  if (text.length > 500) { rateMsg.textContent = '∗ too long (max 500 chars)'; return; }
 
   rateMsg.textContent = '';
   const name = chatName.value.trim() || 'Anonymous';
-  renderMsg({ id: msgId++, time: nowTime(), name, color: myColor, text }, false);
+  ws.send(JSON.stringify({ name, text }));
   chatInput.value = '';
-  lastSendTime = Date.now();
-  simulateReply();
-}
-
-const BOT_LINES = [
-  'received.', '...', 'copy that.',
-  'the wire carries your words.',
-  '銅線は覚えている。',
-  'no matter where you go.',
-  'everyone is always connected.',
-  'close the world. open the next.',
-  'present day, present time.',
-];
-
-function simulateReply() {
-  if (Math.random() > 0.5) return;
-  const delay = 2000 + Math.random() * 5000;
-  setTimeout(() => {
-    const color = ANON_COLORS[Math.floor(Math.random() * ANON_COLORS.length)];
-    const text = BOT_LINES[Math.floor(Math.random() * BOT_LINES.length)];
-    renderMsg({ id: msgId++, time: nowTime(), name: 'Anonymous', color, text }, false);
-    onlineCount = Math.max(1, onlineCount + (Math.random() > 0.5 ? 1 : -1));
-    onlinePill.textContent = `● ${onlineCount} online`;
-  }, delay);
-}
-
-function ambientTraffic() {
-  const delay = 15000 + Math.random() * 30000;
-  setTimeout(() => {
-    if (Math.random() > 0.55) {
-      const color = ANON_COLORS[Math.floor(Math.random() * ANON_COLORS.length)];
-      const texts = ['...', 'anyone here?', 'still connected.',
-        '深夜のwiredは静か。', 'signal check.', 'the wire hums at 60hz.', 'layer 07 confirmed.'];
-      renderMsg({ id: msgId++, time: nowTime(), name: 'Anonymous', color,
-        text: texts[Math.floor(Math.random() * texts.length)] }, false);
-    }
-    ambientTraffic();
-  }, delay);
 }
 
 chatInput.addEventListener('keydown', e => {
@@ -351,8 +348,7 @@ function goHome() {
   } else { window.location.href = '../copland-os.html'; }
 }
 
-loadSeed();
-ambientTraffic();
+initLobby();
 chatInput.focus();
 </script>
 </body>
