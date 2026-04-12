@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>作品集 // wired</title>
+<link rel="stylesheet" href="retro.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.9/katex.min.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.9/katex.min.js"></script>
+<script src="retro-utils.js"></script>
+<script src="content/works.js"></script>
+</head>
+<body class="theme-portfolio">
+
+<!-- WINDOWS XP CHROME -->
+<div class="win-chrome">
+  <div class="win-chrome-row1">
+    <button class="win-btn" onclick="goTo('terminal')">← 戻る</button>
+    <button class="win-btn" style="opacity:0.45;cursor:default;" title="進むページがありません">→ 進む</button>
+    <button class="win-btn" onclick="location.reload()">⟳ 更新</button>
+    <button class="win-btn" onclick="goTo('terminal')">🏠 ホーム</button>
+    <span style="display:inline-block;width:1px;height:28px;background:#aaa;margin:0 4px;"></span>
+    <button class="win-btn" onclick="goTo('blog')">日記</button>
+    <button class="win-btn" onclick="goTo('portfolio')">作品</button>
+    <button class="win-btn" onclick="goTo('micro')">一言</button>
+    <button class="win-btn" onclick="goTo('about')">自己紹介</button>
+    <button class="win-btn" onclick="goTo('links')">リンク</button>
+    <span class="win-chrome-title">COPLAND OS NAVIGATOR v4.017</span>
+  </div>
+  <div class="win-chrome-row2">
+    <span class="win-addr-label">アドレス ▼</span>
+    <input type="text" class="win-addr-bar" value="http://www.wired.local/works/" readonly>
+  </div>
+  <div class="win-chrome-row3">
+    <span class="win-nav-icon">🌐</span>
+    <button class="win-nav-btn" onclick="goTo('portfolio')">◆ 作品集</button>
+    <span style="opacity:0.3">|</span>
+    <button class="win-nav-btn" onclick="goTo('terminal')">[ terminal ]</button>
+    <span class="blink" style="margin-left:auto;margin-right:8px;font-family:'Press Start 2P',monospace;font-size:8px;color:#4a7a0a;">∗ ONLINE ∗</span>
+  </div>
+</div>
+
+<div class="retro-deco-left"></div>
+<div class="retro-deco-right"></div>
+
+<div class="retro-container" id="root"></div>
+
+<script>
+function renderList() {
+  const entries = WORKS.map(p => `
+    <div class="blog-entry" onclick="renderDetail('${p.id}')">
+      <div class="blog-entry-head">
+        <div class="blog-date">◆ ${p.id}</div>
+        <div style="display:flex;align-items:center;gap:4px;">
+          <span class="blog-tags">${p.tech}</span>
+          ${p.isNew ? '<span class="badge-new">NEW</span>' : ''}
+        </div>
+      </div>
+      <div class="blog-entry-body">
+        <div class="blog-title">${p.title}</div>
+        <div class="blog-excerpt">${p.desc}</div>
+      </div>
+    </div>
+    <div class="pixel-hr"></div>
+  `).join('');
+
+  const lastUpdated = WORKS.find(w => w.isNew)?.date || WORKS[0]?.id || '—';
+
+  document.getElementById('root').innerHTML = `
+    <div class="retro-header">
+      <h1>■ 作品集 ■</h1>
+      <div class="subtitle">works // portfolio</div>
+    </div>
+
+    ${counter()}
+    ${NAV_HTML}
+
+    <div class="retro-marquee">
+      <div class="retro-marquee-inner">
+        ◆ portfolio // click any item to read more ◆ リンクフリー ◆ built on protocol_7 ◆ copper and code ◆
+      </div>
+    </div>
+
+    ${sparkles(['◆','◇','◆','◇','◆','◇','◆','◇'])}
+    <div class="deco-dots">◆ ◇ ◆ ◇ ◆</div>
+
+    ${entries}
+
+    <div class="kaomoji-strip">
+      <span class="kao">(ﾉ◕ヮ◕)ﾉ*:･ﾟ✧</span>
+      <span class="kao blink-slow">(ง •̀_•́)ง</span>
+      <span class="kao">＼(٥⁀▽⁀ )／</span>
+    </div>
+
+    <div class="deco-dots">◆ ◇ ◆ ◇ ◆</div>
+
+    <div class="retro-footer">
+      [your name] / works<br>
+      リンクフリー ∗ <span class="blink">∗</span> link-free<br>
+      Best viewed with Copland OS Navigator
+    </div>
+  `;
+}
+
+async function renderDetail(id) {
+  const item = WORKS.find(x => x.id === id);
+  if (!item) return;
+
+  let bodyMd = item.body || '';
+  if (item.bodyFile) {
+    try {
+      const res = await fetch('content/' + item.bodyFile);
+      if (res.ok) bodyMd = await res.text();
+    } catch (e) {
+      bodyMd = `*Error loading ${item.bodyFile}*`;
+    }
+  }
+
+  document.getElementById('root').innerHTML = `
+    ${NAV_HTML}
+    <a class="detail-back" onclick="renderList()">← back to 作品集</a>
+    <div class="detail-title">${item.title} ${item.isNew ? '<span class="badge-new">NEW</span>' : ''}</div>
+    <div class="pixel-hr"></div>
+    <div class="detail-body">${renderMarkdown(bodyMd)}</div>
+    <div class="pf-tech" style="margin-top:16px;">技術: ${item.tech}</div>
+    <div class="pixel-hr" style="margin-top:16px;"></div>
+    ${sparkles(['◆','◇','◆','◇','◆','◇','◆','◇'])}
+    <div class="retro-footer">[your name] / works</div>
+  `;
+  window.scrollTo(0, 0);
+}
+
+renderList();
+</script>
+</body>
+</html>

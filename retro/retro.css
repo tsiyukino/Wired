@@ -1,0 +1,716 @@
+@import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@300;400;500&family=Press+Start+2P&family=Silkscreen:wght@400;700&display=swap');
+
+/* ================================================================
+   RETRO.CSS — Y2K MAXIMALIST WIRED AESTHETIC
+   digi.html energy: Windows XP chrome, pastel pink chaos,
+   lime green text-shadows, purple scrollbars, groove borders
+================================================================ */
+
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0; padding: 0;
+  image-rendering: pixelated;
+}
+
+html, body {
+  width: 100%; min-height: 100%;
+  font-family: 'IBM Plex Mono', monospace;
+  font-weight: 300;
+  font-size: 16px;
+}
+
+a { text-decoration: none; }
+a:hover { text-decoration: underline; }
+
+/* ================================================================
+   Y2K PURPLE SCROLLBAR — straight from digi/partynight.css
+================================================================ */
+::-webkit-scrollbar { width: 17px; }
+::-webkit-scrollbar-button {
+  box-shadow: 0 0 5px black;
+  background-color: #dcdce8;
+  border-style: groove;
+}
+::-webkit-scrollbar-track {
+  box-shadow: 0 0 5px black;
+  background-color: #9ea4a7;
+  border-style: groove;
+}
+::-webkit-scrollbar-thumb {
+  background: #c677d3;
+  border-style: groove;
+  box-shadow: inset 0 0 2px black;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #b30000;
+  box-shadow: 0 0 5px black;
+}
+
+/* ================================================================
+   WINDOWS XP CHROME — top bar fixed, like digi.html .webed
+================================================================ */
+.win-chrome {
+  position: fixed;
+  top: 0; left: 0;
+  width: 100%;
+  height: 117px;
+  background-color: #dddde1;
+  box-shadow: 3px 2px 3px black;
+  z-index: 200;
+}
+
+/* Top row — icons bar */
+.win-chrome-row1 {
+  box-shadow: -39px 0px 1px #c8c9ce inset;
+  margin-top: 1px;
+  margin-left: 1px;
+  width: 99%;
+  max-height: 44px;
+  height: 44px;
+  display: flex;
+  align-items: center;
+  padding: 0 8px;
+  gap: 6px;
+}
+
+/* Icon buttons in top row */
+.win-btn {
+  background-color: #dddee7;
+  border: none;
+  border-style: outset;
+  box-shadow: 1px 1px 3px rgba(0,0,0,0.5), inset 1px 1px 1px rgba(255,255,255,0.6);
+  height: 32px;
+  padding: 0 10px;
+  cursor: pointer;
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 11px;
+  color: #000;
+  white-space: nowrap;
+}
+.win-btn:hover { filter: brightness(1.08); }
+.win-btn:active { box-shadow: inset 2px 2px 3px rgba(0,0,0,0.3); }
+
+.win-btn-icon {
+  background-color: lightgrey;
+  box-shadow: 1px 1px 3px rgba(0,0,0,0.8);
+  min-width: 30px;
+  border-style: 4px grey groove;
+  height: 27px;
+  padding: 0 8px;
+  cursor: pointer;
+  font-size: 11px;
+  border: none;
+}
+
+/* Section title in chrome */
+.win-chrome-title {
+  font-family: 'Press Start 2P', monospace;
+  font-size: 9px;
+  color: #2a0a3a;
+  letter-spacing: 2px;
+  margin-left: auto;
+  margin-right: 8px;
+  opacity: 0.7;
+}
+
+/* Address bar row */
+.win-chrome-row2 {
+  box-shadow: 0px 2px 1px #c8c9ce inset;
+  margin-top: 1px;
+  margin-left: 4px;
+  width: 95%;
+  height: 34px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 0 4px;
+}
+
+.win-addr-label {
+  font-family: 'MS Gothic', monospace;
+  font-size: 12px;
+  cursor: pointer;
+  border: 2px groove;
+  padding: 1px 4px;
+  white-space: nowrap;
+  color: #000;
+}
+
+.win-addr-bar {
+  font-family: 'MS Gothic', Courier, serif;
+  font-size: 12px;
+  background-color: #fcd0fe;
+  border: 3px groove;
+  height: 22px;
+  flex: 1;
+  padding: 0 4px;
+  color: #2a0a3a;
+}
+
+/* Nav buttons row */
+.win-chrome-row3 {
+  margin-top: 1px;
+  margin-left: 5px;
+  width: 99%;
+  height: 28px;
+  box-shadow: 0px 2px 1px #c8c9ce inset;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 0 4px;
+}
+
+.win-nav-btn {
+  background-color: #dddee7;
+  border: none;
+  top: -3px;
+  cursor: pointer;
+  color: black;
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 11px;
+  height: 24px;
+  padding: 0 10px;
+  position: relative;
+}
+.win-nav-btn:hover { text-decoration: underline; }
+
+.win-nav-icon {
+  background-color: #dddee7;
+  border: none;
+  height: 22px;
+  width: auto;
+  cursor: pointer;
+  position: relative;
+  top: -2px;
+  font-size: 14px;
+  padding: 0 3px;
+}
+
+/* ================================================================
+   SIDEBAR DECO STRIPS — striped left/right borders
+================================================================ */
+.retro-deco-left {
+  position: fixed; left: 0; top: 117px;
+  width: 18px; height: calc(100% - 117px); z-index: 10;
+}
+.retro-deco-right {
+  position: fixed; right: 0; top: 117px;
+  width: 18px; height: calc(100% - 117px); z-index: 10;
+}
+
+/* ================================================================
+   CONTAINER — pushed down past chrome
+================================================================ */
+.retro-container {
+  max-width: 860px;
+  margin: 0 auto;
+  padding: 134px 32px 80px;
+}
+
+/* ================================================================
+   HEADER — lime green with multi-shadow (digi txtonight energy)
+================================================================ */
+.retro-header {
+  text-align: center;
+  padding: 18px 0 12px;
+  border-bottom: 3px double currentColor;
+  margin-bottom: 12px;
+}
+.retro-header h1 {
+  font-family: 'Press Start 2P', monospace;
+  font-size: 15px;
+  font-weight: 400;
+  line-height: 1.9;
+  letter-spacing: 3px;
+  /* Party☆Night multi-shadow: lime + darkred/purple depth */
+  color: #89ad25;
+  text-shadow:
+    7px 8px 10px darkred,
+    -5px -6px 8px #b387d1,
+    -3px -4px 8px #b387d1,
+    2px 3px 5px black;
+}
+.retro-header .subtitle {
+  font-family: 'Silkscreen', monospace;
+  font-size: 11px;
+  color: #2a1a4a;
+  opacity: 0.7;
+  margin-top: 10px;
+  letter-spacing: 2px;
+  text-shadow: 1px 1px 2px #b387d1;
+}
+
+/* ================================================================
+   NAV — Silkscreen, inset box like IE toolbar
+================================================================ */
+.retro-nav {
+  text-align: center;
+  font-family: 'Silkscreen', monospace;
+  font-size: 12px;
+  letter-spacing: 1px;
+  padding: 6px 0;
+  border: 2px groove #c8c9ce;
+  background: #dddde1;
+  box-shadow: inset 0 0 3px rgba(0,0,0,0.15);
+  margin-bottom: 14px;
+}
+.retro-nav a {
+  color: #6a0d91;
+  cursor: pointer;
+  margin: 0 5px;
+  font-weight: 700;
+}
+.retro-nav a:hover { text-decoration: underline; color: #b30000; }
+.retro-nav .sep { opacity: 0.35; color: #555; }
+
+/* ================================================================
+   COUNTER — black digit display
+================================================================ */
+.retro-counter {
+  text-align: center;
+  font-family: 'Press Start 2P', monospace;
+  font-size: 9px;
+  margin: 8px 0;
+  letter-spacing: 1px;
+  color: #2a0a3a;
+}
+.hit-counter {
+  display: inline-flex; gap: 0;
+  border: 2px solid #6a0d91;
+  background: #000;
+  margin-left: 8px;
+  vertical-align: middle;
+}
+.hit-digit {
+  width: 20px; height: 26px;
+  background: #000;
+  font-family: 'Press Start 2P', monospace;
+  font-size: 11px;
+  display: flex; align-items: center; justify-content: center;
+  border-right: 1px solid rgba(255,255,255,0.1);
+  color: #c677d3;
+}
+.hit-digit:last-child { border-right: none; }
+
+/* ================================================================
+   PIXEL HRs — pink/magenta by default, overridden per theme
+================================================================ */
+.pixel-hr {
+  height: 4px; width: 100%; margin: 10px 0;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='8' height='4'%3E%3Crect x='0' y='0' width='4' height='4' fill='%23c677d3'/%3E%3Crect x='4' y='0' width='4' height='4' fill='%23fcd0fe'/%3E%3C/svg%3E");
+  background-size: 8px 4px; background-repeat: repeat-x;
+}
+.pixel-hr-green {
+  height: 4px; width: 100%; margin: 10px 0;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='4'%3E%3Crect x='0' y='0' width='4' height='4' fill='%2370a070'/%3E%3Crect x='4' y='0' width='4' height='4' fill='%23b0d8b0'/%3E%3Crect x='8' y='0' width='4' height='4' fill='%2370a070'/%3E%3C/svg%3E");
+  background-size: 12px 4px; background-repeat: repeat-x;
+}
+.pixel-hr-purple {
+  height: 6px; width: 100%; margin: 10px 0;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='6' height='6'%3E%3Crect width='6' height='6' fill='%239080b0'/%3E%3Crect x='0' y='0' width='2' height='2' fill='%23c8b8e8'/%3E%3Crect x='2' y='2' width='2' height='2' fill='%23c8b8e8'/%3E%3Crect x='4' y='4' width='2' height='2' fill='%23c8b8e8'/%3E%3C/svg%3E");
+  background-size: 6px 6px; background-repeat: repeat-x;
+}
+.pixel-hr-gold {
+  height: 4px; width: 100%; margin: 10px 0;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='8' height='4'%3E%3Crect x='0' y='0' width='4' height='4' fill='%23c0a850'/%3E%3Crect x='4' y='0' width='4' height='4' fill='%23f0d888'/%3E%3C/svg%3E");
+  background-size: 8px 4px; background-repeat: repeat-x;
+}
+
+/* ================================================================
+   BADGES — flashing NEW / UPDATE
+================================================================ */
+.badge-new {
+  display: inline-block;
+  background: #ff0000; color: #ffff00;
+  font-family: 'Press Start 2P', monospace;
+  font-size: 9px; padding: 3px 7px;
+  border: 2px solid #ffff00;
+  animation: badge-flash 0.6s step-end infinite;
+  vertical-align: middle; margin-left: 6px;
+}
+@keyframes badge-flash {
+  0%,100% { background: #ff0000; color: #ffff00; border-color: #ffff00; }
+  50%      { background: #ffff00; color: #ff0000; border-color: #ff0000; }
+}
+
+.badge-update {
+  display: inline-block;
+  background: #6a0d91; color: #fcd0fe;
+  font-family: 'Press Start 2P', monospace;
+  font-size: 9px; padding: 3px 7px;
+  border: 2px solid #c677d3;
+  animation: badge-update-pulse 1.0s step-end infinite;
+  vertical-align: middle; margin-left: 6px;
+}
+@keyframes badge-update-pulse {
+  0%,100% { background: #6a0d91; border-color: #c677d3; }
+  50%      { background: #c677d3; border-color: #fcd0fe; }
+}
+
+/* ================================================================
+   SPARKLES — staggered step blink, pink/purple
+================================================================ */
+.sparkle-row {
+  display: flex; gap: 8px; align-items: center;
+  font-size: 20px; margin: 8px 0;
+  justify-content: center;
+}
+.spark { animation: spark-blink 1.2s step-end infinite; color: #c677d3; }
+.spark:nth-child(1) { animation-delay: 0.00s; }
+.spark:nth-child(2) { animation-delay: 0.15s; }
+.spark:nth-child(3) { animation-delay: 0.30s; }
+.spark:nth-child(4) { animation-delay: 0.45s; }
+.spark:nth-child(5) { animation-delay: 0.60s; }
+.spark:nth-child(6) { animation-delay: 0.75s; }
+.spark:nth-child(7) { animation-delay: 0.90s; }
+.spark:nth-child(8) { animation-delay: 1.05s; }
+@keyframes spark-blink {
+  0%,100% { opacity: 0.2; }
+  33%      { opacity: 1.0; }
+  66%      { opacity: 0.55; }
+}
+
+/* ================================================================
+   BLINK TEXT
+================================================================ */
+.blink { animation: do-blink 1s step-end infinite; }
+@keyframes do-blink { 0%,100% { opacity:1; } 50% { opacity:0; } }
+
+.blink-slow { animation: do-blink 2s step-end infinite; }
+
+/* ================================================================
+   UNDER CONSTRUCTION — hazard stripe
+================================================================ */
+.under-construction {
+  height: 30px;
+  background: repeating-linear-gradient(-45deg,
+    #ffcc00 0px, #ffcc00 12px,
+    #000000 12px, #000000 24px);
+  border-top: 2px solid #888;
+  border-bottom: 2px solid #888;
+  display: flex; align-items: center; justify-content: center;
+  font-family: 'Press Start 2P', monospace;
+  font-size: 10px; color: #000;
+  letter-spacing: 2px; margin: 10px 0;
+}
+.under-construction span {
+  background: #ffcc00; padding: 2px 12px;
+  border: 1px solid #000;
+}
+
+/* ================================================================
+   MARQUEE — Silkscreen, pink border
+================================================================ */
+.retro-marquee {
+  font-family: 'Silkscreen', monospace;
+  font-size: 12px; letter-spacing: 0.5px;
+  overflow: hidden; white-space: nowrap; margin: 5px 0;
+  border-top: 2px groove #c677d3;
+  border-bottom: 2px groove #c677d3;
+  padding: 4px 0;
+  background: #fcd0fe;
+  color: #6a0d91;
+}
+.retro-marquee-inner {
+  display: inline-block;
+  animation: marquee-scroll 24s linear infinite;
+}
+@keyframes marquee-scroll {
+  0%   { transform: translateX(100vw); }
+  100% { transform: translateX(-100%); }
+}
+
+/* ================================================================
+   DECO TEXT
+================================================================ */
+.last-updated {
+  text-align: right;
+  font-family: 'Press Start 2P', monospace;
+  font-size: 9px; color: #6a0d91; opacity: 0.5; margin-bottom: 10px;
+}
+.deco-dots {
+  text-align: center; font-size: 16px;
+  color: #c677d3; letter-spacing: 8px; margin: 10px 0;
+}
+.jp-only-banner {
+  text-align: center; font-size: 11px; color: #6a0d91; opacity: 0.5;
+  letter-spacing: 1px; margin-bottom: 8px; font-style: italic;
+}
+
+/* ================================================================
+   KAOMOJI STRIP
+================================================================ */
+.kaomoji-strip {
+  font-size: 20px; line-height: 2.4;
+  font-family: 'IBM Plex Mono', monospace;
+  letter-spacing: 2px; text-align: center;
+  margin: 10px 0; color: #6a0d91;
+}
+.kaomoji-strip .kao { display: inline-block; margin: 0 10px; }
+
+/* ================================================================
+   BLOG / PORTFOLIO ENTRIES — Windows 98 inset box
+================================================================ */
+.blog-entry { cursor: pointer; margin-bottom: 0; }
+.blog-entry:hover .blog-entry-head { filter: brightness(1.08); }
+
+.blog-entry-head {
+  padding: 4px 8px;
+  border-bottom: 1px solid rgba(0,0,0,0.15);
+  display: flex; justify-content: space-between; align-items: center;
+  flex-wrap: wrap; gap: 4px;
+  /* digi.html TONIGHT box feel */
+  background: #f0a8e0;
+  box-shadow: inset 0 0 2px black;
+  border: 2px groove #dbb6af;
+}
+.blog-entry-body {
+  background: rgba(252,208,254,0.55);
+  border: 2px groove #dbb6af;
+  border-top: none;
+  box-shadow: 2px 1px 5px #dbb6af inset;
+  padding: 8px 10px 12px;
+  margin-bottom: 10px;
+}
+.blog-date {
+  font-family: 'Press Start 2P', monospace;
+  font-size: 8px; font-weight: 400; color: #6a0d91; letter-spacing: 1px;
+}
+.blog-tags {
+  font-family: 'Silkscreen', monospace; font-size: 11px; color: #b30000; opacity: 0.8;
+}
+.blog-title {
+  font-family: 'Silkscreen', monospace;
+  font-size: 17px; font-weight: 700;
+  margin-bottom: 6px; letter-spacing: 0.5px;
+  color: #89ad25;
+  text-shadow:
+    2px 1px 3px #375c4c,
+    1px 2px 7px rgba(0,0,0,0.2),
+    -1px -1px 3px white;
+}
+.blog-excerpt { font-size: 13px; line-height: 1.7; color: #2a0a3a; opacity: 0.8; }
+
+/* ================================================================
+   DETAIL VIEW
+================================================================ */
+.detail-back {
+  font-family: 'Silkscreen', monospace;
+  font-size: 12px; cursor: pointer;
+  color: #6a0d91; opacity: 0.7;
+  margin-bottom: 16px; display: inline-block;
+  border: 2px groove #c677d3;
+  padding: 3px 10px;
+  background: #dddde1;
+}
+.detail-back:hover { opacity: 1; text-decoration: underline; }
+.detail-date {
+  font-family: 'Press Start 2P', monospace;
+  font-size: 9px; color: #6a0d91; opacity: 0.5; letter-spacing: 1px; margin-bottom: 8px;
+}
+.detail-title {
+  font-family: 'Silkscreen', monospace;
+  font-size: 22px; font-weight: 700;
+  margin-bottom: 14px; line-height: 1.5; letter-spacing: 0.5px;
+  color: #89ad25;
+  text-shadow:
+    7px 8px 10px darkred,
+    -5px -6px 8px #b387d1,
+    2px 3px 5px black;
+}
+.detail-body {
+  font-size: 15px; line-height: 2; font-weight: 300; letter-spacing: 0.2px;
+  color: #2a0a3a;
+}
+.detail-body h1 {
+  font-family: 'Press Start 2P'; font-size: 13px; font-weight:400;
+  margin: 22px 0 10px; line-height:1.8;
+  color: #89ad25;
+  text-shadow: 3px 3px 6px darkred, -2px -2px 4px #b387d1;
+}
+.detail-body h2 {
+  font-family: 'Silkscreen'; font-size: 18px; font-weight:700;
+  margin: 18px 0 8px; color: #6a0d91;
+  text-shadow: 1px 1px 3px #b387d1;
+}
+.detail-body h3 {
+  font-family: 'Silkscreen'; font-size: 15px; font-weight:700;
+  margin: 14px 0 6px; color: #6a0d91;
+}
+.detail-body p  { margin-bottom: 14px; }
+.detail-body strong { font-weight: 500; color: #6a0d91; }
+.detail-body em { font-style: italic; color: #b30000; }
+.detail-body code {
+  font-family: 'IBM Plex Mono', monospace; font-size: 13px;
+  padding: 2px 5px; border-radius: 2px;
+  background: rgba(198,119,211,0.15);
+  border: 1px solid rgba(198,119,211,0.3);
+  color: #6a0d91;
+}
+.detail-body pre {
+  font-family: 'IBM Plex Mono', monospace; font-size: 13px; line-height: 1.6;
+  padding: 12px 16px; margin: 12px 0; overflow-x: auto;
+  border: 2px groove #dbb6af;
+  background: rgba(252,208,254,0.3);
+  color: #2a0a3a;
+}
+.detail-body blockquote {
+  border-left: 4px solid #c677d3;
+  padding-left: 14px; margin: 12px 0; opacity: 0.8; font-style: italic;
+  color: #6a0d91;
+}
+.detail-body ul, .detail-body ol { margin: 8px 0 8px 20px; }
+.detail-body li { margin-bottom: 4px; }
+.detail-body hr { border: none; border-top: 2px groove #c677d3; margin: 12px 0; }
+.detail-body .math-block { display:block; text-align:center; margin:12px 0; font-size:14px; }
+
+/* ================================================================
+   PORTFOLIO ITEMS
+================================================================ */
+.pf-tech {
+  font-family: 'Silkscreen', monospace; font-size: 9px;
+  margin-top: 4px; color: #b30000; opacity: 0.7; letter-spacing: 0.5px;
+}
+
+/* ================================================================
+   MICRO POSTS — fcd0fe inset card
+================================================================ */
+.micro-item {
+  margin-bottom: 8px; padding: 8px 10px;
+  background: rgba(252,208,254,0.5);
+  border: 2px groove #dbb6af;
+  box-shadow: 2px 1px 4px #dbb6af inset;
+}
+.micro-time {
+  font-family: 'Press Start 2P', monospace;
+  font-size: 8px; color: #6a0d91; letter-spacing: 1px; margin-bottom: 8px;
+}
+.micro-text { font-size: 14px; line-height: 1.7; font-weight: 300; color: #2a0a3a; }
+
+/* ================================================================
+   ABOUT FIELDS
+================================================================ */
+.about-section { margin-bottom: 14px; }
+.about-label {
+  font-family: 'Press Start 2P', monospace; font-size: 9px; font-weight: 400;
+  color: #6a0d91; letter-spacing: 1.5px; text-transform: uppercase; margin-bottom: 6px;
+  opacity: 0.8;
+}
+.about-value { font-size: 15px; line-height: 1.7; font-weight: 300; color: #2a0a3a; }
+
+/* ================================================================
+   FOOTER
+================================================================ */
+.retro-footer {
+  font-family: 'Press Start 2P', monospace; font-size: 9px; font-weight: 400;
+  text-align: center; color: #6a0d91; opacity: 0.45; line-height: 2.4;
+  border-top: 2px groove #c677d3;
+  margin-top: 28px; padding: 14px 0 8px;
+}
+.retro-footer a { color: #6a0d91; }
+
+/* ================================================================
+   THEME: BLOG — fcd0fe pastel pink (primary Y2K theme)
+================================================================ */
+.theme-blog {
+  background-color: #fcd0fe;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='4' height='4'%3E%3Crect width='4' height='4' fill='%23fcd0fe'/%3E%3Crect x='0' y='0' width='2' height='2' fill='%23f0a8e0'/%3E%3Crect x='2' y='2' width='2' height='2' fill='%23f0a8e0'/%3E%3C/svg%3E");
+  background-size: 4px 4px;
+  color: #2a0a3a;
+}
+.theme-blog a { color: #6a0d91; }
+.theme-blog a:hover { color: #b30000; }
+.theme-blog .retro-deco-left,
+.theme-blog .retro-deco-right {
+  background: repeating-linear-gradient(0deg, #f0a8e0, #f0a8e0 6px, #c677d3 6px, #c677d3 12px);
+}
+.theme-blog .retro-deco-left  { border-right: 2px solid #9b3fb5; }
+.theme-blog .retro-deco-right { border-left:  2px solid #9b3fb5; }
+
+/* ================================================================
+   THEME: PORTFOLIO — lime green dot-matrix (89ad25 energy)
+================================================================ */
+.theme-portfolio {
+  background-color: #eefacc;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='8' height='8'%3E%3Crect width='8' height='8' fill='%23eefacc'/%3E%3Crect x='3' y='3' width='1' height='1' fill='%2389ad25' opacity='0.45'/%3E%3C/svg%3E");
+  background-size: 8px 8px;
+  color: #2a3a0a;
+}
+.theme-portfolio a { color: #4a7a0a; }
+.theme-portfolio a:hover { color: #b30000; }
+.theme-portfolio .retro-deco-left,
+.theme-portfolio .retro-deco-right {
+  background: repeating-linear-gradient(0deg, #c8e860, #c8e860 6px, #89ad25 6px, #89ad25 12px);
+}
+.theme-portfolio .retro-deco-left  { border-right: 2px solid #5a7a10; }
+.theme-portfolio .retro-deco-right { border-left:  2px solid #5a7a10; }
+.theme-portfolio .retro-header h1 { color: #4a7a0a; text-shadow: 7px 8px 10px #b30000, -3px -4px 8px #c677d3, 2px 3px 5px black; }
+.theme-portfolio .blog-entry-head { background: #c8e860; border-color: #89ad25; }
+.theme-portfolio .pixel-hr {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='4'%3E%3Crect x='0' y='0' width='4' height='4' fill='%2389ad25'/%3E%3Crect x='4' y='0' width='4' height='4' fill='%23c8e860'/%3E%3Crect x='8' y='0' width='4' height='4' fill='%2389ad25'/%3E%3C/svg%3E");
+  background-size: 12px 4px;
+}
+.theme-portfolio .hit-digit { color: #89ad25; }
+.theme-portfolio .spark { color: #89ad25; }
+.theme-portfolio .blog-title { color: #4a7a0a; }
+.theme-portfolio .retro-nav { background: #d4f070; }
+.theme-portfolio .retro-marquee { background: #c8e860; color: #2a3a0a; border-color: #89ad25; }
+.theme-portfolio ::-webkit-scrollbar-thumb { background: #89ad25; }
+.theme-portfolio ::-webkit-scrollbar-thumb:hover { background: #4a7a0a; }
+
+/* ================================================================
+   THEME: MICRO — deep purple crosshatch
+================================================================ */
+.theme-micro {
+  background-color: #e8d0ff;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='8' height='8'%3E%3Crect width='8' height='8' fill='%23e8d0ff'/%3E%3Crect x='0' y='0' width='1' height='8' fill='%23c677d3' opacity='0.5'/%3E%3Crect x='0' y='0' width='8' height='1' fill='%23c677d3' opacity='0.5'/%3E%3C/svg%3E");
+  background-size: 8px 8px;
+  color: #2a0a3a;
+}
+.theme-micro a { color: #6a0d91; }
+.theme-micro a:hover { color: #b30000; }
+.theme-micro .retro-deco-left,
+.theme-micro .retro-deco-right {
+  background: repeating-linear-gradient(0deg, #e8d0ff, #e8d0ff 6px, #c677d3 6px, #c677d3 12px);
+}
+.theme-micro .retro-deco-left  { border-right: 2px solid #6a0d91; }
+.theme-micro .retro-deco-right { border-left:  2px solid #6a0d91; }
+.theme-micro .hit-digit { color: #c677d3; }
+.theme-micro .spark { color: #9b3fb5; }
+.theme-micro .retro-header h1 { color: #6a0d91; text-shadow: 5px 6px 8px darkred, -3px -4px 6px #fcd0fe, 2px 2px 4px black; }
+.theme-micro .pixel-hr {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='6' height='6'%3E%3Crect width='6' height='6' fill='%236a0d91'/%3E%3Crect x='0' y='0' width='2' height='2' fill='%23e8d0ff'/%3E%3Crect x='2' y='2' width='2' height='2' fill='%23e8d0ff'/%3E%3Crect x='4' y='4' width='2' height='2' fill='%23e8d0ff'/%3E%3C/svg%3E");
+  background-size: 6px 6px; height: 6px;
+}
+
+/* ================================================================
+   THEME: ABOUT — warm parchment / tan
+================================================================ */
+.theme-about {
+  background-color: #fff4d8;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='8'%3E%3Crect width='16' height='8' fill='%23fff4d8'/%3E%3Crect x='0' y='0' width='7' height='3' fill='%23f0e8c0'/%3E%3Crect x='8' y='0' width='8' height='3' fill='%23f0e8c0'/%3E%3Crect x='0' y='4' width='4' height='3' fill='%23ece0b8'/%3E%3Crect x='4' y='4' width='8' height='3' fill='%23ece0b8'/%3E%3C/svg%3E");
+  background-size: 16px 8px;
+  color: #3a2a0a;
+}
+.theme-about a { color: #8a5a0a; }
+.theme-about a:hover { color: #b30000; }
+.theme-about .retro-deco-left,
+.theme-about .retro-deco-right {
+  background: repeating-linear-gradient(0deg, #f0d888, #f0d888 6px, #c0a850 6px, #c0a850 12px);
+}
+.theme-about .retro-deco-left  { border-right: 2px solid #c0a850; }
+.theme-about .retro-deco-right { border-left:  2px solid #c0a850; }
+.theme-about .hit-digit { color: #d4aa00; }
+.theme-about .hit-counter { border-color: #8a6a00; }
+.theme-about .spark { color: #c0a850; }
+.theme-about .retro-header h1 { color: #8a5a0a; text-shadow: 5px 6px 8px #b30000, -2px -3px 6px #c677d3, 2px 2px 4px black; }
+.theme-about .retro-nav { background: #f0d888; border-color: #c0a850; }
+.theme-about .retro-nav a { color: #8a5a0a; }
+.theme-about .retro-marquee { background: #f0d888; color: #3a2a0a; border-color: #c0a850; }
+.theme-about .blog-entry-head { background: #f0d888; border-color: #c0a850; }
+.theme-about .pixel-hr {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='8' height='4'%3E%3Crect x='0' y='0' width='4' height='4' fill='%23c0a850'/%3E%3Crect x='4' y='0' width='4' height='4' fill='%23f0d888'/%3E%3C/svg%3E");
+  background-size: 8px 4px;
+}
+.theme-about ::-webkit-scrollbar-thumb { background: #c0a850; }
+.theme-about ::-webkit-scrollbar-thumb:hover { background: #8a6a00; }

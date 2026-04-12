@@ -1,0 +1,492 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>/wired/ — anonymous board</title>
+<link rel="stylesheet" href="../retro/retro.css">
+<script src="../retro/retro-utils.js"></script>
+<style>
+html, body { min-height: 100%; }
+
+/* ── Board uses the blog pink theme ── */
+body { background-color: #fcd0fe; }
+
+/* ── Post form ── */
+.post-form-box {
+  background: rgba(252,208,254,0.55);
+  border: 2px groove #dbb6af;
+  box-shadow: 2px 1px 5px #dbb6af inset;
+  padding: 12px 14px;
+  margin-bottom: 14px;
+}
+.post-form-title {
+  font-family: 'Press Start 2P', monospace;
+  font-size: 8px; color: #6a0d91; letter-spacing: 2px;
+  margin-bottom: 10px;
+}
+.post-form { display: flex; flex-direction: column; gap: 6px; }
+.post-form input, .post-form textarea {
+  background: #fff8ff;
+  border: 2px groove #dbb6af;
+  color: #2a0a3a;
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 13px;
+  padding: 5px 8px;
+  outline: none;
+  width: 100%;
+}
+.post-form input:focus, .post-form textarea:focus {
+  border-color: #c677d3;
+  background: #fffaff;
+}
+.post-form textarea { min-height: 72px; resize: vertical; }
+.post-form-row { display: flex; gap: 8px; }
+.post-form-row input { flex: 1; }
+.post-form-footer {
+  display: flex; justify-content: space-between; align-items: center;
+  flex-wrap: wrap; gap: 6px;
+}
+.post-form-note {
+  font-family: 'Silkscreen', monospace;
+  font-size: 9px; color: #6a0d91; opacity: 0.55;
+}
+.post-btn {
+  background: #dddde1;
+  border: 2px groove #c8c9ce;
+  box-shadow: 1px 1px 3px rgba(0,0,0,0.3);
+  color: #2a0a3a;
+  font-family: 'Press Start 2P', monospace;
+  font-size: 8px; letter-spacing: 1px;
+  padding: 5px 14px; cursor: pointer;
+}
+.post-btn:hover { filter: brightness(1.08); }
+.post-btn:active { box-shadow: inset 2px 2px 3px rgba(0,0,0,0.25); }
+.post-error {
+  font-family: 'Silkscreen', monospace;
+  font-size: 10px; color: #b30000;
+  background: #ffe0e0; border: 1px solid #b30000;
+  padding: 4px 8px; margin-top: 4px;
+  display: none;
+}
+
+/* ── Thread list cards — same as blog-entry ── */
+.thread-entry { cursor: pointer; margin-bottom: 0; }
+.thread-entry:hover .thread-entry-head { filter: brightness(1.08); }
+
+.thread-entry-head {
+  padding: 4px 8px;
+  display: flex; justify-content: space-between; align-items: center;
+  flex-wrap: wrap; gap: 4px;
+  background: #f0a8e0;
+  box-shadow: inset 0 0 2px black;
+  border: 2px groove #dbb6af;
+}
+.thread-entry-body {
+  background: rgba(252,208,254,0.55);
+  border: 2px groove #dbb6af;
+  border-top: none;
+  box-shadow: 2px 1px 5px #dbb6af inset;
+  padding: 8px 10px 12px;
+  margin-bottom: 10px;
+}
+.thread-no {
+  font-family: 'Press Start 2P', monospace;
+  font-size: 7px; color: #6a0d91; letter-spacing: 1px;
+}
+.thread-subject {
+  font-family: 'Silkscreen', monospace;
+  font-size: 15px; font-weight: 700;
+  color: #89ad25;
+  text-shadow: 2px 1px 3px #375c4c, -1px -1px 3px white;
+  margin-bottom: 4px;
+}
+.thread-preview { font-size: 12px; line-height: 1.6; color: #2a0a3a; opacity: 0.75; }
+.thread-meta {
+  font-family: 'Silkscreen', monospace;
+  font-size: 9px; color: #6a0d91; opacity: 0.6;
+  margin-top: 6px;
+}
+.badge-pin {
+  display: inline-block;
+  background: #6a0d91; color: #fcd0fe;
+  font-family: 'Press Start 2P', monospace;
+  font-size: 7px; padding: 2px 5px;
+  border: 1px solid #c677d3;
+  vertical-align: middle; margin-left: 4px;
+}
+
+/* ── Thread detail ── */
+.post-block {
+  margin-bottom: 8px;
+}
+.post-block-head {
+  padding: 4px 8px;
+  display: flex; align-items: center; gap: 10px; flex-wrap: wrap;
+  background: #f0a8e0;
+  box-shadow: inset 0 0 2px black;
+  border: 2px groove #dbb6af;
+}
+.post-block-head.op { background: #e890d0; }
+.post-name {
+  font-family: 'Silkscreen', monospace;
+  font-size: 11px; font-weight: 700; color: #6a0d91;
+}
+.post-num {
+  font-family: 'Press Start 2P', monospace;
+  font-size: 7px; color: #9b3fb5;
+}
+.post-time {
+  font-family: 'Press Start 2P', monospace;
+  font-size: 7px; color: #6a0d91; opacity: 0.5;
+  margin-left: auto;
+}
+.post-actions {
+  display: flex; gap: 8px;
+}
+.post-action-btn {
+  font-family: 'Silkscreen', monospace;
+  font-size: 9px; color: #6a0d91; opacity: 0.6;
+  cursor: pointer; background: none; border: none; padding: 0;
+}
+.post-action-btn:hover { opacity: 1; text-decoration: underline; }
+
+.post-block-body {
+  background: rgba(252,208,254,0.55);
+  border: 2px groove #dbb6af;
+  border-top: none;
+  box-shadow: 2px 1px 5px #dbb6af inset;
+  padding: 8px 10px 10px;
+  font-size: 13px; line-height: 1.85; font-weight: 300;
+  color: #2a0a3a; white-space: pre-wrap;
+}
+.post-quote {
+  color: #6a0d91; font-weight: 500;
+}
+
+/* Reply form in thread */
+.reply-box {
+  background: rgba(252,208,254,0.4);
+  border: 2px groove #dbb6af;
+  padding: 12px 14px;
+  margin: 12px 0;
+}
+.reply-box-title {
+  font-family: 'Press Start 2P', monospace;
+  font-size: 7px; color: #6a0d91; letter-spacing: 2px; margin-bottom: 8px;
+}
+
+/* Stats bar */
+.board-stats {
+  font-family: 'Silkscreen', monospace;
+  font-size: 10px; color: #6a0d91; opacity: 0.55;
+  text-align: right; margin-bottom: 8px;
+}
+</style>
+</head>
+<body class="theme-blog">
+
+<!-- WINDOWS XP CHROME -->
+<div class="win-chrome">
+  <div class="win-chrome-row1">
+    <button class="win-btn" onclick="goBack()">← Back</button>
+    <button class="win-btn" onclick="location.reload()">⟳ Refresh</button>
+    <button class="win-btn" onclick="goHome()">🏠 Terminal</button>
+    <span style="display:inline-block;width:1px;height:28px;background:#aaa;margin:0 4px;"></span>
+    <button class="win-btn" onclick="showBoard()" id="btn-board">[ /wired/ ]</button>
+    <button class="win-btn" onclick="window.location.href='../lobby/index.html'">[ lobby ]</button>
+    <button class="win-btn" onclick="window.location.href='cli.html'">[ CLI mode ]</button>
+    <span class="win-chrome-title">COPLAND OS NAVIGATOR v4.017</span>
+  </div>
+  <div class="win-chrome-row2">
+    <span class="win-addr-label">Address ▼</span>
+    <input type="text" class="win-addr-bar" id="addr-bar" value="wired://board/wired/" readonly>
+  </div>
+  <div class="win-chrome-row3">
+    <span class="win-nav-icon">📡</span>
+    <button class="win-nav-btn" onclick="showBoard()">■ /wired/ — anonymous board</button>
+    <span style="opacity:0.3">|</span>
+    <button class="win-nav-btn" onclick="goHome()">[ terminal ]</button>
+    <span class="blink" style="margin-left:auto;margin-right:8px;font-family:'Press Start 2P',monospace;font-size:8px;color:#6a0d91;">∗ ONLINE ∗</span>
+  </div>
+</div>
+
+<div class="retro-deco-left"></div>
+<div class="retro-deco-right"></div>
+
+<!-- THREAD LIST -->
+<div class="retro-container" id="view-list">
+
+  <div class="retro-header">
+    <h1>■ /wired/ ■</h1>
+    <div class="subtitle">anonymous board // say what you mean</div>
+  </div>
+
+  <div id="counter-slot"></div>
+
+  <div class="retro-nav">
+    <a onclick="showBoard()">[/wired/]</a><span class="sep"> | </span><a onclick="window.location.href='../lobby/index.html'">[lobby]</a><span class="sep"> | </span><a onclick="goHome()">[terminal]</a><span class="sep"> | </span><a onclick="window.location.href='cli.html'">[CLI mode]</a>
+  </div>
+
+  <div class="retro-marquee">
+    <div class="retro-marquee-inner">
+      ★ anonymous ∗ no accounts needed ∗ be excellent to each other ★ rate limited ∗ rule violations: [ report ] ★ wired.local/board ∗ no matter where you go ★
+    </div>
+  </div>
+
+  <div id="stats-bar" class="board-stats"></div>
+
+  <!-- NEW THREAD FORM -->
+  <div class="post-form-box">
+    <div class="post-form-title">// START A NEW THREAD //</div>
+    <div class="post-form">
+      <div class="post-form-row">
+        <input type="text" id="nt-name" placeholder="Name  (leave blank for Anonymous)" maxlength="32">
+        <input type="text" id="nt-subject" placeholder="Subject  (optional)" maxlength="64">
+      </div>
+      <textarea id="nt-body" placeholder="What's on your mind?" maxlength="2000"></textarea>
+      <div class="post-form-footer">
+        <span class="post-form-note">∗ no account needed  ∗  rate limited  ∗  be excellent to each other</span>
+        <button class="post-btn" onclick="submitThread()">[ POST ]</button>
+      </div>
+      <div class="post-error" id="nt-error"></div>
+    </div>
+  </div>
+
+  <div class="pixel-hr"></div>
+
+  <div id="thread-list"></div>
+
+  <div class="kaomoji-strip">
+    <span class="kao">(´・ω・`)</span>
+    <span class="kao blink-slow">( ´_ゝ`)</span>
+    <span class="kao">(｀・ω・´)</span>
+  </div>
+
+  <div class="retro-footer">
+    /wired/ — anonymous board // demo mode<br>
+    no accounts ∗ no logs ∗ <span class="blink">∗</span> report rule violations<br>
+    Best viewed with Copland OS Navigator
+  </div>
+
+</div>
+
+<!-- THREAD DETAIL -->
+<div class="retro-container" id="view-thread" style="display:none;">
+
+  <div id="thread-detail-inner"></div>
+
+  <div class="retro-footer">
+    /wired/ — thread view // demo mode
+  </div>
+
+</div>
+
+<script>
+// ── Rate limiting ──
+let lastPostTime = 0;
+const POST_DELAY_MS = 60000;
+function canPost() { return Date.now() - lastPostTime > POST_DELAY_MS; }
+
+// ── State ──
+let localThreads = JSON.parse(JSON.stringify(THREADS));
+let nextNo = 1100;
+
+function pad(n) { return String(n).padStart(2,'0'); }
+function nowStr() {
+  const d = new Date();
+  return `${d.getFullYear()}.${pad(d.getMonth()+1)}.${pad(d.getDate())} ${pad(d.getHours())}:${pad(d.getMinutes())}`;
+}
+function esc(s) {
+  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+function showError(el, msg) { el.textContent = '∗ ' + msg; el.style.display = 'block'; }
+
+// ── Views ──
+function showBoard() {
+  document.getElementById('view-list').style.display = '';
+  document.getElementById('view-thread').style.display = 'none';
+  document.getElementById('addr-bar').value = 'wired://board/wired/';
+  renderThreadList();
+  window.scrollTo(0,0);
+}
+
+function renderThreadList() {
+  // Re-inject counter since innerHTML replaces it
+  const counterEl = document.querySelector('#view-list .retro-counter');
+  if (!counterEl) {
+    // already rendered; skip
+  }
+
+  const pinned = localThreads.filter(t => t.pinned);
+  const rest   = localThreads.filter(t => !t.pinned);
+  const all    = [...pinned, ...rest];
+
+  document.getElementById('stats-bar').textContent =
+    `threads: ${all.length} / ${BOARD_META.maxThreads}  ∗  posts: ${all.reduce((a,t) => a + t.replies.length + 1, 0)}  ∗  anonymous`;
+
+  document.getElementById('thread-list').innerHTML = all.map(t => `
+    <div class="thread-entry" onclick="showThread(${t.id})">
+      <div class="thread-entry-head">
+        <span class="thread-no">No.${t.no}</span>
+        ${t.pinned ? '<span class="badge-pin">PIN</span>' : ''}
+        ${t.isNew ? '<span class="badge-new">NEW</span>' : ''}
+        <span style="margin-left:auto;font-family:'Press Start 2P',monospace;font-size:7px;color:#6a0d91;opacity:0.5;">${t.time}</span>
+      </div>
+      <div class="thread-entry-body">
+        <div class="thread-subject">${t.subject ? esc(t.subject) : '<span style="opacity:0.45;font-weight:400;">(no subject)</span>'}</div>
+        <div class="thread-preview">${esc(t.body.split('\n')[0].slice(0,120))}${t.body.length > 120 ? '…' : ''}</div>
+        <div class="thread-meta">[ ${t.replies.length} ${t.replies.length === 1 ? 'reply' : 'replies'} ]  ∗  click to read thread</div>
+      </div>
+    </div>
+    <div class="pixel-hr"></div>
+  `).join('');
+}
+
+// ── Thread detail ──
+function showThread(id) {
+  const t = localThreads.find(x => x.id === id);
+  if (!t) return;
+
+  document.getElementById('view-list').style.display = 'none';
+  document.getElementById('view-thread').style.display = '';
+  document.getElementById('addr-bar').value = `wired://board/wired/thread/${t.no}`;
+
+  const allPosts = [
+    { no: t.no, time: t.time, name: t.name, body: t.body, isOP: true },
+    ...t.replies
+  ];
+
+  const postsHtml = allPosts.map(p => `
+    <div class="post-block">
+      <div class="post-block-head${p.isOP ? ' op' : ''}">
+        <span class="post-name">${esc(p.name)}</span>
+        <span class="post-num">No.${p.no}</span>
+        ${p.isOP ? '<span class="badge-pin" style="background:#89ad25;border-color:#5a7a10;">OP</span>' : ''}
+        <span class="post-time">${p.time}</span>
+        <div class="post-actions">
+          <button class="post-action-btn" onclick="quotePost(${p.no})">[ quote ]</button>
+          <button class="post-action-btn" style="color:#b30000;">[ report ]</button>
+        </div>
+      </div>
+      <div class="post-block-body">${renderPostBody(esc(p.body))}</div>
+    </div>
+  `).join('');
+
+  document.getElementById('thread-detail-inner').innerHTML = `
+    <div class="retro-header" style="margin-bottom:10px;">
+      <h1 style="font-size:11px;">${esc(t.subject || '(no subject)')}</h1>
+      <div class="subtitle">/wired/ No.${t.no}  ∗  ${t.replies.length} replies</div>
+    </div>
+
+    <div class="retro-nav">
+      <a onclick="showBoard()">← back to /wired/</a><span class="sep"> | </span><a onclick="window.location.href='../lobby/index.html'">[lobby]</a><span class="sep"> | </span><a onclick="goHome()">[terminal]</a>
+    </div>
+
+    ${postsHtml}
+
+    <div class="pixel-hr"></div>
+
+    <div class="reply-box">
+      <div class="reply-box-title">// POST A REPLY //</div>
+      <div class="post-form">
+        <input type="text" id="reply-name" placeholder="Name  (Anonymous)" maxlength="32">
+        <textarea id="reply-body" placeholder="Reply..." maxlength="1000"></textarea>
+        <div class="post-form-footer">
+          <span class="post-form-note">∗ &gt;&gt;No to quote a post</span>
+          <button class="post-btn" onclick="submitReply(${t.id})">[ POST REPLY ]</button>
+        </div>
+        <div class="post-error" id="reply-error"></div>
+      </div>
+    </div>
+
+    ${sparkles(['★','∗','☆','∗','★','∗','☆','∗'])}
+  `;
+
+  window.scrollTo(0,0);
+}
+
+function renderPostBody(html) {
+  return html.replace(/&gt;&gt;(\d+)/g, '<span class="post-quote">&gt;&gt;$1</span>');
+}
+
+function quotePost(no) {
+  const box = document.getElementById('reply-body');
+  if (box) {
+    box.value = (box.value ? box.value + '\n' : '') + `>>${no}\n`;
+    box.focus();
+  }
+}
+
+// ── Submit thread ──
+function submitThread() {
+  const body    = document.getElementById('nt-body').value.trim();
+  const subject = document.getElementById('nt-subject').value.trim();
+  const name    = document.getElementById('nt-name').value.trim() || 'Anonymous';
+  const err     = document.getElementById('nt-error');
+
+  if (!body) { showError(err, 'Post body is required.'); return; }
+  if (!canPost()) {
+    const wait = Math.ceil((POST_DELAY_MS - (Date.now() - lastPostTime)) / 1000);
+    showError(err, `Please wait ${wait}s before posting again.`);
+    return;
+  }
+
+  localThreads.unshift({
+    id: Date.now(), no: nextNo++, time: nowStr(), name,
+    subject: subject || null, body, img: null,
+    replies: [], isNew: true, pinned: false,
+  });
+
+  if (localThreads.length > BOARD_META.maxThreads) {
+    const pinned = localThreads.filter(x => x.pinned);
+    const rest   = localThreads.filter(x => !x.pinned);
+    localThreads = [...pinned, ...rest.slice(0, BOARD_META.maxThreads - pinned.length)];
+  }
+
+  lastPostTime = Date.now();
+  document.getElementById('nt-body').value = '';
+  document.getElementById('nt-subject').value = '';
+  document.getElementById('nt-name').value = '';
+  err.style.display = 'none';
+  renderThreadList();
+}
+
+// ── Submit reply ──
+function submitReply(threadId) {
+  const body = document.getElementById('reply-body').value.trim();
+  const name = document.getElementById('reply-name').value.trim() || 'Anonymous';
+  const err  = document.getElementById('reply-error');
+
+  if (!body) { showError(err, 'Reply body is required.'); return; }
+  if (!canPost()) {
+    const wait = Math.ceil((POST_DELAY_MS - (Date.now() - lastPostTime)) / 1000);
+    showError(err, `Please wait ${wait}s before posting again.`);
+    return;
+  }
+
+  const t = localThreads.find(x => x.id === threadId);
+  if (!t) return;
+
+  t.replies.push({ no: nextNo++, time: nowStr(), name, body });
+  lastPostTime = Date.now();
+  showThread(threadId);
+}
+
+// ── Navigation ──
+function goHome() {
+  if (window.parent && window.parent !== window) {
+    window.parent.postMessage({ action: 'navigate', section: 'terminal' }, '*');
+  } else { window.location.href = '../copland-os.html'; }
+}
+function goBack() {
+  if (document.getElementById('view-thread').style.display !== 'none') showBoard();
+  else goHome();
+}
+
+// ── Init ──
+document.getElementById('counter-slot').innerHTML = counter();
+renderThreadList();
+</script>
+</body>
+</html>

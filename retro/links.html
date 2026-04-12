@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>リンク集 // wired</title>
+<link rel="stylesheet" href="retro.css">
+<script src="retro-utils.js"></script>
+<style>
+.links-section { margin-bottom: 28px; }
+.links-section-title {
+  font-family: 'Press Start 2P', monospace;
+  font-size: 9px;
+  color: #6a0d91;
+  letter-spacing: 2px;
+  margin-bottom: 10px;
+  padding: 4px 8px;
+  background: #f0a8e0;
+  border: 2px groove #c677d3;
+  display: inline-block;
+}
+.links-list { list-style: none; margin: 0; padding: 0; }
+.links-list li {
+  padding: 7px 10px;
+  background: rgba(252,208,254,0.4);
+  border: 2px groove #dbb6af;
+  margin-bottom: 6px;
+  font-size: 13px;
+  line-height: 1.6;
+}
+.links-list li:hover { background: rgba(252,208,254,0.7); }
+.links-list .link-name {
+  font-family: 'Silkscreen', monospace;
+  font-size: 13px;
+  font-weight: 700;
+  color: #6a0d91;
+}
+.links-list .link-desc {
+  font-size: 11px;
+  color: #2a0a3a;
+  opacity: 0.7;
+  margin-top: 2px;
+}
+.btn-88x31 {
+  display: inline-block;
+  width: 88px; height: 31px;
+  background: #dddde1;
+  border: 2px groove #c8c9ce;
+  font-family: 'Press Start 2P', monospace;
+  font-size: 5px;
+  color: #6a0d91;
+  text-align: center;
+  line-height: 31px;
+  margin: 3px;
+  cursor: pointer;
+  vertical-align: middle;
+  letter-spacing: 1px;
+}
+.btn-88x31:hover { filter: brightness(1.1); }
+.webring-box {
+  background: rgba(252,208,254,0.5);
+  border: 2px groove #c677d3;
+  padding: 12px 14px;
+  text-align: center;
+  font-family: 'Silkscreen', monospace;
+  font-size: 11px;
+  color: #6a0d91;
+  margin: 14px 0;
+}
+</style>
+</head>
+<body class="theme-blog">
+
+<div class="win-chrome">
+  <div class="win-chrome-row1">
+    <button class="win-btn" onclick="goTo('terminal')">← 戻る</button>
+    <button class="win-btn">→ 進む</button>
+    <button class="win-btn" onclick="location.reload()">⟳ 更新</button>
+    <button class="win-btn" onclick="goTo('terminal')">🏠 ホーム</button>
+    <span style="display:inline-block;width:1px;height:28px;background:#aaa;margin:0 4px;"></span>
+    <button class="win-btn" onclick="goTo('blog')">日記</button>
+    <button class="win-btn" onclick="goTo('portfolio')">作品</button>
+    <button class="win-btn" onclick="goTo('micro')">一言</button>
+    <button class="win-btn" onclick="goTo('about')">自己紹介</button>
+    <button class="win-btn" onclick="goTo('links')">リンク</button>
+    <span class="win-chrome-title">COPLAND OS NAVIGATOR v4.017</span>
+  </div>
+  <div class="win-chrome-row2">
+    <span class="win-addr-label">アドレス ▼</span>
+    <input type="text" class="win-addr-bar" value="http://www.wired.local/links/" readonly>
+  </div>
+  <div class="win-chrome-row3">
+    <span class="win-nav-icon">🌐</span>
+    <button class="win-nav-btn" onclick="goTo('links')">★ リンク集</button>
+    <span style="opacity:0.3">|</span>
+    <button class="win-nav-btn" onclick="goTo('terminal')">[ terminal ]</button>
+    <span class="blink" style="margin-left:auto;margin-right:8px;font-family:'Press Start 2P',monospace;font-size:8px;color:#6a0d91;">∗ ONLINE ∗</span>
+  </div>
+</div>
+
+<div class="retro-deco-left"></div>
+<div class="retro-deco-right"></div>
+
+<div class="retro-container">
+
+  <div class="retro-header">
+    <h1>■ リンク集 ■</h1>
+    <div class="subtitle">links // friends &amp; webs</div>
+  </div>
+
+  <div id="counter-slot"></div>
+
+  <div class="retro-nav">
+    <a onclick="goTo('blog')">[日記]</a><span class="sep"> | </span><a onclick="goTo('portfolio')">[作品]</a><span class="sep"> | </span><a onclick="goTo('micro')">[一言]</a><span class="sep"> | </span><a onclick="goTo('about')">[自己紹介]</a><span class="sep"> | </span><a onclick="goTo('links')">[リンク]</a><span class="sep"> | </span><a onclick="goTo('terminal')">[terminal]</a>
+  </div>
+
+  <div class="retro-marquee">
+    <div class="retro-marquee-inner">
+      ★ リンクフリーです ★ link-free ★ 相互リンク募集中 ★ no matter where you go, everyone is always connected ★ wired.local ★ protocol_7 ★
+    </div>
+  </div>
+
+  <div id="sparkle-slot"></div>
+  <div class="deco-dots">★ ☆ ★ ☆ ★</div>
+
+  <!-- FRIENDS -->
+  <div class="links-section">
+    <div class="links-section-title">// friends //</div>
+    <ul class="links-list">
+      <li>
+        <div class="link-name">[ placeholder ]</div>
+        <div class="link-desc">your friend's site goes here // URL pending</div>
+      </li>
+      <li>
+        <div class="link-name">[ placeholder ]</div>
+        <div class="link-desc">another friend // URL pending</div>
+      </li>
+      <li>
+        <div class="link-name">[ placeholder ]</div>
+        <div class="link-desc">more links to come // URL pending</div>
+      </li>
+    </ul>
+  </div>
+
+  <div class="pixel-hr"></div>
+
+  <!-- WEBRINGS -->
+  <div class="links-section">
+    <div class="links-section-title">// webrings //</div>
+    <div class="webring-box">
+      ← <span style="opacity:0.5">[ webring name ]</span> →<br>
+      <span style="font-size:9px;opacity:0.6;">webring placeholder // not yet joined</span>
+    </div>
+  </div>
+
+  <div class="pixel-hr"></div>
+
+  <!-- 88x31 BUTTONS -->
+  <div class="links-section">
+    <div class="links-section-title">// 88×31 //</div>
+    <div style="margin-top:10px;">
+      <span class="btn-88x31">YOUR SITE</span>
+      <span class="btn-88x31">PLACEHOLDER</span>
+      <span class="btn-88x31">WIRED.LOCAL</span>
+      <span class="btn-88x31">ADD ME?</span>
+    </div>
+    <div style="font-size:10px;opacity:0.5;margin-top:10px;font-family:'Silkscreen',monospace;">
+      88×31 buttons go here // swap with friends
+    </div>
+  </div>
+
+  <div class="pixel-hr"></div>
+
+  <!-- RESOURCES -->
+  <div class="links-section">
+    <div class="links-section-title">// resources //</div>
+    <ul class="links-list">
+      <li>
+        <div class="link-name">[ placeholder ]</div>
+        <div class="link-desc">useful site or resource // URL pending</div>
+      </li>
+      <li>
+        <div class="link-name">[ placeholder ]</div>
+        <div class="link-desc">another resource // URL pending</div>
+      </li>
+    </ul>
+  </div>
+
+  <div class="kaomoji-strip" style="margin-top:12px;">
+    <span class="kao">(ﾉ◕ヮ◕)ﾉ*:･ﾟ✧</span>
+    <span class="kao blink-slow">ヽ(・∀・)ﾉ</span>
+    <span class="kao">(っ＾▿＾)っ</span>
+  </div>
+
+  <div class="deco-dots">★ ☆ ★ ☆ ★</div>
+
+  <div class="retro-footer">
+    リンクフリーです ∗ This page is link-free.<br>
+    相互リンク希望の方はご連絡ください。<br>
+    <span class="blink">∗</span> Best viewed with Copland OS Navigator <span class="blink">∗</span>
+  </div>
+
+</div>
+
+<script>
+  document.getElementById('counter-slot').innerHTML = counter();
+  document.getElementById('sparkle-slot').innerHTML = sparkles(['★','☆','★','☆','★','☆','★','☆']);
+</script>
+</body>
+</html>

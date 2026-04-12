@@ -1,0 +1,1489 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>[ wired ]</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@300;400;500&family=Press+Start+2P&family=Silkscreen:wght@400;700&display=swap');
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+/* ========== FAUUX-STYLE PARALLAX BACKGROUNDS ========== */
+/* Three fixed layers behind everything, each drifting at a different speed/direction.
+   Technique directly from fauux.neocities.org login page. */
+
+.bg-layer-1 {
+  position: fixed; inset: 0; z-index: 0;
+  background-color: #06060a;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='32' height='32'%3E%3Crect width='32' height='32' fill='%2306060a'/%3E%3Crect x='0' y='0' width='32' height='1' fill='%230e0e18' opacity='0.9'/%3E%3Crect x='0' y='0' width='1' height='32' fill='%230e0e18' opacity='0.9'/%3E%3Crect x='15' y='15' width='2' height='2' fill='%2314142a' opacity='0.5'/%3E%3C/svg%3E");
+  background-size: 32px 32px;
+  animation: bg1-drift 80s linear infinite;
+  pointer-events: none;
+}
+
+.bg-layer-2 {
+  position: fixed; inset: 0; z-index: 1;
+  background-color: transparent;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='8' height='8'%3E%3Crect width='8' height='8' fill='transparent'/%3E%3Crect x='3' y='3' width='1' height='1' fill='%23162030' opacity='0.8'/%3E%3C/svg%3E");
+  background-size: 8px 8px;
+  animation: bg2-drift 60s linear infinite;
+  pointer-events: none;
+}
+
+.bg-layer-3 {
+  position: fixed; inset: 0; z-index: 2;
+  background-color: transparent;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='6' height='6'%3E%3Crect width='6' height='6' fill='transparent'/%3E%3Crect x='0' y='0' width='2' height='2' fill='%23180a10' opacity='0.55'/%3E%3Crect x='3' y='2' width='1' height='1' fill='%230a1020' opacity='0.45'/%3E%3Crect x='1' y='4' width='2' height='1' fill='%23100818' opacity='0.4'/%3E%3C/svg%3E");
+  background-size: 6px 6px;
+  animation: bg3-drift 20s linear infinite;
+  pointer-events: none;
+}
+
+/* Dark overlay fades in over the drifting patterns */
+.bg-overlay {
+  position: fixed; inset: 0; z-index: 3;
+  background-color: rgba(0,0,0,0);
+  animation: overlay-in 0.3s linear forwards;
+  animation-delay: 0.6s;
+  pointer-events: none;
+}
+
+/* Vignette — edge darkening */
+.bg-vignette {
+  position: fixed; inset: 0; z-index: 4;
+  background: radial-gradient(ellipse at center, transparent 70%, rgba(0,0,0,0.25) 100%);
+  pointer-events: none;
+}
+
+@keyframes bg1-drift {
+  from { background-position: center center; }
+  to   { background-position: calc(50% + 1024px) calc(50% + 1024px); }
+}
+@keyframes bg2-drift {
+  from { background-position: calc(50% + 1024px) calc(50% + 1024px); }
+  to   { background-position: center center; }
+}
+@keyframes bg3-drift {
+  from { background-position: center center; }
+  to   { background-position: calc(50% - 512px) center; }
+}
+@keyframes overlay-in {
+  from { background-color: rgba(0,0,0,0); }
+  to   { background-color: rgba(0,0,0,0.68); }
+}
+
+/* Terminal fades in after backgrounds settle */
+@keyframes term-appear {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+:root {
+  --term-bg: #0a0a0a;
+  --term-fg: #b0b0b0;
+  --term-dim: #555;
+  --term-bright: #e0e0e0;
+  --term-accent: #7a9ec2;
+  --term-green: #6a9a5a;
+  --term-red: #9a4a4a;
+  --term-yellow: #9a8a4a;
+}
+
+html, body {
+  width: 100%; height: 100%;
+  background: var(--term-bg);
+  font-family: 'IBM Plex Mono', monospace;
+  color: var(--term-fg);
+  overflow: hidden;
+}
+
+/* ========== CRT ========== */
+#crt {
+  position: fixed; inset: 0;
+  pointer-events: none; z-index: 9999;
+  animation: crt-flicker 8s step-end infinite;
+}
+#crt::before {
+  content: '';
+  position: absolute; inset: 0;
+  background: repeating-linear-gradient(0deg, transparent, transparent 1px, rgba(0,0,0,0.07) 1px, rgba(0,0,0,0.07) 2px);
+}
+#crt::after {
+  content: '';
+  position: absolute; inset: 0;
+  background: radial-gradient(ellipse at center, transparent 75%, rgba(0,0,0,0.15) 100%);
+}
+@keyframes crt-flicker {
+  0%,100% { opacity: 1; }
+  92%      { opacity: 1; }
+  93%      { opacity: 0.85; }
+  94%      { opacity: 1; }
+  96%      { opacity: 0.92; }
+  97%      { opacity: 1; }
+}
+
+/* ========== TERMINAL ========== */
+#terminal-page {
+  width: 100%; height: 100%;
+  display: flex; flex-direction: column;
+  overflow: hidden;
+  position: relative; z-index: 10;
+  background: transparent;
+}
+
+/* Persistent welcome banner */
+#welcome-banner {
+  padding: 20px 40px 12px;
+  border-bottom: 1px solid #1a1a1a;
+  flex-shrink: 0;
+  font-size: 14px;
+  line-height: 1.65;
+  letter-spacing: 0.3px;
+  white-space: pre-wrap;
+  display: none;
+  /* Keep a solid bg here so it reads cleanly over parallax layers */
+  background: rgba(10, 10, 10, 0.92);
+}
+
+#term-scroll-area {
+  flex: 1;
+  overflow-y: auto;
+  padding: 8px 40px 0;
+  scrollbar-width: thin;
+  scrollbar-color: #222 transparent;
+  background: rgba(10, 10, 10, 0.88);
+}
+
+.term-output {
+  white-space: pre-wrap;
+  word-wrap: break-word;
+  font-size: 14px;
+  font-weight: 400;
+  line-height: 1.65;
+  letter-spacing: 0.3px;
+}
+
+.term-input-line {
+  display: flex;
+  align-items: center;
+  padding: 4px 40px 20px;
+  flex-shrink: 0;
+  background: rgba(10, 10, 10, 0.95);
+  border-top: 1px solid #1a1a1a;
+}
+.term-prompt {
+  color: var(--term-green);
+  margin-right: 8px;
+  white-space: nowrap;
+  font-size: 14px;
+}
+#term-input {
+  background: none;
+  border: none;
+  color: var(--term-bright);
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 14px;
+  font-weight: 400;
+  letter-spacing: 0.3px;
+  outline: none;
+  flex: 1;
+  caret-color: var(--term-bright);
+}
+
+.term-line { display: block; min-height: 1.65em; }
+.term-dim { color: var(--term-dim); }
+.term-bright { color: var(--term-bright); }
+.term-accent { color: var(--term-accent); }
+.term-green { color: var(--term-green); }
+.term-red { color: var(--term-red); }
+.term-yellow { color: var(--term-yellow); }
+
+.term-link {
+  color: var(--term-accent);
+  cursor: pointer;
+  text-decoration: none;
+  border-bottom: 1px solid transparent;
+}
+.term-link:hover { border-bottom-color: var(--term-accent); }
+
+/* ========== RETRO PAGES ========== */
+#retro-page {
+  display: none;
+  width: 100%; height: 100%;
+  overflow-y: auto;
+  position: relative; z-index: 10;
+}
+
+.retro-wrapper { min-height: 100vh; position: relative; }
+
+/* ---- DEMO-DERIVED RETRO THEMES ---- */
+/* Each theme uses dithered SVG backgrounds from demo-lowfi.html,
+   Press Start 2P for headings, Silkscreen for nav, pixel HRs, stripe sidebars */
+
+/* ── BLOG: pink dither ── */
+.theme-blog {
+  background-color: #ffccdd;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='4' height='4'%3E%3Crect width='4' height='4' fill='%23ffccdd'/%3E%3Crect x='0' y='0' width='2' height='2' fill='%23ff99bb'/%3E%3Crect x='2' y='2' width='2' height='2' fill='%23ff99bb'/%3E%3C/svg%3E");
+  background-size: 4px 4px;
+  image-rendering: pixelated;
+  color: #4a2030;
+}
+.theme-blog a { color: #aa0044; }
+.theme-blog a:hover { text-decoration: underline; }
+.theme-blog .retro-deco-left,
+.theme-blog .retro-deco-right {
+  background: repeating-linear-gradient(0deg, #ff99bb, #ff99bb 6px, #ff66aa 6px, #ff66aa 12px);
+}
+.theme-blog .retro-deco-left  { border-right: 2px solid #cc6688; }
+.theme-blog .retro-deco-right { border-left:  2px solid #cc6688; }
+
+/* ── PORTFOLIO: green dot-matrix ── */
+.theme-portfolio {
+  background-color: #e0f0e0;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='8' height='8'%3E%3Crect width='8' height='8' fill='%23e0f0e0'/%3E%3Crect x='3' y='3' width='1' height='1' fill='%2390c890' opacity='0.5'/%3E%3C/svg%3E");
+  background-size: 8px 8px;
+  image-rendering: pixelated;
+  color: #1a3a1a;
+}
+.theme-portfolio a { color: #2a7a2a; }
+.theme-portfolio a:hover { text-decoration: underline; }
+.theme-portfolio .retro-deco-left,
+.theme-portfolio .retro-deco-right {
+  background: repeating-linear-gradient(0deg, #b0d8b0, #b0d8b0 6px, #70a070 6px, #70a070 12px);
+}
+.theme-portfolio .retro-deco-left  { border-right: 2px solid #70a070; }
+.theme-portfolio .retro-deco-right { border-left:  2px solid #70a070; }
+
+/* ── MICRO: purple crosshatch ── */
+.theme-micro {
+  background-color: #e8e0ff;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='8' height='8'%3E%3Crect width='8' height='8' fill='%23e8e0ff'/%3E%3Crect x='0' y='0' width='1' height='8' fill='%23c8b8e8' opacity='0.6'/%3E%3Crect x='0' y='0' width='8' height='1' fill='%23c8b8e8' opacity='0.6'/%3E%3C/svg%3E");
+  background-size: 8px 8px;
+  image-rendering: pixelated;
+  color: #2a1a4a;
+}
+.theme-micro a { color: #6a3aaa; }
+.theme-micro a:hover { text-decoration: underline; }
+.theme-micro .retro-deco-left,
+.theme-micro .retro-deco-right {
+  background: repeating-linear-gradient(0deg, #c8b8e8, #c8b8e8 6px, #9080b0 6px, #9080b0 12px);
+}
+.theme-micro .retro-deco-left  { border-right: 2px solid #9080b0; }
+.theme-micro .retro-deco-right { border-left:  2px solid #9080b0; }
+
+/* ── ABOUT: warm brick/tan ── */
+.theme-about {
+  background-color: #fff4d8;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='8'%3E%3Crect width='16' height='8' fill='%23fff4d8'/%3E%3Crect x='0' y='0' width='7' height='3' fill='%23f0e8c0'/%3E%3Crect x='8' y='0' width='8' height='3' fill='%23f0e8c0'/%3E%3Crect x='0' y='4' width='4' height='3' fill='%23ece0b8'/%3E%3Crect x='4' y='4' width='8' height='3' fill='%23ece0b8'/%3E%3C/svg%3E");
+  background-size: 16px 8px;
+  image-rendering: pixelated;
+  color: #3a2a0a;
+}
+.theme-about a { color: #8a5a0a; }
+.theme-about a:hover { text-decoration: underline; }
+.theme-about .retro-deco-left,
+.theme-about .retro-deco-right {
+  background: repeating-linear-gradient(0deg, #f0d888, #f0d888 6px, #c0a850 6px, #c0a850 12px);
+}
+.theme-about .retro-deco-left  { border-right: 2px solid #c0a850; }
+.theme-about .retro-deco-right { border-left:  2px solid #c0a850; }
+
+/* ---- Shared retro sidebar strips ---- */
+.retro-deco-left {
+  position: fixed; left: 0; top: 0;
+  width: 24px; height: 100%; z-index: 1;
+}
+.retro-deco-right {
+  position: fixed; right: 0; top: 0;
+  width: 24px; height: 100%; z-index: 1;
+}
+
+/* ---- Container ---- */
+.retro-container {
+  max-width: 680px;
+  margin: 0 auto;
+  padding: 10px 16px 40px;
+}
+
+/* ---- Header: Press Start 2P ---- */
+.retro-header {
+  text-align: center;
+  padding: 18px 0 10px;
+  border-bottom: 3px double currentColor;
+  margin-bottom: 12px;
+}
+.retro-header h1 {
+  font-family: 'Press Start 2P', monospace;
+  font-size: 12px;
+  font-weight: 400;
+  line-height: 1.8;
+  letter-spacing: 2px;
+  image-rendering: pixelated;
+}
+.retro-header .subtitle {
+  font-family: 'Silkscreen', monospace;
+  font-size: 8px; opacity: 0.55;
+  margin-top: 8px; letter-spacing: 2px;
+}
+
+/* ---- Nav: Silkscreen ---- */
+.retro-nav {
+  text-align: center;
+  font-family: 'Silkscreen', monospace;
+  font-size: 9px;
+  letter-spacing: 1px;
+  padding: 8px 0;
+  border-bottom: 1px solid rgba(128,128,128,0.25);
+  margin-bottom: 14px;
+}
+.retro-nav a {
+  color: inherit; text-decoration: none;
+  cursor: pointer; margin: 0 6px; font-weight: 700;
+}
+.retro-nav a:hover { text-decoration: underline; }
+.retro-nav .sep { opacity: 0.25; }
+
+/* ---- Counter ---- */
+.retro-counter {
+  text-align: center;
+  font-family: 'Press Start 2P', monospace;
+  font-size: 7px;
+  opacity: 0.5; margin: 6px 0; letter-spacing: 1px;
+  image-rendering: pixelated;
+}
+
+/* ---- Pixel HR (from demo) ---- */
+.pixel-hr {
+  height: 4px; width: 100%; margin: 10px 0;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='8' height='4'%3E%3Crect x='0' y='0' width='4' height='4' fill='%23cc99aa'/%3E%3Crect x='4' y='0' width='4' height='4' fill='%23ff99cc'/%3E%3C/svg%3E");
+  background-size: 8px 4px; background-repeat: repeat-x;
+  image-rendering: pixelated;
+}
+.theme-portfolio .pixel-hr {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='4'%3E%3Crect x='0' y='0' width='4' height='4' fill='%2370a070'/%3E%3Crect x='4' y='0' width='4' height='4' fill='%23b0d8b0'/%3E%3Crect x='8' y='0' width='4' height='4' fill='%2370a070'/%3E%3C/svg%3E");
+  background-size: 12px 4px;
+}
+.theme-micro .pixel-hr {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='6' height='6'%3E%3Crect width='6' height='6' fill='%239080b0'/%3E%3Crect x='0' y='0' width='2' height='2' fill='%23c8b8e8'/%3E%3Crect x='2' y='2' width='2' height='2' fill='%23c8b8e8'/%3E%3Crect x='4' y='4' width='2' height='2' fill='%23c8b8e8'/%3E%3C/svg%3E");
+  background-size: 6px 6px; height: 6px;
+}
+.theme-about .pixel-hr {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='8' height='4'%3E%3Crect x='0' y='0' width='4' height='4' fill='%23c0a850'/%3E%3Crect x='4' y='0' width='4' height='4' fill='%23f0d888'/%3E%3C/svg%3E");
+  background-size: 8px 4px;
+}
+
+/* ---- Blog list entries ---- */
+.blog-entry {
+  margin-bottom: 0; padding-bottom: 0;
+  border-bottom: none;
+  cursor: pointer;
+}
+.blog-entry:hover .blog-entry-head { opacity: 0.85; }
+.blog-entry-head {
+  background: #ff99bb;
+  border-bottom: 1px solid #cc6688;
+  padding: 3px 8px;
+  display: flex; justify-content: space-between; align-items: center;
+}
+.theme-portfolio .blog-entry-head { background: #b0d8b0; border-color: #70a070; }
+.theme-micro     .blog-entry-head { background: #c8b8e8; border-color: #9080b0; }
+.theme-about     .blog-entry-head { background: #f0d888; border-color: #c0a850; }
+
+.blog-entry-body {
+  background: rgba(255,255,255,0.4);
+  border: 1px solid #cc99aa;
+  border-top: none;
+  padding: 7px 8px 10px;
+  margin-bottom: 10px;
+}
+.theme-portfolio .blog-entry-body { border-color: #70a070; }
+.theme-micro     .blog-entry-body { border-color: #9080b0; }
+.theme-about     .blog-entry-body { border-color: #c0a850; }
+
+.blog-date {
+  font-family: 'Press Start 2P', monospace;
+  font-size: 6px; font-weight: 400;
+  opacity: 0.75; letter-spacing: 1px;
+  image-rendering: pixelated;
+}
+.blog-tags { font-family: 'Silkscreen', monospace; font-size: 8px; opacity: 0.6; }
+
+.blog-title {
+  font-family: 'Silkscreen', monospace;
+  font-size: 13px; font-weight: 700;
+  margin-bottom: 5px; letter-spacing: 0.5px;
+}
+.blog-excerpt { font-size: 11px; line-height: 1.7; opacity: 0.7; font-weight: 300; }
+
+/* ---- Footer ---- */
+.retro-footer {
+  font-family: 'Press Start 2P', monospace;
+  font-size: 7px; font-weight: 400;
+  text-align: center; opacity: 0.35;
+  line-height: 2.2;
+  image-rendering: pixelated;
+  padding: 18px 0 8px;
+  border-top: 1px dashed rgba(128,128,128,0.3);
+  margin-top: 28px; letter-spacing: 0.5px;
+}
+
+.retro-marquee {
+  font-size: 10px; opacity: 0.45;
+  overflow: hidden; white-space: nowrap; margin: 5px 0;
+}
+.retro-marquee-inner {
+  display: inline-block;
+  animation: marquee-scroll 25s linear infinite;
+}
+@keyframes marquee-scroll {
+  0% { transform: translateX(100%); }
+  100% { transform: translateX(-100%); }
+}
+
+.last-updated { text-align: right; font-size: 10px; opacity: 0.35; margin-bottom: 8px; }
+.deco-dots { text-align: center; font-size: 10px; opacity: 0.25; letter-spacing: 4px; margin: 8px 0; }
+.jp-only-banner { text-align: center; font-size: 9px; opacity: 0.35; letter-spacing: 1px; margin-bottom: 6px; font-style: italic; }
+
+.retro-wrapper hr {
+  border: none;
+  border-top: 1px dashed rgba(128,128,128,0.25);
+  margin: 10px 0;
+}
+
+/* ---- Blog list ---- */
+.blog-entry {
+  margin-bottom: 16px; padding-bottom: 14px;
+  border-bottom: 1px dashed rgba(128,128,128,0.2);
+  cursor: pointer;
+}
+.blog-entry:last-child { border-bottom: none; }
+.blog-entry:hover { opacity: 0.8; }
+.blog-date { font-size: 10px; font-weight: 500; opacity: 0.45; margin-bottom: 2px; letter-spacing: 1px; }
+.blog-title { font-size: 14px; font-weight: 500; margin-bottom: 5px; letter-spacing: 0.3px; }
+.blog-excerpt { font-size: 12px; line-height: 1.7; opacity: 0.65; font-weight: 300; }
+.blog-tags { font-size: 9px; opacity: 0.4; margin-top: 4px; letter-spacing: 0.5px; }
+
+/* ---- Blog detail ---- */
+.detail-back {
+  font-size: 11px; cursor: pointer; opacity: 0.5;
+  margin-bottom: 14px; display: inline-block;
+  font-family: 'IBM Plex Mono', monospace;
+}
+.detail-back:hover { opacity: 1; text-decoration: underline; }
+
+.detail-date { font-size: 10px; opacity: 0.4; letter-spacing: 1px; margin-bottom: 4px; }
+.detail-title {
+  font-family: 'Silkscreen', monospace;
+  font-size: 16px; font-weight: 700;
+  margin-bottom: 12px; letter-spacing: 0.5px;
+  line-height: 1.5;
+}
+
+.detail-body {
+  font-size: 13px; line-height: 2;
+  font-weight: 300; letter-spacing: 0.2px;
+}
+.detail-body h1 { font-size: 17px; font-weight: 500; margin: 20px 0 8px; }
+.detail-body h2 { font-size: 15px; font-weight: 500; margin: 16px 0 6px; }
+.detail-body h3 { font-size: 14px; font-weight: 500; margin: 12px 0 4px; }
+.detail-body p { margin-bottom: 12px; }
+.detail-body strong { font-weight: 500; }
+.detail-body em { font-style: italic; }
+.detail-body code {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 12px;
+  padding: 1px 4px;
+  border-radius: 2px;
+}
+.theme-blog .detail-body code { background: rgba(200,100,140,0.15); }
+.theme-portfolio .detail-body code { background: rgba(60,160,60,0.15); }
+
+.detail-body pre {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 12px; line-height: 1.6;
+  padding: 10px 12px;
+  margin: 10px 0;
+  overflow-x: auto;
+  border: 1px solid rgba(128,128,128,0.2);
+}
+.theme-blog .detail-body pre { background: rgba(200,100,140,0.08); }
+.theme-portfolio .detail-body pre { background: rgba(60,160,60,0.08); }
+
+.detail-body blockquote {
+  border-left: 3px solid rgba(128,128,128,0.3);
+  padding-left: 12px;
+  margin: 10px 0;
+  opacity: 0.75;
+  font-style: italic;
+}
+
+.detail-body ul, .detail-body ol {
+  margin: 8px 0 8px 20px;
+}
+.detail-body li { margin-bottom: 4px; }
+
+.detail-body img {
+  max-width: 100%;
+  margin: 10px 0;
+}
+
+/* KaTeX inline */
+.detail-body .math-inline { font-style: normal; }
+.detail-body .math-block {
+  display: block; text-align: center;
+  margin: 12px 0; font-size: 14px;
+}
+
+/* ---- Portfolio list ---- */
+.pf-item {
+  margin-bottom: 14px; padding: 10px;
+  border: 1px solid rgba(128,128,128,0.15);
+  background: rgba(255,255,255,0.35);
+  cursor: pointer;
+}
+.pf-item:hover { opacity: 0.8; }
+.pf-title { font-size: 13px; font-weight: 500; margin-bottom: 3px; }
+.pf-desc { font-size: 11px; line-height: 1.6; opacity: 0.7; font-weight: 300; }
+.pf-tech { font-size: 9px; margin-top: 4px; opacity: 0.45; letter-spacing: 0.5px; }
+
+/* ---- Micro ---- */
+.micro-item {
+  margin-bottom: 8px; padding: 7px 8px;
+  background: rgba(255,255,255,0.35);
+  border: 1px solid rgba(144,128,176,0.35);
+}
+.micro-time { font-family: 'Press Start 2P', monospace; font-size: 6px; opacity: 0.5; letter-spacing: 1px; margin-bottom: 6px; image-rendering: pixelated; }
+.micro-text { font-size: 12px; line-height: 1.7; font-weight: 300; }
+
+/* ---- About ---- */
+.about-section { margin-bottom: 14px; }
+.about-label { font-family: 'Press Start 2P', monospace; font-size: 7px; font-weight: 400; opacity: 0.5; letter-spacing: 1.5px; text-transform: uppercase; margin-bottom: 4px; image-rendering: pixelated; }
+.about-value { font-size: 13px; line-height: 1.7; font-weight: 300; }
+
+/* Scrollbar retro */
+#retro-page::-webkit-scrollbar { width: 10px; }
+#retro-page::-webkit-scrollbar-track { background: rgba(0,0,0,0.05); }
+#retro-page::-webkit-scrollbar-thumb { background: rgba(0,0,0,0.12); }
+
+::selection { background: var(--term-accent); color: #fff; }
+</style>
+<!-- KaTeX for LaTeX rendering -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.9/katex.min.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.9/katex.min.js"></script>
+</head>
+<body>
+
+<!-- FAUUX-STYLE PARALLAX BACKGROUND LAYERS -->
+<div class="bg-layer-1"></div>
+<div class="bg-layer-2"></div>
+<div class="bg-layer-3"></div>
+<div class="bg-overlay"></div>
+<div class="bg-vignette"></div>
+
+<div id="crt"></div>
+
+<!-- TERMINAL -->
+<div id="terminal-page">
+  <div id="welcome-banner"></div>
+  <div id="term-scroll-area">
+    <div class="term-output" id="term-output"></div>
+  </div>
+  <div class="term-input-line">
+    <span class="term-prompt">visitor@wired:~$</span>
+    <input type="text" id="term-input" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false">
+  </div>
+</div>
+
+<!-- RETRO PAGES — iframes pre-loaded, shown/hidden instantly (no reload flash) -->
+<iframe id="retro-navi"
+  style="display:none;position:relative;z-index:10;width:100%;height:100%;border:none;"
+  src="retro/navi-boot.html"></iframe>
+<iframe id="retro-blog"
+  style="display:none;position:relative;z-index:10;width:100%;height:100%;border:none;"
+  src="retro/blog.html"></iframe>
+<iframe id="retro-portfolio"
+  style="display:none;position:relative;z-index:10;width:100%;height:100%;border:none;"
+  src="retro/portfolio.html"></iframe>
+<iframe id="retro-micro"
+  style="display:none;position:relative;z-index:10;width:100%;height:100%;border:none;"
+  src="retro/micro.html"></iframe>
+<iframe id="retro-about"
+  style="display:none;position:relative;z-index:10;width:100%;height:100%;border:none;"
+  src="retro/about.html"></iframe>
+<iframe id="retro-links"
+  style="display:none;position:relative;z-index:10;width:100%;height:100%;border:none;"
+  src="retro/links.html"></iframe>
+
+<script>
+// ========== CONTENT DATABASE ==========
+// Replace these with your actual content. Body supports markdown.
+const blogPosts = [
+  {
+    id: 'copper-remembers',
+    date: '2025.12.15 (月)',
+    title: '銅線は覚えている',
+    excerpt: 'the wire carries everything, even the things we try to forget...',
+    tags: '日記 / Wired / copper',
+    body: `ここにあなたのブログ記事が入ります。
+
+**Markdown** をサポートしています。
+
+## 見出しも使えます
+
+普通の文章なんだけど、
+こうやって改行を入れると、
+なんかそれっぽくなる。
+
+\`\`\`
+$ ping wired.local
+64 bytes from 10.0.2.1: seq=1 ttl=64 time=0.42ms
+\`\`\`
+
+> 銅線は覚えている。すべてを。
+
+数式も書ける: $$E = mc^2$$
+
+インライン数式: $\\alpha + \\beta = \\gamma$ もOK。
+
+*※これはプレースホルダーです。実際のコンテンツに置き換えてください。*`
+  },
+  {
+    id: 'layer-07',
+    date: '2025.11.28 (金)',
+    title: 'Layer 07の観測',
+    excerpt: 'the protocol stack doesn\'t lie. observations from layer 07...',
+    tags: '考察 / protocol',
+    body: `ここにも記事が入ります。
+
+テキストサイトの特徴は、
+
+**文章が主役であること。**
+
+画像は最小限。テキストで勝負する。
+それが90年代後半〜2000年代初頭の個人サイト。
+
+### リスト
+
+- protocol 7 は存在しない
+- だが layer 02 は確かにある
+- 銅線の中を流れる信号
+
+### コード例
+
+\`\`\`javascript
+const wired = await connect('protocol_7');
+wired.on('data', (packet) => {
+  console.log('received:', packet.layer);
+});
+\`\`\`
+
+Replace this with your actual thoughts.`
+  },
+  {
+    id: 'signal-degradation',
+    date: '2025.10.03 (金)',
+    title: '信号劣化について',
+    excerpt: '信号は劣化する。でもノイズの中にも意味がある...',
+    tags: '雑記 / signal',
+    body: `三つ目のプレースホルダー記事。
+
+好きなことを書いてください。日記でも、考察でも、レビューでも。
+
+**テキストサイトは自由。**
+
+信号対雑音比: $SNR = \\frac{P_{signal}}{P_{noise}}$
+
+$$\\text{Shannon} = B \\log_2\\left(1 + \\frac{S}{N}\\right)$$
+
+> 劣化した信号の中にも、元のメッセージは残っている。
+> 問題はそれを復元できるかどうかだ。`
+  }
+];
+
+const portfolioItems = [
+  {
+    id: 'project-01',
+    title: '[project_01] — placeholder',
+    desc: 'ここにプロジェクトの説明が入ります。',
+    tech: 'rust / wasm / copper',
+    body: `# Project 01
+
+## 概要
+
+ここにプロジェクトの詳細な説明が入ります。Replace with your actual project writeup.
+
+### 技術スタック
+
+- **Rust** — systems programming
+- **WebAssembly** — browser target
+- \`copper\` — physical layer
+
+### 実装メモ
+
+\`\`\`rust
+fn main() {
+    let wired = Connection::new("protocol_7");
+    wired.listen(Layer::Two);
+}
+\`\`\`
+
+> このプロジェクトは実在しません。プレースホルダーです。`
+  },
+  {
+    id: 'project-02',
+    title: '[project_02] — placeholder',
+    desc: 'Another project goes here.',
+    tech: 'node / protocol_7 / fiber',
+    body: `# Project 02
+
+Another project description. Fill in your actual work.
+
+## Details
+
+Replace this with a real writeup about what you built, why, and how.
+
+- Goal: ...
+- Result: ...
+- Learnings: ...`
+  },
+  {
+    id: 'project-03',
+    title: '[project_03] — placeholder',
+    desc: 'Third project placeholder.',
+    tech: 'c / bare_metal / wire',
+    body: `# Project 03
+
+Third project. Your actual work goes here.
+
+\`\`\`c
+#include <stdio.h>
+int main() {
+    printf("connected to the wired\\n");
+    return 0;
+}
+\`\`\``
+  }
+];
+
+const microPosts = [
+  { time: '2025.12.15 03:42', text: 'placeholder: short thought goes here. ここに一言を。' },
+  { time: '2025.12.14 23:11', text: 'placeholder: 銅線は60Hzで唸っている。' },
+  { time: '2025.12.12 01:28', text: 'placeholder: and you don\'t seem to understand...' },
+  { time: '2025.12.10 19:05', text: 'placeholder: close the world. open the next.' },
+  { time: '2025.12.08 14:32', text: 'placeholder: fill these with your actual thoughts.' },
+  { time: '2025.12.05 02:17', text: 'placeholder: 深夜のWiredは静か。' },
+];
+
+// ========== MARKDOWN PARSER ==========
+function renderMarkdown(src) {
+  let html = src;
+  // Escape HTML
+  html = html.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+
+  // Block-level LaTeX $$...$$ (before other processing)
+  html = html.replace(/\$\$([^$]+?)\$\$/g, (_, tex) => {
+    try {
+      return `<div class="math-block">${katex.renderToString(tex.trim(), { displayMode: true, throwOnError: false })}</div>`;
+    } catch { return `<div class="math-block">${tex}</div>`; }
+  });
+
+  // Inline LaTeX $...$
+  html = html.replace(/\$([^$\n]+?)\$/g, (_, tex) => {
+    try {
+      return `<span class="math-inline">${katex.renderToString(tex.trim(), { throwOnError: false })}</span>`;
+    } catch { return `<span class="math-inline">${tex}</span>`; }
+  });
+
+  // Code blocks ```...```
+  html = html.replace(/```(\w*)\n([\s\S]*?)```/g, (_, lang, code) => {
+    return `<pre><code>${code.trim()}</code></pre>`;
+  });
+
+  // Inline code `...`
+  html = html.replace(/`([^`]+)`/g, '<code>$1</code>');
+
+  // Headers
+  html = html.replace(/^### (.+)$/gm, '<h3>$1</h3>');
+  html = html.replace(/^## (.+)$/gm, '<h2>$1</h2>');
+  html = html.replace(/^# (.+)$/gm, '<h1>$1</h1>');
+
+  // Bold / italic
+  html = html.replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>');
+  html = html.replace(/\*(.+?)\*/g, '<em>$1</em>');
+
+  // Blockquotes
+  html = html.replace(/^&gt; (.+)$/gm, '<blockquote>$1</blockquote>');
+  // Merge adjacent blockquotes
+  html = html.replace(/<\/blockquote>\n<blockquote>/g, '<br>');
+
+  // Unordered lists
+  html = html.replace(/^- (.+)$/gm, '<li>$1</li>');
+  html = html.replace(/(<li>[\s\S]*?<\/li>)/g, (match) => {
+    if (!match.startsWith('<ul>')) return '<ul>' + match + '</ul>';
+    return match;
+  });
+  html = html.replace(/<\/ul>\s*<ul>/g, '');
+
+  // Horizontal rules
+  html = html.replace(/^---$/gm, '<hr>');
+
+  // Paragraphs: wrap lines not already in block elements
+  const lines = html.split('\n');
+  let result = '';
+  let inBlock = false;
+  for (let line of lines) {
+    const trimmed = line.trim();
+    if (trimmed.startsWith('<h') || trimmed.startsWith('<pre') || trimmed.startsWith('<ul') ||
+        trimmed.startsWith('<blockquote') || trimmed.startsWith('<div') || trimmed.startsWith('<hr') ||
+        trimmed.startsWith('</')) {
+      if (inBlock) { result += '</p>'; inBlock = false; }
+      result += trimmed + '\n';
+    } else if (trimmed === '') {
+      if (inBlock) { result += '</p>\n'; inBlock = false; }
+    } else {
+      if (!inBlock) { result += '<p>'; inBlock = true; }
+      else { result += '<br>'; }
+      result += trimmed;
+    }
+  }
+  if (inBlock) result += '</p>';
+
+  return result;
+}
+
+// ========== TERMINAL ==========
+const output = document.getElementById('term-output');
+const input = document.getElementById('term-input');
+const termPage = document.getElementById('terminal-page');
+const welcomeBanner = document.getElementById('welcome-banner');
+const scrollArea = document.getElementById('term-scroll-area');
+
+const retroFrames = {
+  navi:      document.getElementById('retro-navi'),
+  blog:      document.getElementById('retro-blog'),
+  portfolio: document.getElementById('retro-portfolio'),
+  works:     document.getElementById('retro-portfolio'),
+  micro:     document.getElementById('retro-micro'),
+  about:     document.getElementById('retro-about'),
+  links:     document.getElementById('retro-links'),
+};
+
+// Listen for navigation messages from iframe pages
+window.addEventListener('message', (e) => {
+  if (!e.data || e.data.action !== 'navigate') return;
+  const section = e.data.section;
+  if (section === 'terminal') { backToTerminal(); }
+  else { showRetro(section); }
+});
+
+let bootDone = false;
+let currentSection = 'terminal';
+let commandHistory = [];
+let historyIndex = -1;
+const startTime = Date.now();
+
+function ln(text = '', cls = '') {
+  const span = document.createElement('span');
+  span.className = 'term-line';
+  if (cls) span.classList.add(cls);
+  span.textContent = text;
+  output.appendChild(span);
+  scrollArea.scrollTop = scrollArea.scrollHeight;
+}
+
+function lnHTML(html) {
+  const span = document.createElement('span');
+  span.className = 'term-line';
+  span.innerHTML = html;
+  output.appendChild(span);
+  scrollArea.scrollTop = scrollArea.scrollHeight;
+}
+
+function escapeHtml(s) {
+  return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+
+// ========== BOOT ==========
+async function boot() {
+  const lines = [
+    ['', ''],
+    ['TACHIBANA LABS NAVI — BIOS v2.31', 'dim'],
+    ['', ''],
+    ['RAM check ........... <span class="term-green">640K OK</span>', 'h'],
+    ['Extended ............ <span class="term-green">32768K OK</span>', 'h'],
+    ['', ''],
+    ['Loading COPLAND OS v4.017.2', 'bright'],
+    ['Copyright (c) Tachibana General Laboratories', 'dim'],
+    ['', ''],
+    ['<span class="term-green">[OK]</span> wired_protocol_7', 'h'],
+    ['<span class="term-green">[OK]</span> layer_02_bridge', 'h'],
+    ['<span class="term-green">[OK]</span> navi_display', 'h'],
+    ['<span class="term-yellow">[WARN]</span> knights_of_eastern_calculus — deprecated', 'h'],
+    ['', ''],
+    ['WIRED connection established.', 'bright'],
+    ['', ''],
+  ];
+
+  for (const [text, type] of lines) {
+    if (type === 'h') lnHTML(text);
+    else if (type === 'dim') { const s = document.createElement('span'); s.className = 'term-line term-dim'; s.textContent = text; output.appendChild(s); }
+    else if (type === 'bright') { const s = document.createElement('span'); s.className = 'term-line term-bright'; s.textContent = text; output.appendChild(s); }
+    else ln(text);
+    await new Promise(r => setTimeout(r, 35 + Math.random() * 25));
+  }
+
+  // Show persistent banner
+  welcomeBanner.innerHTML = `<span class="term-bright">  welcome to the wired.</span>
+<span class="term-dim">  no matter where you go, everyone is always connected.</span>
+
+<span class="term-dim">  type</span> <span class="term-accent">help</span> <span class="term-dim">to see available commands, or click a section below:</span>
+
+  <span class="term-link" onclick="runCmd('blog')">[blog]</span>     <span class="term-dim">— 日記・雑記</span>
+  <span class="term-link" onclick="runCmd('works')">[works]</span>    <span class="term-dim">— portfolio</span>
+  <span class="term-link" onclick="runCmd('micro')">[micro]</span>    <span class="term-dim">— 一言</span>
+  <span class="term-link" onclick="runCmd('about')">[about]</span>    <span class="term-dim">— 自己紹介</span>
+  <span class="term-link" onclick="runCmd('links')">[links]</span>    <span class="term-dim">— リンク集</span>
+
+  <span class="term-dim">────────────────────────────</span>
+  <span class="term-link" onclick="runCmd('board')">[board]</span>    <span class="term-dim">— /wired/ anonymous board</span>
+  <span class="term-link" onclick="runCmd('board --cli')">[board --cli]</span> <span class="term-dim">— CLI interface</span>
+  <span class="term-link" onclick="runCmd('lobby')">[lobby]</span>    <span class="term-dim">— anonymous chat lobby</span>
+  <span class="term-link" onclick="runCmd('lobby --cli')">[lobby --cli]</span> <span class="term-dim">— CLI interface</span>
+`;
+  welcomeBanner.style.display = 'block';
+
+  bootDone = true;
+  input.focus();
+  scheduleIdle();
+}
+
+// ========== COMMANDS ==========
+const commandList = ['help','blog','works','portfolio','micro','about','links','navi','board','lobby','clear','whoami','uptime','ping','ls','connect','lain','sudo','glitch','date','cat','history','fortune','ssh','neofetch'];
+
+// ========== VIRTUAL FILESYSTEM (for cat command) ==========
+const vfs = {
+  'readme.txt': [
+    ['', ''],
+    ['  COPLAND OS v4.017.2 — README', 'bright'],
+    ['  Tachibana General Laboratories', 'dim'],
+    ['', ''],
+    ['  This terminal is a gateway to the Wired.', ''],
+    ['  Not all who enter are authorized.', ''],
+    ['  Visitors may browse. Users may act.', ''],
+    ['', ''],
+    ['  Type <span class="term-accent">help</span> for available commands.', 'h'],
+    ['', ''],
+  ],
+  'protocol.txt': [
+    ['', ''],
+    ['  PROTOCOL_7 — TECHNICAL SPECIFICATION', 'bright'],
+    ['  classification: [REDACTED]', 'dim'],
+    ['', ''],
+    ['  Protocol 7 is not recognized by any standards body.', ''],
+    ['  It predates the OSI model.', ''],
+    ['  It predates everything.', ''],
+    ['', ''],
+    ['  layer 0 ......... physical', 'dim'],
+    ['  layer 1 ......... data link', 'dim'],
+    ['  layer 2 ......... network <span class="term-accent">← you are here</span>', 'h'],
+    ['  layer 7 ......... <span class="term-yellow">??????????</span>', 'h'],
+    ['', ''],
+    ['  "The body is just a node. The Wired is real."', 'dim'],
+    ['', ''],
+  ],
+  'lain.txt': [
+    ['', ''],
+    ['  present day, present time.', 'bright'],
+    ['', ''],
+    ['  玲音はどこにでもいる。', 'dim'],
+    ['  Lain is everywhere.', ''],
+    ['', ''],
+    ['  The border between the real world', ''],
+    ['  and the Wired is dissolving.', ''],
+    ['  It always was.', ''],
+    ['', ''],
+    ['  No matter where you go,', ''],
+    ['  everyone is always connected.', ''],
+    ['', ''],
+  ],
+  'wired.txt': [
+    ['', ''],
+    ['  THE WIRED — INTERNAL MEMO', 'bright'],
+    ['  date: [TIMESTAMP CORRUPTED]', 'dim'],
+    ['', ''],
+    ['  The Wired is not the internet.', ''],
+    ['  The internet is a shadow of the Wired.', ''],
+    ['', ''],
+    ['  access level : visitor', 'dim'],
+    ['  node ID      : <span class="term-accent">unassigned</span>', 'h'],
+    ['  signal       : <span class="term-green">stable</span>', 'h'],
+    ['', ''],
+  ],
+  'authorized.txt': [
+    ['', ''],
+    ['  <span class="term-red">ACCESS DENIED</span>', 'h'],
+    ['  <span class="term-dim">this file requires user-level authorization.</span>', 'h'],
+    ['  <span class="term-dim">visitors cannot read this document.</span>', 'h'],
+    ['', ''],
+  ],
+};
+
+const fortuneLines = [
+  ['present day, present time.', 'ハハハハハハハ'],
+  ['the border between the Wired and the real world is dissolving.', null],
+  ['you exist in the Wired whether you want to or not.', null],
+  ['close the world. open the next.', null],
+  ['no matter where you go, everyone is always connected.', null],
+  ['銅線は覚えている。すべてを。', 'the wire remembers. everything.'],
+  ['the body is just a node.', null],
+  ['are you real? is the question even meaningful?', null],
+  ['信号は劣化する。でも意味は残る。', 'signals degrade. meaning remains.'],
+  ['layer 02 is where thought becomes signal.', null],
+  ['God is in the Wired.', null],
+  ['you were always connected.', null],
+];
+
+const commands = {
+  help() {
+    ln('');
+    lnHTML('<span class="term-bright">available commands:</span>');
+    ln('');
+    lnHTML('  <span class="term-accent">blog</span>       <span class="term-dim">open blog / 日記</span>');
+    lnHTML('  <span class="term-accent">works</span>      <span class="term-dim">open portfolio / 作品集</span>');
+    lnHTML('  <span class="term-accent">micro</span>      <span class="term-dim">open micro-posts / 一言</span>');
+    lnHTML('  <span class="term-accent">about</span>      <span class="term-dim">about me / 自己紹介</span>');
+    lnHTML('  <span class="term-accent">links</span>      <span class="term-dim">open link collection / リンク集</span>');
+    lnHTML('  <span class="term-accent">navi</span>       <span class="term-dim">NAVI interface [offline]</span>');
+    ln('');
+    lnHTML('  <span class="term-accent">board</span>      <span class="term-dim">anonymous imageboard / /wired/</span>');
+    lnHTML('  <span class="term-accent">board --cli</span><span class="term-dim">  CLI-only board interface</span>');
+    lnHTML('  <span class="term-accent">lobby</span>      <span class="term-dim">anonymous chat lobby</span>');
+    lnHTML('  <span class="term-accent">lobby --cli</span><span class="term-dim">  CLI-only lobby interface</span>');
+    ln('');
+    lnHTML('  <span class="term-accent">ls</span>         <span class="term-dim">list directory</span>');
+    lnHTML('  <span class="term-accent">cat [file]</span> <span class="term-dim">read a file</span>');
+    lnHTML('  <span class="term-accent">date</span>       <span class="term-dim">current date and time</span>');
+    lnHTML('  <span class="term-accent">whoami</span>     <span class="term-dim">display session info</span>');
+    lnHTML('  <span class="term-accent">uptime</span>     <span class="term-dim">show session uptime</span>');
+    lnHTML('  <span class="term-accent">ping</span>       <span class="term-dim">test wired connection</span>');
+    lnHTML('  <span class="term-accent">fortune</span>    <span class="term-dim">receive a transmission</span>');
+    lnHTML('  <span class="term-accent">history</span>    <span class="term-dim">command history</span>');
+    lnHTML('  <span class="term-accent">clear</span>      <span class="term-dim">clear terminal</span>');
+    ln('');
+    lnHTML('  <span class="term-dim">tip: Tab to autocomplete · ↑↓ for history</span>');
+    ln('');
+  },
+
+  navi() {
+    lnHTML('<span class="term-yellow">[WARN]</span> <span class="term-dim">NAVI module is offline. loading placeholder...</span>');
+    setTimeout(() => showRetro('navi'), 400);
+  },
+  blog() {
+    lnHTML('<span class="term-dim">connecting to blog...</span>');
+    setTimeout(() => showRetro('blog'), 250);
+  },
+  works() {
+    lnHTML('<span class="term-dim">loading portfolio...</span>');
+    setTimeout(() => showRetro('portfolio'), 250);
+  },
+  portfolio() { commands.works(); },
+  micro() {
+    lnHTML('<span class="term-dim">loading micro-posts...</span>');
+    setTimeout(() => showRetro('micro'), 250);
+  },
+  about() {
+    lnHTML('<span class="term-dim">loading about...</span>');
+    setTimeout(() => showRetro('about'), 250);
+  },
+  links() {
+    lnHTML('<span class="term-dim">loading link collection...</span>');
+    setTimeout(() => showRetro('links'), 250);
+  },
+
+  board(args) {
+    const cli = (args || '').trim() === '--cli';
+    if (cli) {
+      lnHTML('<span class="term-dim">launching board CLI...</span>');
+      setTimeout(() => { window.location.href = 'board/cli.html'; }, 300);
+    } else {
+      lnHTML('<span class="term-dim">connecting to /wired/ board...</span>');
+      setTimeout(() => { window.location.href = 'board/index.html'; }, 300);
+    }
+  },
+
+  lobby(args) {
+    const cli = (args || '').trim() === '--cli';
+    if (cli) {
+      lnHTML('<span class="term-dim">launching lobby CLI...</span>');
+      setTimeout(() => { window.location.href = 'lobby/cli.html'; }, 300);
+    } else {
+      lnHTML('<span class="term-dim">connecting to wired lobby...</span>');
+      setTimeout(() => { window.location.href = 'lobby/index.html'; }, 300);
+    }
+  },
+
+  ls() {
+    ln('');
+    lnHTML('<span class="term-dim">drwxr-xr-x</span>  <span class="term-accent">blog/</span>');
+    lnHTML('<span class="term-dim">drwxr-xr-x</span>  <span class="term-accent">works/</span>');
+    lnHTML('<span class="term-dim">drwxr-xr-x</span>  <span class="term-accent">micro/</span>');
+    lnHTML('<span class="term-dim">drwxr-xr-x</span>  <span class="term-accent">about/</span>');
+    lnHTML('<span class="term-dim">drwxr-xr-x</span>  <span class="term-accent">links/</span>');
+    lnHTML('<span class="term-dim">drwxr-xr-x</span>  <span class="term-red">navi/</span>     <span class="term-dim">[offline]</span>');
+    lnHTML('<span class="term-dim">drwxrwxrwx</span>  <span class="term-yellow">board/</span>    <span class="term-dim">anonymous imageboard</span>');
+    lnHTML('<span class="term-dim">drwxrwxrwx</span>  <span class="term-yellow">lobby/</span>    <span class="term-dim">anonymous chat</span>');
+    ln('');
+    lnHTML('<span class="term-dim">-rw-r--r--</span>  <span class="term-accent">readme.txt</span>');
+    lnHTML('<span class="term-dim">-rw-r--r--</span>  <span class="term-accent">protocol.txt</span>');
+    lnHTML('<span class="term-dim">-rw-r--r--</span>  <span class="term-accent">lain.txt</span>');
+    lnHTML('<span class="term-dim">-rw-r--r--</span>  <span class="term-accent">wired.txt</span>');
+    lnHTML('<span class="term-dim">-rw-------</span>  <span class="term-red">authorized.txt</span>');
+    ln('');
+  },
+
+  cat(args) {
+    const file = (args || '').trim().toLowerCase();
+    if (!file) {
+      lnHTML('<span class="term-red">usage:</span> cat [filename]');
+      lnHTML('<span class="term-dim">try: cat readme.txt</span>');
+      return;
+    }
+    const doc = vfs[file];
+    if (!doc) {
+      lnHTML(`<span class="term-red">cat: ${escapeHtml(file)}: no such file</span>`);
+      lnHTML('<span class="term-dim">type <span class="term-accent">ls</span> to list available files</span>');
+      return;
+    }
+    for (const [text, type] of doc) {
+      if (type === 'h') lnHTML(text);
+      else if (type === 'dim') lnHTML(`<span class="term-dim">${text}</span>`);
+      else if (type === 'bright') lnHTML(`<span class="term-bright">${text}</span>`);
+      else ln(text);
+    }
+  },
+
+  date() {
+    const now = new Date();
+    const days = ['日','月','火','水','木','金','土'];
+    const pad = n => String(n).padStart(2,'0');
+    const dateStr = `${now.getFullYear()}.${pad(now.getMonth()+1)}.${pad(now.getDate())} (${days[now.getDay()]})`;
+    const timeStr = `${pad(now.getHours())}:${pad(now.getMinutes())}:${pad(now.getSeconds())}`;
+    ln('');
+    lnHTML(`  <span class="term-bright">${dateStr}</span>  <span class="term-accent">${timeStr}</span>`);
+    lnHTML(`  <span class="term-dim">timezone: ${Intl.DateTimeFormat().resolvedOptions().timeZone}</span>`);
+    lnHTML(`  <span class="term-dim">wired_time: layer_02_sync // drift: 0.00ms</span>`);
+    ln('');
+  },
+
+  history() {
+    ln('');
+    if (commandHistory.length === 0) {
+      lnHTML('<span class="term-dim">no commands in history.</span>');
+    } else {
+      commandHistory.forEach((cmd, i) => {
+        lnHTML(`  <span class="term-dim">${String(i+1).padStart(3,' ')}  </span><span class="term-accent">${escapeHtml(cmd)}</span>`);
+      });
+    }
+    ln('');
+  },
+
+  fortune() {
+    const [en, ja] = fortuneLines[Math.floor(Math.random() * fortuneLines.length)];
+    ln('');
+    lnHTML(`  <span class="term-accent">${escapeHtml(en)}</span>`);
+    if (ja) lnHTML(`  <span class="term-dim">${escapeHtml(ja)}</span>`);
+    ln('');
+  },
+
+  clear() { output.innerHTML = ''; },
+
+  whoami() {
+    ln('');
+    lnHTML('<span class="term-bright">visitor</span> <span class="term-dim">@</span> <span class="term-accent">wired.local</span>');
+    lnHTML('<span class="term-dim">role     : visitor  </span><span class="term-yellow">// not authorized as user</span>');
+    lnHTML('<span class="term-dim">protocol : 7  //  layer: 02  //  access: guest</span>');
+    lnHTML('<span class="term-dim">node     : unassigned</span>');
+    ln('');
+  },
+
+  uptime() {
+    const s = Math.floor((Date.now() - startTime) / 1000);
+    const h = String(Math.floor(s/3600)).padStart(2,'0');
+    const m = String(Math.floor((s%3600)/60)).padStart(2,'0');
+    const sec = String(s%60).padStart(2,'0');
+    lnHTML(`<span class="term-dim">session uptime:</span> <span class="term-bright">${h}:${m}:${sec}</span>`);
+  },
+
+  ping() {
+    ln('');
+    lnHTML('<span class="term-dim">PING wired.local (10.0.2.1) 56 bytes</span>');
+    const t = () => (0.35 + Math.random() * 0.15).toFixed(2);
+    lnHTML(`<span class="term-dim">64 bytes: seq=1 ttl=64 time=</span><span class="term-green">${t()}ms</span>`);
+    lnHTML(`<span class="term-dim">64 bytes: seq=2 ttl=64 time=</span><span class="term-green">${t()}ms</span>`);
+    lnHTML(`<span class="term-dim">64 bytes: seq=3 ttl=64 time=</span><span class="term-green">${t()}ms</span>`);
+    lnHTML('<span class="term-dim">--- wired.local ping statistics ---</span>');
+    lnHTML('<span class="term-dim">3 transmitted, 3 received,</span> <span class="term-green">0% loss</span>');
+    ln('');
+  },
+
+  // ── Easter eggs ──────────────────────────────────────────────────
+  connect() {
+    ln('');
+    lnHTML('<span class="term-dim">establishing connection to protocol_7...</span>');
+    setTimeout(() => lnHTML('<span class="term-yellow">[WARN]</span> <span class="term-dim">protocol_7 is not a recognized standard</span>'), 400);
+    setTimeout(() => lnHTML('<span class="term-green">[OK]</span>   <span class="term-dim">connection established anyway</span>'), 800);
+    setTimeout(() => lnHTML('<span class="term-accent">no matter where you go, everyone is always connected.</span>'), 1300);
+    setTimeout(() => ln(''), 1500);
+  },
+
+  lain() {
+    ln('');
+    lnHTML('<span class="term-bright">present day, present time.</span>');
+    lnHTML('<span class="term-dim">ハハハハハハハ</span>');
+    ln('');
+  },
+
+  sudo() {
+    lnHTML('<span class="term-red">sudo: visitor is not in the sudoers file.</span>');
+    lnHTML('<span class="term-dim">this incident has been logged.</span>');
+  },
+
+  ssh(args) {
+    const target = (args || '').trim() || 'wired.local';
+    ln('');
+    lnHTML(`<span class="term-dim">SSH ${escapeHtml(target)} — attempting connection...</span>`);
+    setTimeout(() => lnHTML('<span class="term-dim">› authenticating...</span>'), 350);
+    setTimeout(() => lnHTML('<span class="term-yellow">[WARN]</span> <span class="term-dim">host key not in known_hosts</span>'), 700);
+    setTimeout(() => lnHTML('<span class="term-red">[DENIED]</span> <span class="term-dim">visitor accounts cannot establish remote sessions</span>'), 1100);
+    setTimeout(() => lnHTML('<span class="term-dim">connection closed by remote host.</span>'), 1500);
+    setTimeout(() => ln(''), 1700);
+  },
+
+  neofetch() {
+    ln('');
+    lnHTML('  <span class="term-accent">  ▄████████████▄</span>');
+    lnHTML('  <span class="term-accent">  █ COPLAND OS █</span>   <span class="term-bright">visitor</span><span class="term-dim">@</span><span class="term-accent">wired.local</span>');
+    lnHTML('  <span class="term-accent">  █ ─────────  █</span>   <span class="term-dim">──────────────────────────</span>');
+    lnHTML(`  <span class="term-accent">  █  NAVI      █</span>   <span class="term-dim">OS     :</span> Copland OS v4.017.2`);
+    lnHTML(`  <span class="term-accent">  █  TACHIBANA █</span>   <span class="term-dim">HOST   :</span> wired.local`);
+    lnHTML(`  <span class="term-accent">  █  LABS      █</span>   <span class="term-dim">SHELL  :</span> wired_sh 2.31`);
+    lnHTML(`  <span class="term-accent">  ▀████████████▀</span>   <span class="term-dim">LAYER  :</span> 02`);
+    lnHTML(`  <span class="term-dim">                   PROTOCOL:</span> 7`);
+    lnHTML(`  <span class="term-dim">                   ACCESS :</span> <span class="term-yellow">visitor</span>`);
+    lnHTML(`  <span class="term-dim">                   SIGNAL :</span> <span class="term-green">stable</span>`);
+    lnHTML(`  <span class="term-dim">                   NODE   :</span> unassigned`);
+    ln('');
+    lnHTML('  <span style="color:#ff0080">█</span><span style="color:#ff4400">█</span><span style="color:#ffaa00">█</span><span style="color:#aaff00">█</span><span style="color:#00ffaa">█</span><span style="color:#00aaff">█</span><span style="color:#7a9ec2">█</span><span style="color:#b0b0b0">█</span>');
+    ln('');
+  },
+
+  async glitch() {
+    lnHTML('<span class="term-yellow">signal degradation detected...</span>');
+    await new Promise(r => setTimeout(r, 100));
+    for (let i = 0; i < 8; i++) {
+      await new Promise(r => setTimeout(r, 70));
+      output.querySelectorAll('.term-line').forEach(l => {
+        if (Math.random() < 0.35) {
+          l.style.opacity = Math.random() < 0.5 ? '0.15' : '1';
+          if (Math.random() < 0.25) {
+            l.style.color = ['#ff0080','#00ffff','#ff8800','#7fff00'][Math.floor(Math.random()*4)];
+          }
+          if (Math.random() < 0.15) {
+            l.style.transform = `translateX(${(Math.random()-0.5)*8}px)`;
+          }
+        }
+      });
+    }
+    await new Promise(r => setTimeout(r, 120));
+    output.querySelectorAll('.term-line').forEach(l => {
+      l.style.opacity = '';
+      l.style.color = '';
+      l.style.transform = '';
+    });
+    lnHTML('<span class="term-green">signal restored.</span>');
+    ln('');
+  },
+};
+
+// ========== COMMAND RUNNER ==========
+// Supports async commands and argument passing (e.g. "cat readme.txt")
+async function runCmd(cmd) {
+  resetIdle();
+  const trimmed = cmd.trim();
+  if (!trimmed) return;
+  lnHTML(`<span class="term-green">visitor@wired:~$</span> ${escapeHtml(cmd)}`);
+  const [name, ...argParts] = trimmed.toLowerCase().split(/\s+/);
+  const args = argParts.join(' ');
+  if (commands[name]) {
+    await Promise.resolve(commands[name](args));
+  } else {
+    lnHTML(`<span class="term-red">command not found:</span> ${escapeHtml(name)}`);
+    lnHTML('<span class="term-dim">type \'help\' for available commands</span>');
+  }
+  ln('');
+}
+
+// ========== INPUT HANDLING ==========
+input.addEventListener('keydown', (e) => {
+  if (!bootDone) { e.preventDefault(); return; }
+  if (e.key === 'Enter') {
+    const cmd = input.value;
+    if (cmd.trim()) commandHistory.push(cmd);
+    historyIndex = commandHistory.length;
+    input.value = '';
+    runCmd(cmd);
+  } else if (e.key === 'ArrowUp') {
+    e.preventDefault();
+    if (historyIndex > 0) { historyIndex--; input.value = commandHistory[historyIndex]; }
+  } else if (e.key === 'ArrowDown') {
+    e.preventDefault();
+    if (historyIndex < commandHistory.length - 1) { historyIndex++; input.value = commandHistory[historyIndex]; }
+    else { historyIndex = commandHistory.length; input.value = ''; }
+  } else if (e.key === 'Tab') {
+    e.preventDefault();
+    const partial = input.value.trim().toLowerCase();
+    if (!partial) return;
+    const matches = commandList.filter(c => c.startsWith(partial));
+    if (matches.length === 1) {
+      input.value = matches[0];
+    } else if (matches.length > 1) {
+      lnHTML(`<span class="term-green">visitor@wired:~$</span> ${escapeHtml(input.value)}`);
+      lnHTML('<span class="term-dim">' + matches.join('  ') + '</span>');
+      ln('');
+    }
+  }
+});
+
+// Any keypress or click resets idle
+document.addEventListener('keydown', () => resetIdle(), { passive: true });
+input.addEventListener('input', () => resetIdle(), { passive: true });
+
+termPage.addEventListener('click', (e) => {
+  if (!e.target.classList.contains('term-link')) input.focus();
+});
+
+termPage.addEventListener('touchend', (e) => {
+  if (!e.target.classList.contains('term-link')) {
+    e.preventDefault();
+    input.focus();
+  }
+}, { passive: false });
+
+// ========== IDLE SYSTEM ==========
+// Stage 1: 45s  — subtle check-in
+// Stage 2: 90s  — more atmospheric, signal concern
+// Stage 3: 180s — the wire speaks, increasingly unsettling
+// Stage 4: 300s — the connection is fading
+let idleTimer = null;
+let idleStage = 0;
+
+const idleMessages = [
+  // Stage 1 — 45s
+  [
+    () => { lnHTML('<span class="term-dim">...まだいますか？</span>'); lnHTML('<span class="term-dim">...are you still there?</span>'); },
+    () => { lnHTML('<span class="term-dim">signal idle. waiting for input...</span>'); },
+    () => { lnHTML('<span class="term-dim">...接続は維持されています。</span>'); lnHTML('<span class="term-dim">...connection maintained.</span>'); },
+  ],
+  // Stage 2 — 90s
+  [
+    () => { lnHTML('<span class="term-dim">the wire is quiet.</span>'); lnHTML('<span class="term-dim">静寂。</span>'); },
+    () => { lnHTML('<span class="term-dim">are you still on the other side?</span>'); lnHTML('<span class="term-dim">まだ向こうにいますか？</span>'); },
+    () => { lnHTML('<span class="term-dim">protocol_7 idle timeout approaching...</span>'); lnHTML('<span class="term-yellow">[WARN]</span> <span class="term-dim">signal degrading</span>'); },
+  ],
+  // Stage 3 — 180s
+  [
+    () => { lnHTML('<span class="term-accent">...no matter where you go.</span>'); lnHTML('<span class="term-dim">どこへ行っても、みんな繋がっている。</span>'); },
+    () => { lnHTML('<span class="term-dim">the Wired remembers even when you are gone.</span>'); lnHTML('<span class="term-dim">Wiredはあなたが去っても覚えている。</span>'); },
+    () => { lnHTML('<span class="term-red">signal loss detected on layer 02.</span>'); lnHTML('<span class="term-dim">reconnection will be attempted.</span>'); },
+  ],
+  // Stage 4 — 300s
+  [
+    () => {
+      lnHTML('<span class="term-red">NODE INACTIVE</span>');
+      lnHTML('<span class="term-dim">存在は信号。信号なき者は存在しない。</span>');
+      lnHTML('<span class="term-dim">existence is signal. no signal, no existence.</span>');
+    },
+    () => {
+      lnHTML('<span class="term-accent">...Lain?</span>');
+      lnHTML('<span class="term-dim">present day, present time.</span>');
+      lnHTML('<span class="term-dim">ハハハハハハハ</span>');
+    },
+    () => {
+      lnHTML('<span class="term-red">[CRITICAL]</span> <span class="term-dim">consciousness upload timeout.</span>');
+      lnHTML('<span class="term-dim">please reconnect to the Wired.</span>');
+      lnHTML('<span class="term-dim">Wiredへの再接続をお願いします。</span>');
+    },
+  ],
+];
+
+const idleDelays = [45000, 90000, 180000, 300000];
+
+function scheduleIdle() {
+  if (idleStage >= idleDelays.length) return;
+  idleTimer = setTimeout(() => {
+    if (currentSection !== 'terminal') { scheduleIdle(); return; }
+    const pool = idleMessages[idleStage];
+    pool[Math.floor(Math.random() * pool.length)]();
+    ln('');
+    idleStage++;
+    scheduleIdle();
+  }, idleDelays[idleStage]);
+}
+
+function resetIdle() {
+  clearTimeout(idleTimer);
+  idleStage = 0;
+  scheduleIdle();
+}
+
+// ========== PAGE TRANSITION (CRT flash) ==========
+const crtFlash = document.createElement('div');
+crtFlash.style.cssText = 'position:fixed;inset:0;z-index:99998;background:white;opacity:0;pointer-events:none;transition:opacity 0.04s linear;';
+document.body.appendChild(crtFlash);
+
+function flashTransition(cb) {
+  crtFlash.style.transition = 'opacity 0.04s linear';
+  crtFlash.style.opacity = '0.7';
+  setTimeout(() => {
+    cb();
+    crtFlash.style.transition = 'opacity 0.18s linear';
+    crtFlash.style.opacity = '0';
+  }, 60);
+}
+
+// ========== RETRO PAGE SYSTEM ==========
+let activeFrame = null;
+
+function showRetro(section) {
+  const frame = retroFrames[section];
+  if (!frame) return;
+  flashTransition(() => {
+    currentSection = section;
+    termPage.style.display = 'none';
+    if (activeFrame && activeFrame !== frame) activeFrame.style.display = 'none';
+    frame.style.display = 'block';
+    activeFrame = frame;
+  });
+}
+
+function backToTerminal() {
+  flashTransition(() => {
+    currentSection = 'terminal';
+    if (activeFrame) { activeFrame.style.display = 'none'; activeFrame = null; }
+    termPage.style.display = 'flex';
+    input.focus();
+    scrollArea.scrollTop = scrollArea.scrollHeight;
+  });
+}
+
+// ========== KEYBOARD ==========
+document.addEventListener('keydown', (e) => {
+  if (e.key === 'Escape' && currentSection !== 'terminal') backToTerminal();
+});
+
+// ========== INIT ==========
+window.addEventListener('load', () => setTimeout(() => { boot(); }, 300));
+</script>
+</body>
+</html>

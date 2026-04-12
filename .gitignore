@@ -1,0 +1,6 @@
+node_modules/
+.env
+*.db
+deploy/wired.env
+Reference/
+copland-os-legacy.html

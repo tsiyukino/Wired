@@ -1,0 +1,359 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>WIRED LOBBY — anonymous chat</title>
+<link rel="stylesheet" href="../retro/retro.css">
+<script src="../retro/retro-utils.js"></script>
+<style>
+html, body { height: 100%; overflow: hidden; }
+
+/* ── Fixed layout: header chrome + chat below ── */
+#lobby-wrap {
+  position: fixed;
+  top: 117px; left: 18px; right: 18px; bottom: 0;
+  display: flex; flex-direction: column;
+  background-color: #fcd0fe;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='4' height='4'%3E%3Crect width='4' height='4' fill='%23fcd0fe'/%3E%3Crect x='0' y='0' width='2' height='2' fill='%23f0a8e0'/%3E%3Crect x='2' y='2' width='2' height='2' fill='%23f0a8e0'/%3E%3C/svg%3E");
+  background-size: 4px 4px;
+}
+
+/* Lobby header bar */
+#lobby-header {
+  padding: 8px 24px 6px;
+  background: #f0a8e0;
+  box-shadow: inset 0 0 2px black;
+  border-bottom: 2px groove #dbb6af;
+  flex-shrink: 0;
+  display: flex; justify-content: space-between; align-items: center;
+  flex-wrap: wrap; gap: 6px;
+}
+.lobby-title {
+  font-family: 'Press Start 2P', monospace;
+  font-size: 11px; color: #6a0d91; letter-spacing: 3px;
+  text-shadow: 7px 8px 10px darkred, -5px -6px 8px #b387d1, 2px 3px 5px black;
+}
+.lobby-sub {
+  font-family: 'Silkscreen', monospace;
+  font-size: 9px; color: #2a0a3a; opacity: 0.55; letter-spacing: 1px;
+}
+.online-pill {
+  font-family: 'Press Start 2P', monospace;
+  font-size: 7px; color: #fcd0fe;
+  background: #6a0d91; border: 2px solid #c677d3;
+  padding: 3px 8px; letter-spacing: 1px;
+}
+
+/* Nav strip */
+#lobby-nav {
+  font-family: 'Silkscreen', monospace;
+  font-size: 11px; letter-spacing: 1px;
+  padding: 4px 24px;
+  border: none; border-bottom: 2px groove #c8c9ce;
+  background: #dddde1;
+  box-shadow: inset 0 0 3px rgba(0,0,0,0.12);
+  flex-shrink: 0;
+  display: flex; gap: 4px; align-items: center; flex-wrap: wrap;
+}
+#lobby-nav a { color: #6a0d91; cursor: pointer; font-weight: 700; padding: 0 4px; }
+#lobby-nav a:hover { color: #b30000; text-decoration: underline; }
+#lobby-nav .sep { color: #555; opacity: 0.35; }
+
+/* Messages area */
+#msg-area {
+  flex: 1;
+  overflow-y: auto;
+  padding: 10px 24px;
+  scrollbar-width: thin;
+  scrollbar-color: #c677d3 #dbb6af;
+}
+
+/* Individual message — styled like micro-item */
+.msg-row {
+  display: flex;
+  gap: 10px;
+  align-items: baseline;
+  padding: 5px 8px;
+  margin-bottom: 4px;
+  background: rgba(252,208,254,0.5);
+  border: 2px groove #dbb6af;
+  box-shadow: 2px 1px 4px #dbb6af inset;
+}
+.msg-row.sys-row {
+  background: rgba(240,168,224,0.25);
+  border-color: rgba(219,182,175,0.4);
+  box-shadow: none;
+}
+.msg-time {
+  font-family: 'Press Start 2P', monospace;
+  font-size: 7px; color: #6a0d91; opacity: 0.45;
+  white-space: nowrap; flex-shrink: 0;
+}
+.msg-name {
+  font-family: 'Silkscreen', monospace;
+  font-size: 11px; font-weight: 700;
+  white-space: nowrap; flex-shrink: 0;
+}
+.msg-text {
+  font-size: 13px; line-height: 1.6; color: #2a0a3a;
+  word-break: break-word; font-weight: 300;
+}
+.msg-text.sys-text { color: #9b3fb5; font-style: italic; font-size: 11px; }
+.msg-mention { color: #b30000; font-weight: 500; }
+
+/* Pixel HR in messages */
+.msg-pixel-hr {
+  height: 4px; width: 100%; margin: 6px 0;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='8' height='4'%3E%3Crect x='0' y='0' width='4' height='4' fill='%23c677d3'/%3E%3Crect x='4' y='0' width='4' height='4' fill='%23fcd0fe'/%3E%3C/svg%3E");
+  background-size: 8px 4px; background-repeat: repeat-x;
+  image-rendering: pixelated;
+}
+
+/* Input area */
+#input-area {
+  border-top: 2px groove #dbb6af;
+  background: #dddde1;
+  padding: 8px 24px 10px;
+  flex-shrink: 0;
+}
+.input-row {
+  display: flex; gap: 6px; align-items: center;
+}
+#chat-name {
+  width: 120px; flex-shrink: 0;
+  background: #fff8ff;
+  border: 2px groove #dbb6af;
+  color: #6a0d91;
+  font-family: 'Silkscreen', monospace; font-size: 11px;
+  padding: 5px 8px; outline: none;
+}
+#chat-name:focus { border-color: #c677d3; }
+#chat-input {
+  flex: 1;
+  background: #fff8ff;
+  border: 2px groove #dbb6af;
+  border-left: 3px solid #c677d3;
+  color: #2a0a3a;
+  font-family: 'IBM Plex Mono', monospace; font-size: 13px;
+  padding: 5px 10px; outline: none;
+}
+#chat-input:focus { border-left-color: #6a0d91; background: #fffaff; }
+.send-btn {
+  background: #dddde1;
+  border: 2px groove #c8c9ce;
+  box-shadow: 1px 1px 3px rgba(0,0,0,0.3);
+  color: #2a0a3a;
+  font-family: 'Press Start 2P', monospace;
+  font-size: 8px; padding: 5px 12px; cursor: pointer;
+  flex-shrink: 0;
+}
+.send-btn:hover { filter: brightness(1.08); }
+.send-btn:active { box-shadow: inset 2px 2px 3px rgba(0,0,0,0.25); }
+.input-hint {
+  font-family: 'Silkscreen', monospace;
+  font-size: 9px; color: #6a0d91; opacity: 0.5;
+  margin-top: 4px; text-align: right;
+}
+#rate-msg {
+  font-family: 'Silkscreen', monospace;
+  font-size: 9px; color: #b30000;
+  min-height: 1em; margin-top: 3px;
+}
+</style>
+</head>
+<body class="theme-blog">
+
+<!-- WINDOWS XP CHROME -->
+<div class="win-chrome">
+  <div class="win-chrome-row1">
+    <button class="win-btn" onclick="goHome()">← Terminal</button>
+    <button class="win-btn" onclick="location.reload()">⟳ Refresh</button>
+    <button class="win-btn" onclick="window.location.href='../board/index.html'">[ /wired/ board ]</button>
+    <button class="win-btn" onclick="window.location.href='cli.html'">[ CLI mode ]</button>
+    <span class="win-chrome-title">COPLAND OS NAVIGATOR v4.017</span>
+  </div>
+  <div class="win-chrome-row2">
+    <span class="win-addr-label">Address ▼</span>
+    <input type="text" class="win-addr-bar" value="wired://lobby/" readonly>
+  </div>
+  <div class="win-chrome-row3">
+    <span class="win-nav-icon">📡</span>
+    <button class="win-nav-btn">∗ WIRED LOBBY — anonymous instant messaging</button>
+    <span style="opacity:0.3">|</span>
+    <button class="win-nav-btn" onclick="goHome()">[ terminal ]</button>
+    <span class="blink" style="margin-left:auto;margin-right:8px;font-family:'Press Start 2P',monospace;font-size:8px;color:#6a0d91;">∗ CONNECTED ∗</span>
+  </div>
+</div>
+
+<div class="retro-deco-left"></div>
+<div class="retro-deco-right"></div>
+
+<div id="lobby-wrap">
+
+  <div id="lobby-header">
+    <div>
+      <div class="lobby-title">∗ WIRED LOBBY ∗</div>
+      <div class="lobby-sub">anonymous instant messaging // no logs kept // demo mode</div>
+    </div>
+    <div class="online-pill" id="online-pill">● 1 online</div>
+  </div>
+
+  <div id="lobby-nav">
+    <a onclick="window.location.href='../board/index.html'">[/wired/ board]</a>
+    <span class="sep"> | </span>
+    <a onclick="goHome()">[terminal]</a>
+    <span class="sep"> | </span>
+    <a onclick="window.location.href='cli.html'">[CLI mode]</a>
+    <span style="margin-left:auto;font-family:'Press Start 2P',monospace;font-size:7px;color:#6a0d91;opacity:0.4;">no accounts ∗ no logs ∗ rate limited</span>
+  </div>
+
+  <div id="msg-area"></div>
+
+  <div id="input-area">
+    <div class="input-row">
+      <input type="text" id="chat-name" placeholder="Anonymous" maxlength="20">
+      <input type="text" id="chat-input" placeholder="say something..." maxlength="500" autocomplete="off">
+      <button class="send-btn" onclick="sendMessage()">[ SEND ]</button>
+    </div>
+    <div id="rate-msg"></div>
+    <div class="input-hint">Enter to send  ∗  no account needed  ∗  rate limited</div>
+  </div>
+
+</div>
+
+<script>
+let lastSendTime = 0;
+const SEND_DELAY_MS = 3000;
+let myColor = ANON_COLORS[Math.floor(Math.random() * ANON_COLORS.length)];
+let msgId = SEED_MESSAGES.length + 1;
+let onlineCount = Math.floor(Math.random() * 8) + 3;
+let msgCount = 0;
+
+const msgArea   = document.getElementById('msg-area');
+const chatInput = document.getElementById('chat-input');
+const chatName  = document.getElementById('chat-name');
+const rateMsg   = document.getElementById('rate-msg');
+const onlinePill = document.getElementById('online-pill');
+
+function esc(s) {
+  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+function nowTime() {
+  const d = new Date();
+  return pad(d.getHours()) + ':' + pad(d.getMinutes());
+}
+function pad(n) { return String(n).padStart(2,'0'); }
+
+function renderMsg(m, isSystem) {
+  const row = document.createElement('div');
+  row.className = 'msg-row' + (isSystem ? ' sys-row' : '');
+
+  const textHtml = isSystem
+    ? `<span class="msg-text sys-text">${esc(m.text)}</span>`
+    : `<span class="msg-text">${renderText(esc(m.text))}</span>`;
+
+  row.innerHTML = `
+    <span class="msg-time">${m.time}</span>
+    <span class="msg-name" style="color:${m.color}">${esc(m.name)}</span>
+    ${textHtml}
+  `;
+  msgArea.appendChild(row);
+  msgArea.scrollTop = msgArea.scrollHeight;
+  msgCount++;
+  if (msgCount > LOBBY_META.maxHistory + 20) {
+    msgArea.firstChild && msgArea.removeChild(msgArea.firstChild);
+  }
+}
+
+function renderText(html) {
+  return html.replace(/@(\w+)/g, '<span class="msg-mention">@$1</span>');
+}
+
+function sysMsg(text) {
+  renderMsg({ time: nowTime(), name: '∗ system', color: '#9b3fb5', text }, true);
+}
+
+function addHr() {
+  const hr = document.createElement('div');
+  hr.className = 'msg-pixel-hr';
+  msgArea.appendChild(hr);
+}
+
+function loadSeed() {
+  SEED_MESSAGES.forEach(m => renderMsg(m, false));
+  addHr();
+  sysMsg('You have joined the lobby. Say something.');
+}
+
+function sendMessage() {
+  const text = chatInput.value.trim();
+  if (!text) return;
+
+  if (Date.now() - lastSendTime < SEND_DELAY_MS) {
+    const wait = Math.ceil((SEND_DELAY_MS - (Date.now() - lastSendTime)) / 1000);
+    rateMsg.textContent = `∗ slow down — wait ${wait}s`;
+    return;
+  }
+  if (text.length > 500) { rateMsg.textContent = '∗ too long (max 500 chars)'; return; }
+
+  rateMsg.textContent = '';
+  const name = chatName.value.trim() || 'Anonymous';
+  renderMsg({ id: msgId++, time: nowTime(), name, color: myColor, text }, false);
+  chatInput.value = '';
+  lastSendTime = Date.now();
+  simulateReply();
+}
+
+const BOT_LINES = [
+  'received.', '...', 'copy that.',
+  'the wire carries your words.',
+  '銅線は覚えている。',
+  'no matter where you go.',
+  'everyone is always connected.',
+  'close the world. open the next.',
+  'present day, present time.',
+];
+
+function simulateReply() {
+  if (Math.random() > 0.5) return;
+  const delay = 2000 + Math.random() * 5000;
+  setTimeout(() => {
+    const color = ANON_COLORS[Math.floor(Math.random() * ANON_COLORS.length)];
+    const text = BOT_LINES[Math.floor(Math.random() * BOT_LINES.length)];
+    renderMsg({ id: msgId++, time: nowTime(), name: 'Anonymous', color, text }, false);
+    onlineCount = Math.max(1, onlineCount + (Math.random() > 0.5 ? 1 : -1));
+    onlinePill.textContent = `● ${onlineCount} online`;
+  }, delay);
+}
+
+function ambientTraffic() {
+  const delay = 15000 + Math.random() * 30000;
+  setTimeout(() => {
+    if (Math.random() > 0.55) {
+      const color = ANON_COLORS[Math.floor(Math.random() * ANON_COLORS.length)];
+      const texts = ['...', 'anyone here?', 'still connected.',
+        '深夜のwiredは静か。', 'signal check.', 'the wire hums at 60hz.', 'layer 07 confirmed.'];
+      renderMsg({ id: msgId++, time: nowTime(), name: 'Anonymous', color,
+        text: texts[Math.floor(Math.random() * texts.length)] }, false);
+    }
+    ambientTraffic();
+  }, delay);
+}
+
+chatInput.addEventListener('keydown', e => {
+  if (e.key === 'Enter') { e.preventDefault(); sendMessage(); }
+});
+
+function goHome() {
+  if (window.parent && window.parent !== window) {
+    window.parent.postMessage({ action: 'navigate', section: 'terminal' }, '*');
+  } else { window.location.href = '../copland-os.html'; }
+}
+
+loadSeed();
+ambientTraffic();
+chatInput.focus();
+</script>
+</body>
+</html>

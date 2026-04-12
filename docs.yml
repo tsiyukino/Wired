@@ -1,0 +1,69 @@
+project: wired
+summary: >
+  A personal website styled as a Lain/Y2K neocities OS, with a terminal-emulator
+  shell, a retro blog/portfolio section, an anonymous imageboard, and an anonymous
+  chat lobby — currently a frontend demo with mock data, being expanded into a
+  real self-hosted dynamic site.
+kind: web-app
+language: html/css/js
+stack:
+  - Vanilla HTML/CSS/JS (no build toolchain, no bundler)
+  - IBM Plex Mono, Press Start 2P, Silkscreen (Google Fonts)
+  - KaTeX (math rendering in blog posts)
+  - Cloudflare (CDN / reverse proxy)
+  - Node.js + ES modules (server runtime)
+  - better-sqlite3 (persistence — single SQLite file)
+  - ws (WebSocket server for lobby)
+
+layout:
+  copland-os.html:        Terminal-emulator entry point; iframe-navigates to retro/ pages via postMessage
+  copland-os-legacy.html: Previous iteration kept for reference, not live
+  retro/:                 Personal site pages (blog, portfolio, micro, about, links)
+  retro/retro.css:        Shared Y2K stylesheet — all themes, Windows XP chrome, scrollbars
+  retro/retro-utils.js:   Shared helpers — hit counter, sparkles, nav injection, custom Markdown renderer
+  retro/content/:         Data files (posts.js, works.js, about.js, micro.js) — edit to update content
+  retro/content/posts/:   Optional .md body files for blog posts
+  retro/content/works/:   Optional .md body files for portfolio entries
+  board/:                 Anonymous imageboard — index.html (GUI, pending API wiring), cli.html (terminal view, live)
+  lobby/:                 Anonymous chat lobby — index.html (GUI, pending API wiring), cli.html (terminal view, live)
+  server/:                Node.js backend — config, DB, and route handlers
+  server/index.js:        Entry point; wires HTTP server, static files, API routes, and WebSocket upgrade
+  server/config.js:       Reads env vars; exports single frozen config object
+  server/db.js:           Opens SQLite connection and initialises schema
+  server/routes/board.js: Board REST endpoints (threads, replies, rate limiting)
+  server/routes/lobby.js: Lobby WebSocket handler and /api/lobby/history endpoint
+  package.json:           Node dependencies (express, better-sqlite3, ws) and start scripts
+  .env.example:           Documents every env var with its default; copy to .env for local overrides
+  .gitignore:             Excludes node_modules/, .env, *.db, and deploy/wired.env from version control
+  deploy/wired.service:   systemd unit file — install to /etc/systemd/system/ on the server
+  deploy/wired.env:       Production env vars loaded by systemd (gitignored — never commit this)
+  Reference/:             Archived fauux.neocities.org + invisiblefile.neocities.org — design reference only, not deployed
+
+conventions:
+  file_size_limit: 150        # soft ceiling; many current files exceed this (see gotchas)
+  function_size_limit: 30
+  naming: kebab-case for files, camelCase for JS identifiers
+  css: retro.css holds all shared styles; page-specific rules go in inline <style> blocks
+  content: data lives in content/*.js arrays; blog/portfolio bodies optionally in content/posts/*.md
+  navigation: retro/ pages post {action: navigate, section} to parent; copland-os.html routes via iframe
+  themes: each retro/ page uses a .theme-* class (theme-blog, theme-portfolio, etc.) defined in retro.css
+
+gotchas:
+  - copland-os.html is 57 KB of inline CSS+JS — will need extraction as the project grows
+  - board-data.js and lobby-data.js are mock stubs; comments mark where server/DB calls will go
+  - retro-utils.js includes a hand-rolled Markdown renderer with custom @[video] and @[youtube] syntax
+  - Reference/ is a large local archive; do not treat it as deployable source
+  - lang="ja" on some pages, lang="en" on others — intentional per-page choice
+
+deploy:
+  hosting: Personal server behind Cloudflare (CDN + reverse proxy)
+  status: CLI views wired to real backend; GUI views pending API integration
+  backend: Node.js; board uses SQLite via better-sqlite3; lobby uses WebSocket via ws; see docs/decisions/2026-04-12_backend-architecture.md
+
+docs:
+  root: docs/
+  index: docs/index.md
+
+test:
+  runner: none
+  notes: No test infrastructure. Manual browser testing only.

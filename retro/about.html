@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>自己紹介 // wired</title>
+<link rel="stylesheet" href="retro.css">
+<script src="retro-utils.js"></script>
+<script src="content/about.js"></script>
+</head>
+<body class="theme-about">
+
+<!-- WINDOWS XP CHROME -->
+<div class="win-chrome">
+  <div class="win-chrome-row1">
+    <button class="win-btn" onclick="goTo('terminal')">← 戻る</button>
+    <button class="win-btn" style="opacity:0.45;cursor:default;" title="進むページがありません">→ 進む</button>
+    <button class="win-btn" onclick="location.reload()">⟳ 更新</button>
+    <button class="win-btn" onclick="goTo('terminal')">🏠 ホーム</button>
+    <span style="display:inline-block;width:1px;height:28px;background:#aaa;margin:0 4px;"></span>
+    <button class="win-btn" onclick="goTo('blog')">日記</button>
+    <button class="win-btn" onclick="goTo('portfolio')">作品</button>
+    <button class="win-btn" onclick="goTo('micro')">一言</button>
+    <button class="win-btn" onclick="goTo('about')">自己紹介</button>
+    <button class="win-btn" onclick="goTo('links')">リンク</button>
+    <span class="win-chrome-title">COPLAND OS NAVIGATOR v4.017</span>
+  </div>
+  <div class="win-chrome-row2">
+    <span class="win-addr-label">アドレス ▼</span>
+    <input type="text" class="win-addr-bar" value="http://www.wired.local/about/" readonly style="background:#fff4d8;">
+  </div>
+  <div class="win-chrome-row3">
+    <span class="win-nav-icon">🌐</span>
+    <button class="win-nav-btn" onclick="goTo('about')">☆ 自己紹介</button>
+    <span style="opacity:0.3">|</span>
+    <button class="win-nav-btn" onclick="goTo('terminal')">[ terminal ]</button>
+    <span class="blink" style="margin-left:auto;margin-right:8px;font-family:'Press Start 2P',monospace;font-size:8px;color:#8a5a0a;">∗ ONLINE ∗</span>
+  </div>
+</div>
+
+<div class="retro-deco-left"></div>
+<div class="retro-deco-right"></div>
+
+<div class="retro-container" id="root"></div>
+
+<script>
+const linksHtml = ABOUT.links
+  .map(l => `<a href="${l.href}">${l.label}</a>`)
+  .join(' / ');
+
+const naviSpecsHtml = ABOUT.naviSpecs.join('<br>');
+
+document.getElementById('root').innerHTML = `
+  <div class="retro-header">
+    <h1>■ 自己紹介 ■</h1>
+    <div class="subtitle">about me</div>
+  </div>
+
+  ${counter()}
+
+  <div class="retro-nav">
+    <a onclick="goTo('blog')">[日記]</a><span class="sep"> | </span><a onclick="goTo('portfolio')">[作品]</a><span class="sep"> | </span><a onclick="goTo('micro')">[一言]</a><span class="sep"> | </span><a onclick="goTo('about')">[自己紹介]</a><span class="sep"> | </span><a onclick="goTo('links')">[リンク]</a><span class="sep"> | </span><a onclick="goTo('terminal')">[terminal]</a>
+  </div>
+
+  <div class="retro-marquee">
+    <div class="retro-marquee-inner">
+      ☆ ようこそ！ ☆ welcome ☆ リンクフリーです ☆ NAVI_ACCESS :: LEVEL_02 ☆ protocol_7 established ☆
+    </div>
+  </div>
+
+  ${sparkles(['☆','★','☆','★','☆','★','☆','★'])}
+  <div class="deco-dots">☆ ★ ☆ ★ ☆</div>
+
+  <div class="about-section">
+    <div class="about-label">name</div>
+    <div class="about-value">${ABOUT.name}</div>
+  </div>
+
+  <div class="pixel-hr-gold"></div>
+
+  <div class="about-section">
+    <div class="about-label">handle</div>
+    <div class="about-value">${ABOUT.handle}</div>
+  </div>
+
+  <div class="pixel-hr-gold"></div>
+
+  <div class="about-section">
+    <div class="about-label">所在地</div>
+    <div class="about-value">${ABOUT.location}</div>
+  </div>
+
+  <div class="pixel-hr-gold"></div>
+
+  <div class="about-section">
+    <div class="about-label">about</div>
+    <div class="about-value">${ABOUT.bio}</div>
+  </div>
+
+  <div class="pixel-hr-gold"></div>
+
+  <div class="about-section">
+    <div class="about-label">interests</div>
+    <div class="about-value">${ABOUT.interests}</div>
+  </div>
+
+  <div class="pixel-hr-gold"></div>
+
+  <div class="about-section">
+    <div class="about-label">links</div>
+    <div class="about-value">${linksHtml}</div>
+  </div>
+
+  <div class="pixel-hr-gold"></div>
+
+  <div class="about-section">
+    <div class="about-label">NAVI SPECS</div>
+    <div class="about-value" style="font-family:'Press Start 2P',monospace;font-size:7px;line-height:2.4;opacity:0.6;">
+      ${naviSpecsHtml}
+    </div>
+  </div>
+
+  <div class="under-construction" style="margin-top:20px;">
+    <span>∗ PAGE UNDER CONSTRUCTION ∗</span>
+  </div>
+
+  <div class="kaomoji-strip" style="margin-top:12px;">
+    <span class="kao">(ﾉ◕ヮ◕)ﾉ*:･ﾟ✧</span>
+    <span class="kao blink-slow">ヽ(・∀・)ﾉ</span>
+    <span class="kao">(っ＾▿＾)っ</span>
+  </div>
+
+  <div class="deco-dots">☆ ★ ☆ ★ ☆</div>
+
+  <div class="retro-footer">
+    Copyright (C) ${ABOUT.copyrightName} / Since ${ABOUT.since}<br>
+    This page is link-free. リンクフリーです。<br>
+    Best viewed with Copland OS Navigator<br>
+    <span class="blink">∗</span> 1024×768 推奨 <span class="blink">∗</span>
+  </div>
+`;
+</script>
+</body>
+</html>

@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>WIRED LOBBY CLI</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@300;400;500&display=swap');
+
+* { margin:0; padding:0; box-sizing:border-box; }
+
+html, body {
+  width:100%; height:100%;
+  background: #06060a;
+  font-family: 'IBM Plex Mono', monospace;
+  color: #a8c0d8;
+  overflow: hidden;
+}
+
+body::before {
+  content:''; position:fixed; inset:0; z-index:9999; pointer-events:none;
+  background: repeating-linear-gradient(0deg, transparent, transparent 1px, rgba(0,0,0,0.05) 1px, rgba(0,0,0,0.05) 2px);
+}
+
+:root {
+  --fg:     #a8c0d8;
+  --dim:    #304858;
+  --bright: #d0e8f8;
+  --accent: #c677d3;
+  --green:  #89ad25;
+  --red:    #b30000;
+  --sys:    #6a0d91;
+}
+
+#app { width:100%; height:100%; display:flex; flex-direction:column; position:relative; z-index:10; }
+
+/* Banner */
+#banner {
+  padding: 8px 24px 7px;
+  border-bottom: 1px solid #0a1420;
+  background: rgba(6,6,10,0.97);
+  flex-shrink:0; font-size:12px; line-height:1.6; white-space:pre;
+  color: #304858;
+}
+
+/* Messages */
+#msg-out {
+  flex:1; overflow-y:auto; padding: 6px 24px;
+  background: rgba(6,6,10,0.92);
+  scrollbar-width:thin; scrollbar-color:#2a1a3a transparent;
+}
+
+.msg-ln {
+  display:flex; gap:10px; font-size:13px;
+  line-height:1.8; min-height:1.8em; align-items:baseline;
+}
+.ml-time  { color:#304858; font-size:11px; flex-shrink:0; white-space:nowrap; }
+.ml-name  { font-weight:500; flex-shrink:0; white-space:nowrap; }
+.ml-text  { color:var(--fg); word-break:break-word; }
+.ml-text.sys { color:var(--sys); font-style:italic; font-size:11px; }
+.ml-mention { color:var(--red); font-weight:500; }
+
+.info-ln {
+  display:block; font-size:12px; line-height:1.65;
+  color:var(--dim); white-space:pre-wrap;
+}
+
+/* Input */
+#input-row {
+  display:flex; align-items:center;
+  padding: 4px 24px 14px;
+  border-top: 1px solid #0a1420;
+  background: rgba(6,6,10,0.97);
+  flex-shrink:0; gap:8px;
+}
+#name-lbl { color:var(--accent); font-size:13px; white-space:nowrap; flex-shrink:0; }
+#cli-in {
+  flex:1; background:none; border:none;
+  color:var(--bright);
+  font-family:'IBM Plex Mono',monospace; font-size:13px;
+  outline:none; caret-color:var(--accent);
+}
+</style>
+</head>
+<body>
+<div id="app">
+
+  <div id="banner"><span style="color:#c677d3;">COPLAND OS // LOBBY CLI</span>   <span style="color:#89ad25;">WIRED LOBBY</span> — anonymous instant messaging
+Type a message to chat  ∗  <span style="color:#d0e8f8;">/help</span> for commands  ∗  <span style="color:#d0e8f8;">/gui</span> for graphical view  ∗  <span style="color:#d0e8f8;">/name &lt;handle&gt;</span> to set name</div>
+
+  <div id="msg-out"></div>
+
+  <div id="input-row">
+    <span id="name-lbl">Anonymous ❯</span>
+    <input type="text" id="cli-in" autofocus autocomplete="off" spellcheck="false" placeholder="say something...">
+  </div>
+
+</div>
+<script>
+let myName = 'Anonymous';
+let msgCount = 0;
+
+const outEl   = document.getElementById('msg-out');
+const inEl    = document.getElementById('cli-in');
+const nameLbl = document.getElementById('name-lbl');
+
+function esc(s) { return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+function nowTime() { const d=new Date(),p=n=>String(n).padStart(2,'0'); return `${p(d.getHours())}:${p(d.getMinutes())}`; }
+
+function addMsg(time, name, color, text, isSystem) {
+  const row = document.createElement('div');
+  row.className = 'msg-ln';
+  const textHtml = isSystem
+    ? `<span class="ml-text sys">${esc(text)}</span>`
+    : `<span class="ml-text">${renderText(esc(text))}</span>`;
+  row.innerHTML = `<span class="ml-time">${time}</span><span class="ml-name" style="color:${color}">${esc(name)}</span>${textHtml}`;
+  outEl.appendChild(row);
+  outEl.scrollTop = outEl.scrollHeight;
+  msgCount++;
+  // Trim display buffer beyond 70 entries
+  if (msgCount > 70 && outEl.firstChild) outEl.removeChild(outEl.firstChild);
+}
+
+function info(text) {
+  const s = document.createElement('span');
+  s.className = 'info-ln'; s.textContent = text;
+  outEl.appendChild(s); outEl.scrollTop = outEl.scrollHeight;
+}
+
+function sysMsg(text) { addMsg(nowTime(), '∗ system', '#6a0d91', text, true); }
+
+function renderText(html) {
+  return html.replace(/@(\w+)/g, '<span class="ml-mention">@$1</span>');
+}
+
+// ── WebSocket ──
+function wsUrl() {
+  const proto = location.protocol === 'https:' ? 'wss' : 'ws';
+  return `${proto}://${location.host}/ws/lobby`;
+}
+
+let ws = null;
+
+function connect() {
+  ws = new WebSocket(wsUrl());
+
+  ws.addEventListener('open', () => {
+    sysMsg('connected to the wired.');
+    inEl.disabled = false;
+    inEl.focus();
+  });
+
+  ws.addEventListener('message', (e) => {
+    let msg;
+    try { msg = JSON.parse(e.data); } catch { return; }
+    addMsg(msg.time, msg.name, msg.color, msg.text, false);
+  });
+
+  ws.addEventListener('close', () => {
+    inEl.disabled = true;
+    sysMsg('disconnected. the wire is silent.');
+  });
+
+  ws.addEventListener('error', () => {
+    sysMsg('connection error. check the server.');
+  });
+}
+
+// ── Slash commands ──
+function handleSlash(raw) {
+  const parts = raw.slice(1).trim().split(/\s+/);
+  const cmd = parts[0].toLowerCase();
+  const args = parts.slice(1).join(' ');
+
+  switch(cmd) {
+    case 'help':
+      info('');
+      info('  LOBBY CLI — COMMANDS');
+      info('  ────────────────────────────────────────');
+      info('  /name <handle>   set your display name');
+      info('  /clear           clear the screen');
+      info('  /gui             switch to graphical view');
+      info('  /board           go to /wired/ board');
+      info('  /exit            return to terminal');
+      info('  ────────────────────────────────────────');
+      info('  (type anything without / to send a message)');
+      info('');
+      break;
+    case 'name':
+      if (!args.trim()) { sysMsg('Usage: /name <handle>'); break; }
+      myName = args.trim().slice(0, 20);
+      nameLbl.textContent = myName + ' ❯';
+      sysMsg(`You are now "${myName}".`);
+      break;
+    case 'clear':
+      outEl.innerHTML = ''; msgCount = 0;
+      sysMsg('∗ Screen cleared.');
+      break;
+    case 'gui':   window.location.href = 'index.html'; break;
+    case 'board': window.location.href = '../board/cli.html'; break;
+    case 'exit':
+      if (window.parent && window.parent !== window)
+        window.parent.postMessage({ action: 'navigate', section: 'terminal' }, '*');
+      else window.location.href = '../copland-os.html';
+      break;
+    default:
+      sysMsg(`Unknown command: /${cmd}  — type /help`);
+  }
+}
+
+// ── Send ──
+function sendMsg(text) {
+  if (!ws || ws.readyState !== WebSocket.OPEN) {
+    sysMsg('∗ not connected'); return;
+  }
+  if (text.length > 500) { sysMsg('∗ too long (max 500)'); return; }
+  ws.send(JSON.stringify({ name: myName, text }));
+}
+
+inEl.addEventListener('keydown', e => {
+  if (e.key !== 'Enter') return;
+  const raw = inEl.value.trim(); inEl.value = '';
+  if (!raw) return;
+  raw.startsWith('/') ? handleSlash(raw) : sendMsg(raw);
+});
+
+// ── Boot ──
+inEl.disabled = true;
+info('');
+info('  ∗ WIRED LOBBY — anonymous instant messaging');
+info('  ──────────────────────────────────────────────────────');
+info('  connecting...');
+info('');
+
+// Load history then open WebSocket
+fetch('/api/lobby/history')
+  .then(r => r.json())
+  .then(({ messages }) => {
+    if (messages.length) {
+      messages.forEach(m => addMsg(m.time, m.name, m.color, m.text, false));
+      info('');
+    }
+    connect();
+  })
+  .catch(() => {
+    sysMsg('failed to load history. attempting connection anyway...');
+    connect();
+  });
+</script>
+</body>
+</html>

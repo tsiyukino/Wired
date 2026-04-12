@@ -1,0 +1,434 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>/wired/ CLI board</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@300;400;500&display=swap');
+
+* { margin:0; padding:0; box-sizing:border-box; }
+
+html, body {
+  width:100%; height:100%;
+  background: #06060a;
+  font-family: 'IBM Plex Mono', monospace;
+  color: #b0b0c8;
+  overflow: hidden;
+}
+
+/* CRT scanlines */
+body::before {
+  content:''; position:fixed; inset:0; z-index:9999; pointer-events:none;
+  background: repeating-linear-gradient(0deg, transparent, transparent 1px, rgba(0,0,0,0.06) 1px, rgba(0,0,0,0.06) 2px);
+}
+
+:root {
+  --fg:     #b0b0c8;
+  --dim:    #484860;
+  --bright: #e0d8f8;
+  --accent: #c677d3;
+  --green:  #89ad25;
+  --red:    #b30000;
+  --yellow: #ffcc00;
+}
+
+#app { width:100%; height:100%; display:flex; flex-direction:column; position:relative; z-index:10; }
+
+/* Banner */
+#banner {
+  padding: 8px 24px 7px;
+  border-bottom: 1px solid #1a1428;
+  background: rgba(6,6,10,0.97);
+  flex-shrink: 0;
+  font-size: 12px; line-height: 1.6; white-space: pre;
+  color: var(--dim);
+}
+
+/* Output */
+#out {
+  flex:1; overflow-y:auto; padding: 6px 24px;
+  background: rgba(6,6,10,0.92);
+  scrollbar-width: thin; scrollbar-color: #3a1a5a transparent;
+}
+
+.ln {
+  display:block; white-space:pre-wrap; word-wrap:break-word;
+  font-size:13px; line-height:1.75; min-height:1.75em;
+}
+.dim    { color: var(--dim); }
+.bright { color: var(--bright); }
+.acc    { color: var(--accent); }
+.green  { color: var(--green); }
+.red    { color: var(--red); }
+.yellow { color: var(--yellow); }
+
+/* Thread / post formatting */
+.t-no    { color: var(--accent); }
+.t-subj  { color: var(--green); font-weight: 500; }
+.p-name  { color: var(--green); }
+.p-no    { color: var(--accent); }
+.p-time  { color: var(--dim); }
+.p-quote { color: var(--accent); }
+.p-op    { color: var(--yellow); }
+.ok      { color: var(--green); }
+.err     { color: var(--red); }
+
+/* Input row */
+#input-row {
+  display:flex; align-items:center;
+  padding: 4px 24px 14px;
+  border-top: 1px solid #1a1428;
+  background: rgba(6,6,10,0.97);
+  flex-shrink: 0; gap: 8px;
+}
+#prompt { color: var(--accent); font-size:13px; white-space:nowrap; flex-shrink:0; }
+#cli-in {
+  flex:1; background:none; border:none;
+  color: var(--bright);
+  font-family: 'IBM Plex Mono', monospace; font-size:13px;
+  outline:none; caret-color: var(--accent);
+}
+
+/* Multiline editor */
+#ml-wrap {
+  display:none; padding: 6px 24px;
+  background: rgba(10,6,20,0.97);
+  border-top: 1px solid #2a1a4a; flex-shrink:0;
+}
+#ml-hint { font-size:10px; color:var(--dim); margin-bottom:4px; }
+#ml-text {
+  width:100%; background:#080610; border:1px solid #3a1a5a;
+  color:var(--fg); font-family:'IBM Plex Mono',monospace; font-size:12px;
+  padding:8px; resize:none; outline:none; min-height:80px;
+}
+.ml-btns { display:flex; gap:10px; margin-top:5px; }
+.ml-btn {
+  background:#1a0a2a; border:1px solid #4a1a6a;
+  color:var(--accent); font-family:'IBM Plex Mono',monospace;
+  font-size:11px; padding:3px 10px; cursor:pointer;
+}
+.ml-btn:hover { background:#2a1a3a; }
+</style>
+</head>
+<body>
+<div id="app">
+
+  <div id="banner"><span style="color:#c677d3;">COPLAND OS // BOARD CLI</span>   <span style="color:#89ad25;">/wired/</span> — anonymous board
+Type <span style="color:#e0d8f8;">help</span> for commands  ∗  <span style="color:#e0d8f8;">gui</span> for graphical view  ∗  <span style="color:#e0d8f8;">ls</span> to list threads</div>
+
+  <div id="out"></div>
+
+  <div id="ml-wrap">
+    <div id="ml-hint">∗ composing — Ctrl+Enter to submit, Esc to cancel</div>
+    <textarea id="ml-text" placeholder="Write your post..."></textarea>
+    <div class="ml-btns">
+      <button class="ml-btn" onclick="mlSubmit()">[ SUBMIT ]</button>
+      <button class="ml-btn" onclick="mlCancel()">[ CANCEL ]</button>
+    </div>
+  </div>
+
+  <div id="input-row">
+    <span id="prompt">/wired/ ❯</span>
+    <input type="text" id="cli-in" autofocus autocomplete="off" spellcheck="false">
+  </div>
+
+</div>
+<script>
+// ── State ──
+let view = 'list';
+let currentThread = null;
+let postMode = null;      // 'thread' | 'reply'
+let postMeta = {};
+let composeStep = null;   // 'subject' | 'name' | 'body'
+let cmdHistory = [], histIdx = -1;
+
+const outEl    = document.getElementById('out');
+const inEl     = document.getElementById('cli-in');
+const promptEl = document.getElementById('prompt');
+const mlWrap   = document.getElementById('ml-wrap');
+const mlText   = document.getElementById('ml-text');
+
+// ── Output helpers ──
+function ln(html='', cls='') {
+  const s = document.createElement('span');
+  s.className = 'ln' + (cls ? ' '+cls : '');
+  s.innerHTML = html;
+  outEl.appendChild(s);
+  outEl.scrollTop = outEl.scrollHeight;
+}
+function blank() { ln(); }
+function sep(c='─', n=62) { ln('<span class="dim">'+c.repeat(n)+'</span>'); }
+function esc(s) { return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+
+// ── API helpers ──
+async function apiFetch(path, opts) {
+  const res = await fetch(path, opts);
+  if (!res.ok) {
+    const body = await res.json().catch(() => ({}));
+    throw new Error(body.error || `HTTP ${res.status}`);
+  }
+  return res.json();
+}
+
+// ── Commands ──
+const CMD = {
+  help() {
+    blank();
+    sep('═');
+    ln('  <span class="bright">BOARD CLI — COMMANDS</span>');
+    sep('═');
+    ln('  <span class="acc">ls</span>             list all threads');
+    ln('  <span class="acc">read &lt;no&gt;</span>      open thread by number');
+    ln('  <span class="acc">post</span>           start a new thread');
+    ln('  <span class="acc">reply</span>          reply to current thread');
+    ln('  <span class="acc">quote &lt;no&gt;</span>    reply quoting a post number');
+    ln('  <span class="acc">back</span>           return to thread list');
+    ln('  <span class="acc">clear</span>          clear screen');
+    ln('  <span class="acc">gui</span>            switch to graphical view');
+    ln('  <span class="acc">lobby</span>          go to chat lobby');
+    ln('  <span class="acc">exit</span>           return to terminal');
+    sep('═');
+    blank();
+  },
+
+  async ls() {
+    lock();
+    try {
+      const { threads } = await apiFetch('/api/board/threads');
+      blank(); sep('═');
+      ln('  <span class="bright">/wired/</span>  <span class="dim">no matter where you go, everyone is always connected</span>');
+      ln(`  <span class="dim">threads: ${threads.length}</span>`);
+      sep('═');
+      if (threads.length === 0) {
+        ln('  <span class="dim">(no threads yet — type <span class="bright">post</span> to start one)</span>');
+      }
+      threads.forEach(t => {
+        const pin  = t.pinned ? '<span class="yellow">[PIN]</span> ' : '     ';
+        const subj = t.subject
+          ? `<span class="t-subj">${esc(t.subject)}</span>`
+          : '<span class="dim">(no subject)</span>';
+        ln(`  ${pin}<span class="t-no">No.${t.no}</span>  ${subj}  <span class="dim">(${t.replyCount}R)</span>`);
+        const prev = esc(t.body.split('\n')[0].slice(0, 70));
+        ln(`       <span class="dim">${prev}${prev.length >= 70 ? '…' : ''}</span>`);
+      });
+      sep();
+      ln('  <span class="dim">type <span class="bright">read &lt;no&gt;</span> to open a thread</span>');
+      blank();
+    } catch(e) {
+      ln(`∗ failed to load threads: ${esc(e.message)}`, 'err');
+    } finally {
+      unlock();
+    }
+  },
+
+  async read(args) {
+    const no = parseInt(args[0]);
+    if (!no) { ln('Usage: read &lt;thread_no&gt;', 'err'); return; }
+    lock();
+    try {
+      // find thread id from the listing — fetch all threads to resolve no → id
+      const { threads } = await apiFetch('/api/board/threads');
+      const stub = threads.find(t => t.no === no);
+      if (!stub) { ln(`Thread No.${no} not found.`, 'err'); return; }
+
+      const { thread, replies } = await apiFetch(`/api/board/threads/${stub.id}`);
+      currentThread = { ...thread, replies };
+      view = 'thread';
+      updatePrompt();
+
+      blank(); sep('═');
+      const subj = thread.subject
+        ? `<span class="t-subj">${esc(thread.subject)}</span>`
+        : '<span class="dim">(no subject)</span>';
+      ln(`  ${subj}  <span class="dim">No.${thread.no} ∗ ${replies.length} replies ∗ ${thread.time}</span>`);
+      sep('═');
+
+      [{ ...thread, isOP: true }, ...replies].forEach(p => {
+        blank();
+        ln(`  <span class="p-name">${esc(p.name)}</span>  <span class="p-no">No.${p.no}</span>  <span class="p-time">${p.time}</span>${p.isOP ? ' <span class="p-op">[OP]</span>' : ''}`);
+        p.body.split('\n').forEach(line => {
+          const r = esc(line).replace(/&gt;&gt;(\d+)/g, '<span class="p-quote">&gt;&gt;$1</span>');
+          ln(`    ${r}`);
+        });
+      });
+
+      blank(); sep();
+      ln('  <span class="dim">type <span class="bright">reply</span> to post  ∗  <span class="bright">back</span> to return to list</span>');
+      blank();
+    } catch(e) {
+      ln(`∗ failed to load thread: ${esc(e.message)}`, 'err');
+    } finally {
+      unlock();
+    }
+  },
+
+  post() {
+    blank(); ln('  <span class="acc">// NEW THREAD //</span>'); blank();
+    postMode = 'thread'; postMeta = {};
+    startCompose('subject');
+  },
+
+  reply(args, quoteNo) {
+    if (view !== 'thread' || !currentThread) {
+      ln('Open a thread first with: read &lt;no&gt;', 'err'); return;
+    }
+    blank(); ln(`  <span class="acc">// REPLY TO No.${currentThread.no} //</span>`); blank();
+    postMode = 'reply'; postMeta = {};
+    if (quoteNo) postMeta.quotePrefix = `>>${quoteNo}\n`;
+    startCompose('name');
+  },
+
+  quote(args) {
+    const no = parseInt(args[0]);
+    if (!no) { ln('Usage: quote &lt;post_no&gt;', 'err'); return; }
+    CMD.reply([], no);
+  },
+
+  async back() {
+    if (view === 'thread') {
+      view = 'list'; currentThread = null; updatePrompt();
+      ln('← returned to /wired/', 'dim'); blank();
+      await CMD.ls();
+    } else {
+      ln('Already at board root.', 'dim');
+    }
+  },
+
+  clear() { outEl.innerHTML = ''; },
+  gui()   { window.location.href = 'index.html'; },
+  lobby() { window.location.href = '../lobby/cli.html'; },
+  exit()  {
+    if (window.parent && window.parent !== window)
+      window.parent.postMessage({ action: 'navigate', section: 'terminal' }, '*');
+    else window.location.href = '../copland-os.html';
+  },
+};
+
+// ── Input lock (disable while awaiting API) ──
+function lock()   { inEl.disabled = true; }
+function unlock() { inEl.disabled = false; inEl.focus(); }
+
+// ── Compose flow ──
+function startCompose(step) {
+  composeStep = step;
+  if (step === 'subject') {
+    promptEl.textContent = 'Subject ❯';
+  } else if (step === 'name') {
+    promptEl.textContent = 'Name ❯';
+  } else if (step === 'body') {
+    inEl.parentElement.style.display = 'none';
+    mlWrap.style.display = 'block';
+    mlText.value = postMeta.quotePrefix || '';
+    mlText.focus();
+  }
+}
+
+async function mlSubmit() {
+  const body = mlText.value.trim();
+  if (!body) { ln('∗ Body cannot be empty.', 'err'); return; }
+
+  mlWrap.style.display = 'none';
+  inEl.parentElement.style.display = 'flex';
+  composeStep = null; updatePrompt();
+
+  try {
+    if (postMode === 'thread') {
+      const { thread } = await apiFetch('/api/board/threads', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          name:    postMeta.name || 'Anonymous',
+          subject: postMeta.subject || null,
+          body,
+        }),
+      });
+      blank(); ln(`∗ Thread No.${thread.no} posted.`, 'ok'); blank();
+      view = 'list';
+      await CMD.ls();
+    } else if (postMode === 'reply') {
+      const { reply } = await apiFetch(`/api/board/threads/${currentThread.id}/reply`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          name: postMeta.name || 'Anonymous',
+          body,
+        }),
+      });
+      blank(); ln(`∗ Reply No.${reply.no} posted.`, 'ok'); blank();
+      await CMD.read([String(currentThread.no)]);
+    }
+  } catch(e) {
+    ln(`∗ Post failed: ${esc(e.message)}`, 'err');
+  } finally {
+    postMode = null; postMeta = {};
+    inEl.focus();
+  }
+}
+
+function mlCancel() {
+  mlWrap.style.display = 'none';
+  inEl.parentElement.style.display = 'flex';
+  composeStep = null; postMode = null; postMeta = {};
+  updatePrompt(); ln('∗ Cancelled.', 'dim'); inEl.focus();
+}
+
+mlText.addEventListener('keydown', e => {
+  if (e.key === 'Enter' && e.ctrlKey) { e.preventDefault(); mlSubmit(); }
+  if (e.key === 'Escape') mlCancel();
+});
+
+// ── Input ──
+inEl.addEventListener('keydown', async e => {
+  if (e.key === 'Enter') {
+    const raw = inEl.value; inEl.value = '';
+    if (raw.trim()) { cmdHistory.unshift(raw); histIdx = -1; }
+
+    if (composeStep) { handleCompose(raw); return; }
+    ln(`<span class="dim">${promptText()} ${esc(raw)}</span>`);
+    await handleCmd(raw.trim());
+    return;
+  }
+  if (e.key === 'ArrowUp')   { e.preventDefault(); if (histIdx < cmdHistory.length-1) { histIdx++; inEl.value = cmdHistory[histIdx]; } }
+  if (e.key === 'ArrowDown') { e.preventDefault(); if (histIdx > 0) { histIdx--; inEl.value = cmdHistory[histIdx]; } else { histIdx = -1; inEl.value = ''; } }
+});
+
+function handleCompose(raw) {
+  if (composeStep === 'subject') {
+    postMeta.subject = raw.trim() || null;
+    ln(`<span class="dim">Subject: ${postMeta.subject || '(none)'}</span>`);
+    startCompose('name');
+  } else if (composeStep === 'name') {
+    postMeta.name = raw.trim() || 'Anonymous';
+    ln(`<span class="dim">Name: ${postMeta.name}</span>`);
+    blank(); startCompose('body');
+  }
+}
+
+async function handleCmd(raw) {
+  if (!raw) return;
+  const parts = raw.split(/\s+/);
+  const cmd = parts[0].toLowerCase();
+  const args = parts.slice(1);
+  if (CMD[cmd]) await CMD[cmd](args);
+  else ln(`<span class="red">unknown: ${esc(cmd)}</span>  <span class="dim">type <span class="bright">help</span></span>`);
+}
+
+function updatePrompt() { promptEl.textContent = promptText(); }
+function promptText() {
+  if (view === 'thread' && currentThread) return `/wired/No.${currentThread.no} ❯`;
+  return '/wired/ ❯';
+}
+
+// ── Boot ──
+blank(); sep('═');
+ln('  <span class="acc">∗ /wired/ — ANONYMOUS BOARD ∗</span>');
+ln('  <span class="dim">no matter where you go, everyone is always connected</span>');
+sep('═'); blank();
+ln('  <span class="dim">type <span class="bright">ls</span> to list threads  ∗  <span class="bright">help</span> for all commands  ∗  <span class="bright">gui</span> for graphical view</span>');
+blank();
+CMD.ls();
+inEl.focus();
+</script>
+</body>
+</html>
