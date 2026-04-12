@@ -8,6 +8,7 @@ Step-by-step walkthroughs for getting things running.
 How-to guides for common tasks.
 - [Using the board and lobby](guides/adding-content.md) — posting, chatting, CLI commands, env vars
 - [Deployment](guides/deployment.md) — installing on Ubuntu, systemd service setup, updating
+- [Cloudflare Setup](guides/cloudflare.md) — DNS, SSL, cache rules, WebSocket, firewall
 
 ## Explanation
 Background and architecture notes.

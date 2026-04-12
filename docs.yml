@@ -35,8 +35,9 @@ layout:
   package.json:           Node dependencies (express, better-sqlite3, ws) and start scripts
   .env.example:           Documents every env var with its default; copy to .env for local overrides
   .gitignore:             Excludes node_modules/, .env, *.db, and deploy/wired.env from version control
-  deploy/wired.service:   systemd unit file — install to /etc/systemd/system/ on the server
-  deploy/wired.env:       Production env vars loaded by systemd (gitignored — never commit this)
+  deploy/wired.service:     systemd unit file — install to /etc/systemd/system/ on the server
+  deploy/wired.env:         Production env vars loaded by systemd (gitignored — never commit this)
+  deploy/ufw-cloudflare.sh: Locks port 3000 to Cloudflare IPs only — run once after DNS propagates
   Reference/:             Archived fauux.neocities.org + invisiblefile.neocities.org — design reference only, not deployed
 
 conventions:
