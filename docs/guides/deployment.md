@@ -32,10 +32,34 @@ nano deploy/wired.env
 ```
 
 Fill in at minimum:
-- `DB_PATH` — absolute path where the database file should live, e.g. `/home/YOUR_USER/wired/wired.db`
+- `DB_PATH` — absolute path where the database file should live, e.g. `/var/lib/wired/wired.db`
 - `NODE_ENV=production`
 
 The server will refuse to start in production with a relative `DB_PATH`.
+
+### Admin panel env vars
+
+Three additional vars are required before the admin panel will work:
+
+**`ADMIN_PASSWORD_HASH`** — bcrypt hash of your admin password. Generate it once on the server (or locally with Node installed):
+
+```bash
+node -e "const b=require('bcryptjs');console.log(b.hashSync('yourpassword',12))"
+```
+
+Paste the printed hash (starts with `$2a$12$…`) into `wired.env`.
+
+**`SESSION_SECRET`** — random 32-byte hex string used to sign session cookies:
+
+```bash
+node -e "console.log(require('crypto').randomBytes(32).toString('hex'))"
+```
+
+**`ADMIN_PATH`** — the URL slug for the admin panel. Choose something non-obvious; this is the only thing standing between the public and the login form.
+
+**`BIN_TTL_DAYS`** — how many days soft-deleted board posts sit in the bin before being permanently purged on next server start. Default `7`.
+
+The server will refuse to start in production if `ADMIN_PASSWORD_HASH` or `SESSION_SECRET` are missing.
 
 ## 4. Edit the service file
 

@@ -1,0 +1,505 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>// lain</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg:     #0a0a0f;
+      --panel:  #111118;
+      --border: #2a2a3a;
+      --accent: #7f5af0;
+      --red:    #e53170;
+      --green:  #2cb67d;
+      --yellow: #f7c948;
+      --text:   #fffffe;
+      --muted:  #72757e;
+      --mono:   'IBM Plex Mono', 'Courier New', monospace;
+    }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: var(--mono);
+      font-size: 13px;
+      min-height: 100vh;
+    }
+
+    /* ── layout ── */
+    #login-screen {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+    }
+
+    #app { display: none; }
+
+    .shell {
+      width: 100%;
+      max-width: 960px;
+      margin: 0 auto;
+      padding: 24px 16px;
+    }
+
+    header {
+      display: flex;
+      align-items: baseline;
+      gap: 16px;
+      border-bottom: 1px solid var(--border);
+      padding-bottom: 12px;
+      margin-bottom: 24px;
+    }
+
+    header h1 { font-size: 14px; color: var(--accent); letter-spacing: 2px; }
+    header nav { display: flex; gap: 12px; flex: 1; }
+    header nav button {
+      background: none;
+      border: none;
+      color: var(--muted);
+      font: inherit;
+      cursor: pointer;
+      padding: 2px 6px;
+      border-bottom: 2px solid transparent;
+    }
+    header nav button.active,
+    header nav button:hover { color: var(--text); border-color: var(--accent); }
+
+    #logout-btn {
+      background: none;
+      border: 1px solid var(--border);
+      color: var(--muted);
+      font: inherit;
+      cursor: pointer;
+      padding: 4px 10px;
+    }
+    #logout-btn:hover { color: var(--red); border-color: var(--red); }
+
+    /* ── panels ── */
+    .panel { display: none; }
+    .panel.active { display: block; }
+
+    .section-title {
+      font-size: 11px;
+      color: var(--muted);
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      margin-bottom: 16px;
+    }
+
+    /* ── login box ── */
+    .login-box {
+      border: 1px solid var(--border);
+      background: var(--panel);
+      padding: 32px 40px;
+      width: 320px;
+    }
+    .login-box h2 { font-size: 13px; color: var(--accent); margin-bottom: 24px; letter-spacing: 2px; }
+
+    /* ── form elements ── */
+    label { display: block; color: var(--muted); font-size: 11px; margin-bottom: 4px; }
+
+    input[type="password"],
+    input[type="text"],
+    input[type="file"] {
+      width: 100%;
+      background: var(--bg);
+      border: 1px solid var(--border);
+      color: var(--text);
+      font: inherit;
+      padding: 6px 8px;
+      margin-bottom: 16px;
+      outline: none;
+    }
+    input:focus { border-color: var(--accent); }
+
+    button.primary {
+      background: var(--accent);
+      border: none;
+      color: #fff;
+      font: inherit;
+      cursor: pointer;
+      padding: 7px 16px;
+      width: 100%;
+    }
+    button.primary:hover { filter: brightness(1.15); }
+    button.primary:disabled { opacity: 0.5; cursor: default; }
+
+    .err { color: var(--red); font-size: 11px; margin-top: 8px; min-height: 16px; }
+
+    /* ── tables ── */
+    table { width: 100%; border-collapse: collapse; margin-bottom: 24px; }
+    th { text-align: left; color: var(--muted); font-size: 11px; letter-spacing: 1px; border-bottom: 1px solid var(--border); padding: 6px 8px; }
+    td { padding: 8px 8px; border-bottom: 1px solid var(--border); vertical-align: top; max-width: 300px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    tr:hover td { background: var(--panel); }
+
+    .btn-danger {
+      background: none;
+      border: 1px solid var(--red);
+      color: var(--red);
+      font: inherit;
+      cursor: pointer;
+      padding: 2px 8px;
+      font-size: 11px;
+    }
+    .btn-danger:hover { background: var(--red); color: #fff; }
+
+    .btn-restore {
+      background: none;
+      border: 1px solid var(--green);
+      color: var(--green);
+      font: inherit;
+      cursor: pointer;
+      padding: 2px 8px;
+      font-size: 11px;
+      margin-right: 4px;
+    }
+    .btn-restore:hover { background: var(--green); color: #fff; }
+
+    .tag {
+      font-size: 10px;
+      padding: 1px 5px;
+      border: 1px solid var(--border);
+      color: var(--muted);
+    }
+    .tag.thread { border-color: var(--yellow); color: var(--yellow); }
+    .tag.reply  { border-color: var(--muted); }
+
+    .upload-area {
+      border: 1px dashed var(--border);
+      padding: 24px;
+      margin-bottom: 16px;
+      text-align: center;
+      color: var(--muted);
+    }
+    .upload-area input { margin: 0 auto; }
+
+    .notice {
+      border-left: 2px solid var(--accent);
+      padding: 8px 12px;
+      color: var(--muted);
+      font-size: 11px;
+      margin-bottom: 16px;
+    }
+
+    .empty { color: var(--muted); font-size: 12px; padding: 24px 0; text-align: center; }
+
+    /* lobby page/nav */
+    .pagination { display: flex; gap: 8px; align-items: center; margin-bottom: 16px; }
+    .pagination button {
+      background: none;
+      border: 1px solid var(--border);
+      color: var(--text);
+      font: inherit;
+      cursor: pointer;
+      padding: 3px 10px;
+    }
+    .pagination button:disabled { opacity: 0.3; cursor: default; }
+    .pagination span { color: var(--muted); font-size: 11px; }
+  </style>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+</head>
+<body>
+
+<!-- ── login ── -->
+<div id="login-screen">
+  <div class="login-box">
+    <h2>// lain</h2>
+    <label for="pw">password</label>
+    <input type="password" id="pw" autocomplete="current-password" autofocus>
+    <button class="primary" id="login-btn">enter</button>
+    <div class="err" id="login-err"></div>
+  </div>
+</div>
+
+<!-- ── app shell ── -->
+<div id="app">
+  <div class="shell">
+    <header>
+      <h1>// lain</h1>
+      <nav>
+        <button class="active" data-panel="posts">posts</button>
+        <button data-panel="board">board</button>
+        <button data-panel="bin">bin</button>
+        <button data-panel="lobby">lobby</button>
+      </nav>
+      <button id="logout-btn">logout</button>
+    </header>
+
+    <!-- posts panel -->
+    <div class="panel active" id="panel-posts">
+      <div class="section-title">blog posts</div>
+      <div class="notice">Upload a .md file. The slug is derived from the filename. Re-uploading the same filename overwrites the post.</div>
+      <div class="upload-area">
+        <label for="post-file">select .md file</label>
+        <input type="file" id="post-file" accept=".md">
+      </div>
+      <button class="primary" id="upload-btn" style="width:auto;margin-bottom:24px;">upload</button>
+      <div class="err" id="upload-err"></div>
+      <table id="posts-table">
+        <thead><tr><th>slug</th><th>title</th><th>updated</th><th></th></tr></thead>
+        <tbody></tbody>
+      </table>
+      <div class="empty" id="posts-empty" style="display:none">no posts yet</div>
+    </div>
+
+    <!-- board panel -->
+    <div class="panel" id="panel-board">
+      <div class="section-title">board threads</div>
+      <div class="notice">Deleting a thread moves it and all its replies to the bin. Deleting a single reply moves only that reply.</div>
+      <table id="board-table">
+        <thead><tr><th>#</th><th>subject</th><th>body</th><th>replies</th><th>time</th><th></th></tr></thead>
+        <tbody></tbody>
+      </table>
+      <div class="empty" id="board-empty" style="display:none">no threads</div>
+    </div>
+
+    <!-- bin panel -->
+    <div class="panel" id="panel-bin">
+      <div class="section-title">bin</div>
+      <div class="notice">Posts here are permanently deleted after the TTL expires. You can restore or delete them early.</div>
+      <table id="bin-table">
+        <thead><tr><th>kind</th><th>#</th><th>body</th><th>deleted</th><th>expires</th><th></th></tr></thead>
+        <tbody></tbody>
+      </table>
+      <div class="empty" id="bin-empty" style="display:none">bin is empty</div>
+    </div>
+
+    <!-- lobby panel -->
+    <div class="panel" id="panel-lobby">
+      <div class="section-title">lobby messages</div>
+      <div class="notice">Deletions are permanent and immediate.</div>
+      <div class="pagination">
+        <button id="lobby-prev" disabled>prev</button>
+        <span id="lobby-page-label">page 1</span>
+        <button id="lobby-next">next</button>
+      </div>
+      <table id="lobby-table">
+        <thead><tr><th>id</th><th>time</th><th>name</th><th>text</th><th></th></tr></thead>
+        <tbody></tbody>
+      </table>
+      <div class="empty" id="lobby-empty" style="display:none">no messages</div>
+    </div>
+
+  </div><!-- .shell -->
+</div><!-- #app -->
+
+<script type="module">
+  // ── state ──
+  let lobbyOffset = 0;
+  const LOBBY_LIMIT = 50;
+
+  // ── helpers ──
+  async function api(method, path, body) {
+    const opts = { method, headers: {} };
+    if (body) { opts.headers['Content-Type'] = 'application/json'; opts.body = JSON.stringify(body); }
+    const r = await fetch('/api/admin' + path, opts);
+    const json = await r.json().catch(() => ({}));
+    if (!r.ok) throw new Error(json.error || r.statusText);
+    return json;
+  }
+
+  function fmt(iso) {
+    if (!iso) return '';
+    return iso.slice(0, 16).replace('T', ' ');
+  }
+
+  function truncate(s, n = 60) {
+    if (!s) return '';
+    return s.length > n ? s.slice(0, n) + '…' : s;
+  }
+
+  // ── login ──
+  const loginScreen = document.getElementById('login-screen');
+  const appEl       = document.getElementById('app');
+  const loginBtn    = document.getElementById('login-btn');
+  const loginErr    = document.getElementById('login-err');
+  const pwInput     = document.getElementById('pw');
+
+  async function tryLogin() {
+    loginErr.textContent = '';
+    loginBtn.disabled = true;
+    try {
+      await api('POST', '/login', { password: pwInput.value });
+      loginScreen.style.display = 'none';
+      appEl.style.display = 'block';
+      loadPanel('posts');
+    } catch (e) {
+      loginErr.textContent = e.message;
+    } finally {
+      loginBtn.disabled = false;
+    }
+  }
+
+  loginBtn.addEventListener('click', tryLogin);
+  pwInput.addEventListener('keydown', e => { if (e.key === 'Enter') tryLogin(); });
+
+  // ── logout ──
+  document.getElementById('logout-btn').addEventListener('click', async () => {
+    await api('POST', '/logout').catch(() => {});
+    location.reload();
+  });
+
+  // ── panel nav ──
+  const navBtns = document.querySelectorAll('nav button');
+  function switchPanel(name) {
+    navBtns.forEach(b => b.classList.toggle('active', b.dataset.panel === name));
+    document.querySelectorAll('.panel').forEach(p => p.classList.toggle('active', p.id === 'panel-' + name));
+    loadPanel(name);
+  }
+  navBtns.forEach(b => b.addEventListener('click', () => switchPanel(b.dataset.panel)));
+
+  function loadPanel(name) {
+    if (name === 'posts')  loadPosts();
+    if (name === 'board')  loadBoard();
+    if (name === 'bin')    loadBin();
+    if (name === 'lobby')  loadLobby();
+  }
+
+  // ── posts ──
+  async function loadPosts() {
+    const { posts } = await api('GET', '/posts');
+    const tbody = document.querySelector('#posts-table tbody');
+    tbody.innerHTML = '';
+    document.getElementById('posts-empty').style.display = posts.length ? 'none' : '';
+    posts.forEach(p => {
+      const tr = document.createElement('tr');
+      tr.innerHTML = `
+        <td title="${p.slug}">${truncate(p.slug, 24)}</td>
+        <td title="${p.title}">${truncate(p.title, 40)}</td>
+        <td>${fmt(p.updated_at)}</td>
+        <td><button class="btn-danger" data-id="${p.id}">delete</button></td>
+      `;
+      tr.querySelector('.btn-danger').addEventListener('click', async () => {
+        if (!confirm(`Permanently delete "${p.slug}"?`)) return;
+        await api('DELETE', `/posts/${p.id}`);
+        loadPosts();
+      });
+      tbody.appendChild(tr);
+    });
+  }
+
+  document.getElementById('upload-btn').addEventListener('click', async () => {
+    const file = document.getElementById('post-file').files[0];
+    const errEl = document.getElementById('upload-err');
+    errEl.textContent = '';
+    if (!file) { errEl.textContent = 'select a file first'; return; }
+    const fd = new FormData();
+    fd.append('file', file);
+    const r = await fetch('/api/admin/posts', { method: 'POST', body: fd });
+    const json = await r.json().catch(() => ({}));
+    if (!r.ok) { errEl.textContent = json.error || 'upload failed'; return; }
+    document.getElementById('post-file').value = '';
+    loadPosts();
+  });
+
+  // ── board ──
+  async function loadBoard() {
+    const r = await fetch('/api/board/threads');
+    const { threads } = await r.json();
+    // Fetch via public API since admin has no separate thread list
+    const tbody = document.querySelector('#board-table tbody');
+    tbody.innerHTML = '';
+    document.getElementById('board-empty').style.display = threads.length ? 'none' : '';
+    threads.forEach(t => {
+      const tr = document.createElement('tr');
+      tr.innerHTML = `
+        <td>${t.no}</td>
+        <td title="${t.subject ?? ''}">${truncate(t.subject ?? '—', 20)}</td>
+        <td title="${t.body}">${truncate(t.body, 40)}</td>
+        <td>${t.replyCount}</td>
+        <td>${t.time}</td>
+        <td><button class="btn-danger" data-id="${t.id}">bin</button></td>
+      `;
+      tr.querySelector('.btn-danger').addEventListener('click', async () => {
+        if (!confirm(`Move thread #${t.no} and its ${t.replyCount} replies to bin?`)) return;
+        await api('DELETE', `/threads/${t.id}`);
+        loadBoard();
+      });
+      tbody.appendChild(tr);
+    });
+  }
+
+  // ── bin ──
+  async function loadBin() {
+    const { bin } = await api('GET', '/bin');
+    const tbody = document.querySelector('#bin-table tbody');
+    tbody.innerHTML = '';
+    document.getElementById('bin-empty').style.display = bin.length ? 'none' : '';
+    bin.forEach(row => {
+      const tr = document.createElement('tr');
+      tr.innerHTML = `
+        <td><span class="tag ${row.kind}">${row.kind}</span></td>
+        <td>${row.no}</td>
+        <td title="${row.body}">${truncate(row.body, 50)}</td>
+        <td>${fmt(row.deleted_at)}</td>
+        <td>${fmt(row.expires_at)}</td>
+        <td>
+          <button class="btn-restore" data-id="${row.id}">restore</button>
+          <button class="btn-danger"  data-id="${row.id}">delete</button>
+        </td>
+      `;
+      tr.querySelector('.btn-restore').addEventListener('click', async () => {
+        await api('POST', `/bin/${row.id}/restore`).catch(e => alert(e.message));
+        loadBin();
+      });
+      tr.querySelector('.btn-danger').addEventListener('click', async () => {
+        if (!confirm('Permanently delete this post?')) return;
+        await api('DELETE', `/bin/${row.id}`);
+        loadBin();
+      });
+      tbody.appendChild(tr);
+    });
+  }
+
+  // ── lobby ──
+  document.getElementById('lobby-prev').addEventListener('click', () => {
+    lobbyOffset = Math.max(0, lobbyOffset - LOBBY_LIMIT);
+    loadLobby();
+  });
+  document.getElementById('lobby-next').addEventListener('click', () => {
+    lobbyOffset += LOBBY_LIMIT;
+    loadLobby();
+  });
+
+  async function loadLobby() {
+    const { messages } = await api('GET', `/lobby?offset=${lobbyOffset}&limit=${LOBBY_LIMIT}`);
+    const tbody = document.querySelector('#lobby-table tbody');
+    tbody.innerHTML = '';
+    document.getElementById('lobby-empty').style.display = messages.length ? 'none' : '';
+    document.getElementById('lobby-prev').disabled = lobbyOffset === 0;
+    document.getElementById('lobby-next').disabled = messages.length < LOBBY_LIMIT;
+    document.getElementById('lobby-page-label').textContent = `offset ${lobbyOffset}`;
+
+    messages.forEach(m => {
+      const tr = document.createElement('tr');
+      tr.innerHTML = `
+        <td>${m.id}</td>
+        <td>${m.time}</td>
+        <td>${m.name}</td>
+        <td title="${m.text}">${truncate(m.text, 60)}</td>
+        <td><button class="btn-danger" data-id="${m.id}">delete</button></td>
+      `;
+      tr.querySelector('.btn-danger').addEventListener('click', async () => {
+        await api('DELETE', `/lobby/${m.id}`);
+        loadLobby();
+      });
+      tbody.appendChild(tr);
+    });
+  }
+
+  // ── boot: check if already logged in ──
+  api('GET', '/posts').then(() => {
+    loginScreen.style.display = 'none';
+    appEl.style.display = 'block';
+    loadPanel('posts');
+  }).catch(() => {
+    // not logged in — stay on login screen
+  });
+</script>
+</body>
+</html>

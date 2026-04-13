@@ -26,12 +26,16 @@ layout:
   retro/content/works/:   Optional .md body files for portfolio entries
   board/:                 Anonymous imageboard — index.html (GUI, pending API wiring), cli.html (terminal view, live)
   lobby/:                 Anonymous chat lobby — index.html (GUI, pending API wiring), cli.html (terminal view, live)
-  server/:                Node.js backend — config, DB, and route handlers
-  server/index.js:        Entry point; wires HTTP server, static files, API routes, and WebSocket upgrade
-  server/config.js:       Reads env vars; exports single frozen config object
-  server/db.js:           Opens SQLite connection and initialises schema
-  server/routes/board.js: Board REST endpoints (threads, replies, rate limiting)
-  server/routes/lobby.js: Lobby WebSocket handler and /api/lobby/history endpoint
+  server/:                    Node.js backend — config, DB, and route handlers
+  server/index.js:            Entry point; wires HTTP server, static files, API routes, and WebSocket upgrade
+  server/config.js:           Reads env vars; exports single frozen config object
+  server/db.js:               Opens SQLite connection and initialises schema (including bin and blog_posts)
+  server/auth.js:             Admin session auth — signed HttpOnly cookies, bcrypt password check
+  server/routes/board.js:     Board REST endpoints (threads, replies, rate limiting)
+  server/routes/lobby.js:     Lobby WebSocket handler and /api/lobby/history endpoint
+  server/routes/admin.js:     Admin REST endpoints — posts, board moderation, bin, lobby moderation
+  server/routes/admin-static.js: Serves admin SPA at the secret path; blocks all sub-paths
+  admin/index.html:           Admin panel SPA — login, post upload, board bin, lobby moderation
   package.json:           Node dependencies (express, better-sqlite3, ws) and start scripts
   .env.example:           Documents every env var with its default; copy to .env for local overrides
   .gitignore:             Excludes node_modules/, .env, *.db, and deploy/wired.env from version control
@@ -58,7 +62,7 @@ gotchas:
 
 deploy:
   hosting: Personal server behind Cloudflare (CDN + reverse proxy)
-  status: CLI views wired to real backend; GUI views pending API integration
+  status: Board and lobby fully wired; admin panel live at secret path (Stage 5 complete)
   backend: Node.js; board uses SQLite via better-sqlite3; lobby uses WebSocket via ws; see docs/decisions/2026-04-12_backend-architecture.md
 
 docs:

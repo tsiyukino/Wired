@@ -2,11 +2,15 @@ import http from 'http';
 import path from 'path';
 import { fileURLToPath } from 'url';
 import express from 'express';
+import cookieParser from 'cookie-parser';
 import { WebSocketServer } from 'ws';
 import config from './config.js';
-import { getDb, initSchema } from './db.js';
+import { getDb, initSchema, sweepBin } from './db.js';
+import { sessionMiddleware } from './auth.js';
 import { registerBoardRoutes } from './routes/board.js';
 import { registerLobbyRoutes } from './routes/lobby.js';
+import { registerAdminRoutes } from './routes/admin.js';
+import { registerAdminStatic } from './routes/admin-static.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const ROOT = path.resolve(__dirname, '..');
@@ -17,6 +21,7 @@ const EXCLUDED = new Set([
 
 const app = express();
 app.use(express.json());
+app.use(cookieParser());
 
 // Trust Cloudflare's forwarded IP for rate limiting
 app.set('trust proxy', 1);
@@ -46,7 +51,14 @@ app.use((req, res, next) => {
 // Static files — serve the project root (minus the excluded paths above)
 app.use(express.static(ROOT));
 
-// API routes
+// Session middleware — attaches req.isAdmin on every request
+app.use(sessionMiddleware);
+
+// Admin panel — secret path serves the SPA; API routes follow
+registerAdminStatic(app, config.adminPath);
+registerAdminRoutes(app);
+
+// Public API routes
 registerBoardRoutes(app);
 
 // HTTP server (WebSocket shares it)
@@ -85,8 +97,9 @@ function shutdown(signal) {
 process.on('SIGTERM', () => shutdown('SIGTERM'));
 process.on('SIGINT',  () => shutdown('SIGINT'));
 
-// Initialise DB schema then start listening
+// Initialise DB schema, sweep expired bin rows, then start listening
 initSchema();
+sweepBin();
 server.listen(config.port, () => {
   console.log(`wired server listening on :${config.port}`);
 });

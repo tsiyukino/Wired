@@ -17,34 +17,36 @@ Node with ES modules. Reasons: `better-sqlite3` is the most mature synchronous S
 
 Single file on the server host. Appropriate for a personal site with low concurrent write volume. SQLite serializes writes, which eliminates the most common class of race conditions without extra work. The tradeoff is that horizontal scaling requires a migration — acceptable for this use case.
 
-Schema (settled here, created by `db.js`):
+Schema (created by `db.js`):
 
 ```sql
-CREATE TABLE IF NOT EXISTS threads (
-  id        INTEGER PRIMARY KEY AUTOINCREMENT,
-  no        INTEGER UNIQUE NOT NULL,
-  time      TEXT NOT NULL,
-  name      TEXT NOT NULL DEFAULT 'Anonymous',
-  subject   TEXT,
-  body      TEXT NOT NULL,
-  pinned    INTEGER NOT NULL DEFAULT 0
+CREATE TABLE IF NOT EXISTS threads ( ... );
+CREATE TABLE IF NOT EXISTS replies ( ... );
+CREATE TABLE IF NOT EXISTS lobby_messages ( ... );
+
+-- Added Stage 5 (admin panel):
+CREATE TABLE IF NOT EXISTS bin (
+  id          INTEGER PRIMARY KEY AUTOINCREMENT,
+  kind        TEXT NOT NULL CHECK(kind IN ('thread','reply')),
+  original_id INTEGER NOT NULL,
+  no          INTEGER NOT NULL,
+  time        TEXT NOT NULL,
+  name        TEXT NOT NULL,
+  subject     TEXT,
+  body        TEXT NOT NULL,
+  thread_no   INTEGER,          -- non-null for replies; references parent thread.no
+  deleted_at  TEXT NOT NULL,
+  expires_at  TEXT NOT NULL     -- purged by sweepBin() on server start
 );
 
-CREATE TABLE IF NOT EXISTS replies (
-  id        INTEGER PRIMARY KEY AUTOINCREMENT,
-  thread_id INTEGER NOT NULL REFERENCES threads(id),
-  no        INTEGER UNIQUE NOT NULL,
-  time      TEXT NOT NULL,
-  name      TEXT NOT NULL DEFAULT 'Anonymous',
-  body      TEXT NOT NULL
-);
-
-CREATE TABLE IF NOT EXISTS lobby_messages (
-  id    INTEGER PRIMARY KEY AUTOINCREMENT,
-  time  TEXT NOT NULL,
-  name  TEXT NOT NULL DEFAULT 'Anonymous',
-  color TEXT NOT NULL,
-  text  TEXT NOT NULL
+CREATE TABLE IF NOT EXISTS blog_posts (
+  id         INTEGER PRIMARY KEY AUTOINCREMENT,
+  slug       TEXT UNIQUE NOT NULL,
+  filename   TEXT NOT NULL,
+  title      TEXT NOT NULL,
+  body       TEXT NOT NULL,
+  created_at TEXT NOT NULL,
+  updated_at TEXT NOT NULL
 );
 ```
 
@@ -64,7 +66,25 @@ POST /api/board/threads/:id/reply  append reply
 
 GET  /api/lobby/history            last N messages (seed for new connections)
 WS   /ws/lobby                     bidirectional chat
+
+-- Admin (Stage 5) — all require a valid session cookie:
+POST   /api/admin/login
+POST   /api/admin/logout
+GET    /api/admin/posts
+POST   /api/admin/posts              (multipart, .md upload)
+DELETE /api/admin/posts/:id
+GET    /api/admin/bin
+POST   /api/admin/bin/:id/restore
+DELETE /api/admin/bin/:id
+DELETE /api/admin/threads/:id        (move to bin)
+DELETE /api/admin/replies/:id        (move to bin)
+GET    /api/admin/lobby
+DELETE /api/admin/lobby/:id          (permanent)
 ```
+
+### Admin auth
+
+Single-admin. Session is a stateless signed cookie (HMAC-SHA256 over a timestamp payload, keyed by `SESSION_SECRET`). Flags: `HttpOnly`, `Secure`, `SameSite=Strict`. Password stored as a bcrypt hash in `ADMIN_PASSWORD_HASH` env var. Chosen over JWT-in-localStorage because `HttpOnly` cookies are not readable by JS, removing the XSS theft vector.
 
 ### Static file serving
 
