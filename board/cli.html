@@ -11,9 +11,9 @@
 
 html, body {
   width:100%; height:100%;
-  background: #06060a;
+  background: #0a0a0a;
   font-family: 'IBM Plex Mono', monospace;
-  color: #b0b0c8;
+  color: #b0b0b0;
   overflow: hidden;
 }
 
@@ -24,13 +24,13 @@ body::before {
 }
 
 :root {
-  --fg:     #b0b0c8;
-  --dim:    #484860;
-  --bright: #e0d8f8;
-  --accent: #c677d3;
-  --green:  #89ad25;
-  --red:    #b30000;
-  --yellow: #ffcc00;
+  --fg:     #b0b0b0;
+  --dim:    #555555;
+  --bright: #e0e0e0;
+  --accent: #7a9ec2;
+  --green:  #6a9a5a;
+  --red:    #9a4a4a;
+  --yellow: #9a8a4a;
 }
 
 #app { width:100%; height:100%; display:flex; flex-direction:column; position:relative; z-index:10; }
@@ -38,23 +38,23 @@ body::before {
 /* Banner */
 #banner {
   padding: 8px 24px 7px;
-  border-bottom: 1px solid #1a1428;
-  background: rgba(6,6,10,0.97);
+  border-bottom: 1px solid #1a1a1a;
+  background: rgba(10,10,10,0.97);
   flex-shrink: 0;
-  font-size: 12px; line-height: 1.6; white-space: pre;
+  font-size: 13px; line-height: 1.6; white-space: pre;
   color: var(--dim);
 }
 
 /* Output */
 #out {
   flex:1; overflow-y:auto; padding: 6px 24px;
-  background: rgba(6,6,10,0.92);
-  scrollbar-width: thin; scrollbar-color: #3a1a5a transparent;
+  background: rgba(10,10,10,0.92);
+  scrollbar-width: thin; scrollbar-color: #333 transparent;
 }
 
 .ln {
   display:block; white-space:pre-wrap; word-wrap:break-word;
-  font-size:13px; line-height:1.75; min-height:1.75em;
+  font-size:15px; line-height:1.75; min-height:1.75em;
 }
 .dim    { color: var(--dim); }
 .bright { color: var(--bright); }
@@ -78,44 +78,44 @@ body::before {
 #input-row {
   display:flex; align-items:center;
   padding: 4px 24px 14px;
-  border-top: 1px solid #1a1428;
-  background: rgba(6,6,10,0.97);
+  border-top: 1px solid #1a1a1a;
+  background: rgba(10,10,10,0.97);
   flex-shrink: 0; gap: 8px;
 }
-#prompt { color: var(--accent); font-size:13px; white-space:nowrap; flex-shrink:0; }
+#prompt { color: var(--accent); font-size:15px; white-space:nowrap; flex-shrink:0; }
 #cli-in {
   flex:1; background:none; border:none;
   color: var(--bright);
-  font-family: 'IBM Plex Mono', monospace; font-size:13px;
+  font-family: 'IBM Plex Mono', monospace; font-size:15px;
   outline:none; caret-color: var(--accent);
 }
 
 /* Multiline editor */
 #ml-wrap {
   display:none; padding: 6px 24px;
-  background: rgba(10,6,20,0.97);
-  border-top: 1px solid #2a1a4a; flex-shrink:0;
+  background: rgba(10,10,10,0.97);
+  border-top: 1px solid #222; flex-shrink:0;
 }
-#ml-hint { font-size:10px; color:var(--dim); margin-bottom:4px; }
+#ml-hint { font-size:12px; color:var(--dim); margin-bottom:4px; }
 #ml-text {
-  width:100%; background:#080610; border:1px solid #3a1a5a;
-  color:var(--fg); font-family:'IBM Plex Mono',monospace; font-size:12px;
+  width:100%; background:#111; border:1px solid #333;
+  color:var(--fg); font-family:'IBM Plex Mono',monospace; font-size:14px;
   padding:8px; resize:none; outline:none; min-height:80px;
 }
 .ml-btns { display:flex; gap:10px; margin-top:5px; }
 .ml-btn {
-  background:#1a0a2a; border:1px solid #4a1a6a;
+  background:#1a1a1a; border:1px solid #444;
   color:var(--accent); font-family:'IBM Plex Mono',monospace;
-  font-size:11px; padding:3px 10px; cursor:pointer;
+  font-size:13px; padding:3px 10px; cursor:pointer;
 }
-.ml-btn:hover { background:#2a1a3a; }
+.ml-btn:hover { background:#222; }
 </style>
 </head>
 <body>
 <div id="app">
 
-  <div id="banner"><span style="color:#c677d3;">COPLAND OS // BOARD CLI</span>   <span style="color:#89ad25;">/wired/</span> — anonymous board
-Type <span style="color:#e0d8f8;">help</span> for commands  ∗  <span style="color:#e0d8f8;">gui</span> for graphical view  ∗  <span style="color:#e0d8f8;">ls</span> to list threads</div>
+  <div id="banner"><span style="color:#7a9ec2;">COPLAND OS // BOARD CLI</span>   <span style="color:#6a9a5a;">/wired/</span> — anonymous board
+Type <span style="color:#e0e0e0;">help</span> for commands  ∗  <span style="color:#e0e0e0;">gui</span> for graphical view  ∗  <span style="color:#e0e0e0;">ls</span> to list threads</div>
 
   <div id="out"></div>
 

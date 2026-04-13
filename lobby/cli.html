@@ -11,9 +11,9 @@
 
 html, body {
   width:100%; height:100%;
-  background: #06060a;
+  background: #0a0a0a;
   font-family: 'IBM Plex Mono', monospace;
-  color: #a8c0d8;
+  color: #b0b0b0;
   overflow: hidden;
 }
 
@@ -23,13 +23,13 @@ body::before {
 }
 
 :root {
-  --fg:     #a8c0d8;
-  --dim:    #304858;
-  --bright: #d0e8f8;
-  --accent: #c677d3;
-  --green:  #89ad25;
-  --red:    #b30000;
-  --sys:    #6a0d91;
+  --fg:     #b0b0b0;
+  --dim:    #555555;
+  --bright: #e0e0e0;
+  --accent: #7a9ec2;
+  --green:  #6a9a5a;
+  --red:    #9a4a4a;
+  --sys:    #6a8aaa;
 }
 
 #app { width:100%; height:100%; display:flex; flex-direction:column; position:relative; z-index:10; }
@@ -37,31 +37,31 @@ body::before {
 /* Banner */
 #banner {
   padding: 8px 24px 7px;
-  border-bottom: 1px solid #0a1420;
-  background: rgba(6,6,10,0.97);
-  flex-shrink:0; font-size:12px; line-height:1.6; white-space:pre;
-  color: #304858;
+  border-bottom: 1px solid #1a1a1a;
+  background: rgba(10,10,10,0.97);
+  flex-shrink:0; font-size:13px; line-height:1.6; white-space:pre;
+  color: var(--dim);
 }
 
 /* Messages */
 #msg-out {
   flex:1; overflow-y:auto; padding: 6px 24px;
-  background: rgba(6,6,10,0.92);
-  scrollbar-width:thin; scrollbar-color:#2a1a3a transparent;
+  background: rgba(10,10,10,0.92);
+  scrollbar-width:thin; scrollbar-color:#333 transparent;
 }
 
 .msg-ln {
-  display:flex; gap:10px; font-size:13px;
+  display:flex; gap:10px; font-size:15px;
   line-height:1.8; min-height:1.8em; align-items:baseline;
 }
-.ml-time  { color:#304858; font-size:11px; flex-shrink:0; white-space:nowrap; }
+.ml-time  { color:var(--dim); font-size:13px; flex-shrink:0; white-space:nowrap; }
 .ml-name  { font-weight:500; flex-shrink:0; white-space:nowrap; }
 .ml-text  { color:var(--fg); word-break:break-word; }
-.ml-text.sys { color:var(--sys); font-style:italic; font-size:11px; }
+.ml-text.sys { color:var(--sys); font-style:italic; font-size:13px; }
 .ml-mention { color:var(--red); font-weight:500; }
 
 .info-ln {
-  display:block; font-size:12px; line-height:1.65;
+  display:block; font-size:14px; line-height:1.65;
   color:var(--dim); white-space:pre-wrap;
 }
 
@@ -69,15 +69,15 @@ body::before {
 #input-row {
   display:flex; align-items:center;
   padding: 4px 24px 14px;
-  border-top: 1px solid #0a1420;
-  background: rgba(6,6,10,0.97);
+  border-top: 1px solid #1a1a1a;
+  background: rgba(10,10,10,0.97);
   flex-shrink:0; gap:8px;
 }
-#name-lbl { color:var(--accent); font-size:13px; white-space:nowrap; flex-shrink:0; }
+#name-lbl { color:var(--accent); font-size:15px; white-space:nowrap; flex-shrink:0; }
 #cli-in {
   flex:1; background:none; border:none;
   color:var(--bright);
-  font-family:'IBM Plex Mono',monospace; font-size:13px;
+  font-family:'IBM Plex Mono',monospace; font-size:15px;
   outline:none; caret-color:var(--accent);
 }
 </style>
@@ -85,8 +85,8 @@ body::before {
 <body>
 <div id="app">
 
-  <div id="banner"><span style="color:#c677d3;">COPLAND OS // LOBBY CLI</span>   <span style="color:#89ad25;">WIRED LOBBY</span> — anonymous instant messaging
-Type a message to chat  ∗  <span style="color:#d0e8f8;">/help</span> for commands  ∗  <span style="color:#d0e8f8;">/gui</span> for graphical view  ∗  <span style="color:#d0e8f8;">/name &lt;handle&gt;</span> to set name</div>
+  <div id="banner"><span style="color:#7a9ec2;">COPLAND OS // LOBBY CLI</span>   <span style="color:#6a9a5a;">WIRED LOBBY</span> — anonymous instant messaging
+Type a message to chat  ∗  <span style="color:#e0e0e0;">/help</span> for commands  ∗  <span style="color:#e0e0e0;">/gui</span> for graphical view  ∗  <span style="color:#e0e0e0;">/name &lt;handle&gt;</span> to set name</div>
 
   <div id="msg-out"></div>
 
