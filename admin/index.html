@@ -1,335 +1,429 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>// lain</title>
-  <style>
-    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>COPLAND OS // ADMIN</title>
+<link rel="stylesheet" href="../retro/retro.css">
+<script src="../retro/retro-utils.js"></script>
+<style>
+html, body { min-height: 100%; }
+body { background-color: #fcd0fe; }
 
-    :root {
-      --bg:     #0a0a0f;
-      --panel:  #111118;
-      --border: #2a2a3a;
-      --accent: #7f5af0;
-      --red:    #e53170;
-      --green:  #2cb67d;
-      --yellow: #f7c948;
-      --text:   #fffffe;
-      --muted:  #72757e;
-      --mono:   'IBM Plex Mono', 'Courier New', monospace;
-    }
+/* ── Login screen ── */
+#login-screen {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+}
+#app { display: none; }
 
-    body {
-      background: var(--bg);
-      color: var(--text);
-      font-family: var(--mono);
-      font-size: 13px;
-      min-height: 100vh;
-    }
+.login-box {
+  background: rgba(252,208,254,0.85);
+  border: 2px groove #dbb6af;
+  box-shadow: 2px 1px 5px #dbb6af inset;
+  padding: 28px 32px;
+  width: 320px;
+}
+.login-title {
+  font-family: 'Press Start 2P', monospace;
+  font-size: 9px; color: #6a0d91; letter-spacing: 3px;
+  margin-bottom: 20px; text-align: center;
+}
+.login-box label {
+  font-family: 'Silkscreen', monospace;
+  font-size: 10px; color: #6a0d91;
+  display: block; margin-bottom: 4px;
+}
+.login-box input[type="password"] {
+  width: 100%;
+  background: #fff8ff;
+  border: 2px groove #dbb6af;
+  color: #2a0a3a;
+  font-family: 'IBM Plex Mono', monospace; font-size: 13px;
+  padding: 6px 8px; outline: none; margin-bottom: 12px;
+}
+.login-box input[type="password"]:focus { border-color: #c677d3; }
+#login-err {
+  font-family: 'Silkscreen', monospace;
+  font-size: 9px; color: #b30000;
+  min-height: 14px; margin-top: 6px; text-align: center;
+}
 
-    /* ── layout ── */
-    #login-screen {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      min-height: 100vh;
-    }
+/* ── Retro container override — full width for admin ── */
+.admin-wrap {
+  width: 100%;
+  max-width: 980px;
+  margin: 0 auto;
+  padding: 14px 18px 40px;
+}
 
-    #app { display: none; }
+/* ── Tab nav ── */
+.admin-tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0;
+  margin-bottom: 16px;
+  border-bottom: 2px groove #dbb6af;
+}
+.admin-tab {
+  font-family: 'Press Start 2P', monospace;
+  font-size: 7px; letter-spacing: 1px;
+  color: #6a0d91;
+  background: rgba(252,208,254,0.4);
+  border: 2px groove #dbb6af;
+  border-bottom: none;
+  padding: 6px 12px;
+  cursor: pointer;
+  margin-bottom: -2px;
+}
+.admin-tab:hover { background: #f0a8e0; }
+.admin-tab.active {
+  background: #f0a8e0;
+  box-shadow: inset 0 0 2px black;
+  color: #2a0a3a;
+}
 
-    .shell {
-      width: 100%;
-      max-width: 960px;
-      margin: 0 auto;
-      padding: 24px 16px;
-    }
+/* ── Panels ── */
+.panel { display: none; }
+.panel.active { display: block; }
 
-    header {
-      display: flex;
-      align-items: baseline;
-      gap: 16px;
-      border-bottom: 1px solid var(--border);
-      padding-bottom: 12px;
-      margin-bottom: 24px;
-    }
+/* ── Section heading ── */
+.admin-section-head {
+  font-family: 'Press Start 2P', monospace;
+  font-size: 8px; color: #6a0d91; letter-spacing: 2px;
+  margin-bottom: 12px;
+  padding-bottom: 6px;
+  border-bottom: 1px solid #dbb6af;
+}
 
-    header h1 { font-size: 14px; color: var(--accent); letter-spacing: 2px; }
-    header nav { display: flex; gap: 12px; flex: 1; }
-    header nav button {
-      background: none;
-      border: none;
-      color: var(--muted);
-      font: inherit;
-      cursor: pointer;
-      padding: 2px 6px;
-      border-bottom: 2px solid transparent;
-    }
-    header nav button.active,
-    header nav button:hover { color: var(--text); border-color: var(--accent); }
+/* ── Notice bar ── */
+.admin-notice {
+  background: rgba(240,168,224,0.3);
+  border: 2px groove #dbb6af;
+  box-shadow: 2px 1px 4px #dbb6af inset;
+  padding: 7px 12px;
+  margin-bottom: 14px;
+  font-family: 'Silkscreen', monospace;
+  font-size: 9px; color: #2a0a3a; line-height: 1.7;
+}
+.admin-notice code {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 10px; color: #6a0d91;
+}
 
-    #logout-btn {
-      background: none;
-      border: 1px solid var(--border);
-      color: var(--muted);
-      font: inherit;
-      cursor: pointer;
-      padding: 4px 10px;
-    }
-    #logout-btn:hover { color: var(--red); border-color: var(--red); }
+/* ── Upload area ── */
+.upload-area {
+  background: rgba(252,208,254,0.4);
+  border: 2px groove #dbb6af;
+  box-shadow: 2px 1px 4px #dbb6af inset;
+  padding: 16px;
+  margin-bottom: 10px;
+  display: flex; align-items: center; gap: 12px; flex-wrap: wrap;
+}
+.upload-area label {
+  font-family: 'Silkscreen', monospace;
+  font-size: 10px; color: #6a0d91; flex-shrink: 0;
+}
+.upload-area input[type="file"] {
+  font-family: 'IBM Plex Mono', monospace; font-size: 11px;
+  color: #2a0a3a;
+}
 
-    /* ── panels ── */
-    .panel { display: none; }
-    .panel.active { display: block; }
+/* ── Inputs ── */
+input[type="text"],
+input[type="password"] {
+  background: #fff8ff;
+  border: 2px groove #dbb6af;
+  color: #2a0a3a;
+  font-family: 'IBM Plex Mono', monospace; font-size: 13px;
+  padding: 5px 8px; outline: none;
+}
+input[type="text"]:focus,
+input[type="password"]:focus { border-color: #c677d3; background: #fffaff; }
 
-    .section-title {
-      font-size: 11px;
-      color: var(--muted);
-      letter-spacing: 2px;
-      text-transform: uppercase;
-      margin-bottom: 16px;
-    }
+/* ── Buttons ── */
+.post-btn {
+  background: #dddde1;
+  border: 2px groove #c8c9ce;
+  box-shadow: 1px 1px 3px rgba(0,0,0,0.3);
+  color: #2a0a3a;
+  font-family: 'Press Start 2P', monospace;
+  font-size: 7px; letter-spacing: 1px;
+  padding: 5px 14px; cursor: pointer;
+}
+.post-btn:hover { filter: brightness(1.08); }
+.post-btn:active { box-shadow: inset 2px 2px 3px rgba(0,0,0,0.25); }
+.post-btn:disabled { opacity: 0.5; cursor: default; }
 
-    /* ── login box ── */
-    .login-box {
-      border: 1px solid var(--border);
-      background: var(--panel);
-      padding: 32px 40px;
-      width: 320px;
-    }
-    .login-box h2 { font-size: 13px; color: var(--accent); margin-bottom: 24px; letter-spacing: 2px; }
+.btn-danger {
+  background: #dddde1;
+  border: 2px groove #c8c9ce;
+  box-shadow: 1px 1px 2px rgba(0,0,0,0.2);
+  color: #b30000;
+  font-family: 'Silkscreen', monospace; font-size: 9px;
+  padding: 3px 8px; cursor: pointer;
+}
+.btn-danger:hover { background: #b30000; color: #fcd0fe; }
 
-    /* ── form elements ── */
-    label { display: block; color: var(--muted); font-size: 11px; margin-bottom: 4px; }
+.btn-restore {
+  background: #dddde1;
+  border: 2px groove #c8c9ce;
+  box-shadow: 1px 1px 2px rgba(0,0,0,0.2);
+  color: #5a7a10;
+  font-family: 'Silkscreen', monospace; font-size: 9px;
+  padding: 3px 8px; cursor: pointer; margin-right: 4px;
+}
+.btn-restore:hover { background: #89ad25; color: #fff8ff; }
 
-    input[type="password"],
-    input[type="text"],
-    input[type="file"] {
-      width: 100%;
-      background: var(--bg);
-      border: 1px solid var(--border);
-      color: var(--text);
-      font: inherit;
-      padding: 6px 8px;
-      margin-bottom: 16px;
-      outline: none;
-    }
-    input:focus { border-color: var(--accent); }
+/* ── Error / status ── */
+.admin-err {
+  font-family: 'Silkscreen', monospace;
+  font-size: 9px; color: #b30000;
+  min-height: 14px; margin: 6px 0;
+}
 
-    button.primary {
-      background: var(--accent);
-      border: none;
-      color: #fff;
-      font: inherit;
-      cursor: pointer;
-      padding: 7px 16px;
-      width: 100%;
-    }
-    button.primary:hover { filter: brightness(1.15); }
-    button.primary:disabled { opacity: 0.5; cursor: default; }
+/* ── Tables ── */
+table {
+  width: 100%; border-collapse: collapse;
+  margin-bottom: 16px;
+}
+thead tr {
+  background: #f0a8e0;
+  box-shadow: inset 0 0 2px black;
+  border: 2px groove #dbb6af;
+}
+th {
+  text-align: left;
+  font-family: 'Press Start 2P', monospace;
+  font-size: 7px; color: #6a0d91; letter-spacing: 1px;
+  padding: 6px 8px;
+}
+td {
+  padding: 7px 8px;
+  border-bottom: 1px solid #dbb6af;
+  vertical-align: middle;
+  max-width: 280px; overflow: hidden;
+  text-overflow: ellipsis; white-space: nowrap;
+  font-size: 12px; color: #2a0a3a;
+  background: rgba(252,208,254,0.35);
+}
+tr:hover td { background: rgba(240,168,224,0.45); }
 
-    .err { color: var(--red); font-size: 11px; margin-top: 8px; min-height: 16px; }
+.tag {
+  font-family: 'Silkscreen', monospace; font-size: 8px;
+  padding: 2px 5px;
+  border: 1px solid #dbb6af; color: #6a0d91;
+  background: rgba(252,208,254,0.6);
+}
+.tag.thread { border-color: #89ad25; color: #5a7a10; }
+.tag.reply  { border-color: #c677d3; color: #6a0d91; }
 
-    /* ── tables ── */
-    table { width: 100%; border-collapse: collapse; margin-bottom: 24px; }
-    th { text-align: left; color: var(--muted); font-size: 11px; letter-spacing: 1px; border-bottom: 1px solid var(--border); padding: 6px 8px; }
-    td { padding: 8px 8px; border-bottom: 1px solid var(--border); vertical-align: top; max-width: 300px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-    tr:hover td { background: var(--panel); }
+.empty {
+  font-family: 'Silkscreen', monospace;
+  font-size: 10px; color: #6a0d91; opacity: 0.5;
+  padding: 20px 0; text-align: center;
+}
 
-    .btn-danger {
-      background: none;
-      border: 1px solid var(--red);
-      color: var(--red);
-      font: inherit;
-      cursor: pointer;
-      padding: 2px 8px;
-      font-size: 11px;
-    }
-    .btn-danger:hover { background: var(--red); color: #fff; }
+/* ── Pagination ── */
+.pagination {
+  display: flex; gap: 8px; align-items: center; margin-bottom: 12px;
+}
+.pagination span {
+  font-family: 'Silkscreen', monospace; font-size: 9px; color: #6a0d91; opacity: 0.6;
+}
 
-    .btn-restore {
-      background: none;
-      border: 1px solid var(--green);
-      color: var(--green);
-      font: inherit;
-      cursor: pointer;
-      padding: 2px 8px;
-      font-size: 11px;
-      margin-right: 4px;
-    }
-    .btn-restore:hover { background: var(--green); color: #fff; }
+/* ── About editor ── */
+#about-editor {
+  width: 100%;
+  min-height: 400px;
+  background: #fff8ff;
+  border: 2px groove #dbb6af;
+  color: #2a0a3a;
+  font-family: 'IBM Plex Mono', monospace; font-size: 12px; line-height: 1.6;
+  padding: 12px; resize: vertical; outline: none;
+  margin-bottom: 10px;
+}
+#about-editor:focus { border-color: #c677d3; }
 
-    .tag {
-      font-size: 10px;
-      padding: 1px 5px;
-      border: 1px solid var(--border);
-      color: var(--muted);
-    }
-    .tag.thread { border-color: var(--yellow); color: var(--yellow); }
-    .tag.reply  { border-color: var(--muted); }
+/* ── Micro input row ── */
+.micro-compose {
+  display: flex; gap: 8px; align-items: center;
+  margin-bottom: 14px;
+}
+.micro-compose input[type="text"] { flex: 1; }
 
-    .upload-area {
-      border: 1px dashed var(--border);
-      padding: 24px;
-      margin-bottom: 16px;
-      text-align: center;
-      color: var(--muted);
-    }
-    .upload-area input { margin: 0 auto; }
-
-    .notice {
-      border-left: 2px solid var(--accent);
-      padding: 8px 12px;
-      color: var(--muted);
-      font-size: 11px;
-      margin-bottom: 16px;
-    }
-
-    .empty { color: var(--muted); font-size: 12px; padding: 24px 0; text-align: center; }
-
-    /* lobby page/nav */
-    .pagination { display: flex; gap: 8px; align-items: center; margin-bottom: 16px; }
-    .pagination button {
-      background: none;
-      border: 1px solid var(--border);
-      color: var(--text);
-      font: inherit;
-      cursor: pointer;
-      padding: 3px 10px;
-    }
-    .pagination button:disabled { opacity: 0.3; cursor: default; }
-    .pagination span { color: var(--muted); font-size: 11px; }
-  </style>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+/* ── Logout strip ── */
+.admin-topbar {
+  display: flex; justify-content: space-between; align-items: center;
+  margin-bottom: 14px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid #dbb6af;
+}
+.admin-topbar-title {
+  font-family: 'Press Start 2P', monospace;
+  font-size: 8px; color: #6a0d91; letter-spacing: 2px;
+}
+</style>
 </head>
-<body>
+<body class="theme-blog">
 
-<!-- ── login ── -->
+<!-- ── Login ── -->
 <div id="login-screen">
   <div class="login-box">
-    <h2>// lain</h2>
+    <div class="login-title">// COPLAND ADMIN //</div>
     <label for="pw">password</label>
     <input type="password" id="pw" autocomplete="current-password" autofocus>
-    <button class="primary" id="login-btn">enter</button>
-    <div class="err" id="login-err"></div>
+    <button class="post-btn" id="login-btn" style="width:100%;">[ ENTER ]</button>
+    <div id="login-err"></div>
   </div>
 </div>
 
-<!-- ── app shell ── -->
+<!-- ── App ── -->
 <div id="app">
-  <div class="shell">
-    <header>
-      <h1>// lain</h1>
-      <nav>
-        <button class="active" data-panel="posts">posts</button>
-        <button data-panel="works">works</button>
-        <button data-panel="micro">micro</button>
-        <button data-panel="about">about</button>
-        <button data-panel="board">board</button>
-        <button data-panel="bin">bin</button>
-        <button data-panel="lobby">lobby</button>
-      </nav>
-      <button id="logout-btn">logout</button>
-    </header>
+
+  <!-- Windows XP Chrome -->
+  <div class="win-chrome">
+    <div class="win-chrome-row1">
+      <button class="win-btn" onclick="location.reload()">⟳ Refresh</button>
+      <span class="win-chrome-title">COPLAND OS NAVIGATOR v4.017 // ADMIN</span>
+    </div>
+    <div class="win-chrome-row2">
+      <span class="win-addr-label">Address ▼</span>
+      <input type="text" class="win-addr-bar" value="wired://admin/" readonly>
+    </div>
+    <div class="win-chrome-row3">
+      <span class="win-nav-icon">🔒</span>
+      <button class="win-nav-btn">■ ADMIN PANEL — restricted access</button>
+      <span class="blink" style="margin-left:auto;margin-right:8px;font-family:'Press Start 2P',monospace;font-size:8px;color:#6a0d91;">∗ AUTHENTICATED ∗</span>
+    </div>
+  </div>
+
+  <div class="retro-deco-left"></div>
+  <div class="retro-deco-right"></div>
+
+  <div class="admin-wrap">
+
+    <div class="admin-topbar">
+      <div class="admin-topbar-title">∗ ADMIN ∗</div>
+      <button class="btn-danger" id="logout-btn">[ LOGOUT ]</button>
+    </div>
+
+    <!-- Tab nav -->
+    <div class="admin-tabs">
+      <button class="admin-tab active" data-panel="posts">POSTS</button>
+      <button class="admin-tab" data-panel="works">WORKS</button>
+      <button class="admin-tab" data-panel="micro">MICRO</button>
+      <button class="admin-tab" data-panel="about">ABOUT</button>
+      <button class="admin-tab" data-panel="board">BOARD</button>
+      <button class="admin-tab" data-panel="bin">BIN</button>
+      <button class="admin-tab" data-panel="lobby">LOBBY</button>
+    </div>
 
     <!-- posts panel -->
     <div class="panel active" id="panel-posts">
-      <div class="section-title">blog posts</div>
-      <div class="notice">Upload a .md file. The slug is derived from the filename. Re-uploading the same filename overwrites the post.</div>
+      <div class="admin-section-head">// BLOG POSTS //</div>
+      <div class="admin-notice">Upload a .md file. Slug is derived from filename. Re-uploading the same filename overwrites.</div>
       <div class="upload-area">
-        <label for="post-file">select .md file</label>
+        <label for="post-file">select .md file ▶</label>
         <input type="file" id="post-file" accept=".md">
+        <button class="post-btn" id="upload-btn">[ UPLOAD ]</button>
       </div>
-      <button class="primary" id="upload-btn" style="width:auto;margin-bottom:24px;">upload</button>
-      <div class="err" id="upload-err"></div>
+      <div class="admin-err" id="upload-err"></div>
       <table id="posts-table">
-        <thead><tr><th>slug</th><th>title</th><th>updated</th><th></th></tr></thead>
+        <thead><tr><th>SLUG</th><th>TITLE</th><th>UPDATED</th><th></th></tr></thead>
         <tbody></tbody>
       </table>
-      <div class="empty" id="posts-empty" style="display:none">no posts yet</div>
+      <div class="empty" id="posts-empty" style="display:none">∗ no posts yet ∗</div>
     </div>
 
     <!-- works panel -->
     <div class="panel" id="panel-works">
-      <div class="section-title">works</div>
-      <div class="notice">Upload a .md file. Add <code>tech: rust / wasm</code> as the first line for the tech stack field. Re-uploading the same filename overwrites.</div>
+      <div class="admin-section-head">// WORKS //</div>
+      <div class="admin-notice">Upload a .md file. Add <code>tech: rust / wasm</code> as the first line for the tech field. Re-uploading overwrites.</div>
       <div class="upload-area">
-        <label for="work-file">select .md file</label>
+        <label for="work-file">select .md file ▶</label>
         <input type="file" id="work-file" accept=".md">
+        <button class="post-btn" id="upload-work-btn">[ UPLOAD ]</button>
       </div>
-      <button class="primary" id="upload-work-btn" style="width:auto;margin-bottom:24px;">upload</button>
-      <div class="err" id="upload-work-err"></div>
+      <div class="admin-err" id="upload-work-err"></div>
       <table id="works-table">
-        <thead><tr><th>slug</th><th>title</th><th>tech</th><th>updated</th><th></th></tr></thead>
+        <thead><tr><th>SLUG</th><th>TITLE</th><th>TECH</th><th>UPDATED</th><th></th></tr></thead>
         <tbody></tbody>
       </table>
-      <div class="empty" id="works-empty" style="display:none">no works yet</div>
+      <div class="empty" id="works-empty" style="display:none">∗ no works yet ∗</div>
     </div>
 
     <!-- micro panel -->
     <div class="panel" id="panel-micro">
-      <div class="section-title">micro posts</div>
-      <div style="display:flex;gap:8px;margin-bottom:24px;align-items:flex-start;">
-        <input type="text" id="micro-input" placeholder="short thought..." style="flex:1;margin-bottom:0;">
-        <button class="primary" id="micro-post-btn" style="width:auto;">post</button>
+      <div class="admin-section-head">// MICRO POSTS //</div>
+      <div class="micro-compose">
+        <input type="text" id="micro-input" placeholder="short thought...">
+        <button class="post-btn" id="micro-post-btn">[ POST ]</button>
       </div>
-      <div class="err" id="micro-err"></div>
+      <div class="admin-err" id="micro-err"></div>
       <table id="micro-table">
-        <thead><tr><th>time</th><th>text</th><th></th></tr></thead>
+        <thead><tr><th>TIME</th><th>TEXT</th><th></th></tr></thead>
         <tbody></tbody>
       </table>
-      <div class="empty" id="micro-empty" style="display:none">no micro posts yet</div>
+      <div class="empty" id="micro-empty" style="display:none">∗ no micro posts yet ∗</div>
     </div>
 
     <!-- about panel -->
     <div class="panel" id="panel-about">
-      <div class="section-title">about</div>
-      <div class="notice">Edit the about.js file directly. This is a JS object — keep the <code>const ABOUT = { ... };</code> structure intact.</div>
-      <textarea id="about-editor" style="width:100%;min-height:400px;background:#0a0a0f;border:1px solid var(--border);color:var(--text);font:13px/1.6 'IBM Plex Mono',monospace;padding:12px;resize:vertical;outline:none;margin-bottom:12px;"></textarea>
-      <button class="primary" id="about-save-btn" style="width:auto;">save</button>
-      <div class="err" id="about-err"></div>
+      <div class="admin-section-head">// ABOUT //</div>
+      <div class="admin-notice">Edit about.js directly. Keep the <code>const ABOUT = { ... };</code> structure intact.</div>
+      <textarea id="about-editor"></textarea>
+      <button class="post-btn" id="about-save-btn">[ SAVE ]</button>
+      <div class="admin-err" id="about-err"></div>
     </div>
 
     <!-- board panel -->
     <div class="panel" id="panel-board">
-      <div class="section-title">board threads</div>
-      <div class="notice">Deleting a thread moves it and all its replies to the bin. Deleting a single reply moves only that reply.</div>
+      <div class="admin-section-head">// BOARD THREADS //</div>
+      <div class="admin-notice">Deleting a thread moves it and all replies to the bin. Deleting a single reply moves only that reply.</div>
       <table id="board-table">
-        <thead><tr><th>#</th><th>subject</th><th>body</th><th>replies</th><th>time</th><th></th></tr></thead>
+        <thead><tr><th>#</th><th>SUBJECT</th><th>BODY</th><th>R</th><th>TIME</th><th></th></tr></thead>
         <tbody></tbody>
       </table>
-      <div class="empty" id="board-empty" style="display:none">no threads</div>
+      <div class="empty" id="board-empty" style="display:none">∗ no threads ∗</div>
     </div>
 
     <!-- bin panel -->
     <div class="panel" id="panel-bin">
-      <div class="section-title">bin</div>
-      <div class="notice">Posts here are permanently deleted after the TTL expires. You can restore or delete them early.</div>
+      <div class="admin-section-head">// BIN //</div>
+      <div class="admin-notice">Posts are permanently deleted after TTL expires. You can restore or purge early.</div>
       <table id="bin-table">
-        <thead><tr><th>kind</th><th>#</th><th>body</th><th>deleted</th><th>expires</th><th></th></tr></thead>
+        <thead><tr><th>KIND</th><th>#</th><th>BODY</th><th>DELETED</th><th>EXPIRES</th><th></th></tr></thead>
         <tbody></tbody>
       </table>
-      <div class="empty" id="bin-empty" style="display:none">bin is empty</div>
+      <div class="empty" id="bin-empty" style="display:none">∗ bin is empty ∗</div>
     </div>
 
     <!-- lobby panel -->
     <div class="panel" id="panel-lobby">
-      <div class="section-title">lobby messages</div>
-      <div class="notice">Deletions are permanent and immediate.</div>
+      <div class="admin-section-head">// LOBBY MESSAGES //</div>
+      <div class="admin-notice">Deletions are permanent and immediate.</div>
       <div class="pagination">
-        <button id="lobby-prev" disabled>prev</button>
-        <span id="lobby-page-label">page 1</span>
-        <button id="lobby-next">next</button>
+        <button class="post-btn" id="lobby-prev" disabled>[ PREV ]</button>
+        <span id="lobby-page-label">offset 0</span>
+        <button class="post-btn" id="lobby-next">[ NEXT ]</button>
       </div>
       <table id="lobby-table">
-        <thead><tr><th>id</th><th>time</th><th>name</th><th>text</th><th></th></tr></thead>
+        <thead><tr><th>ID</th><th>TIME</th><th>NAME</th><th>TEXT</th><th></th></tr></thead>
         <tbody></tbody>
       </table>
-      <div class="empty" id="lobby-empty" style="display:none">no messages</div>
+      <div class="empty" id="lobby-empty" style="display:none">∗ no messages ∗</div>
     </div>
 
-  </div><!-- .shell -->
+    <div class="pixel-hr"></div>
+    <div class="retro-footer">
+      COPLAND OS ADMIN // restricted access<br>
+      <span class="blink">∗</span> authorised personnel only <span class="blink">∗</span>
+    </div>
+
+  </div><!-- .admin-wrap -->
 </div><!-- #app -->
 
 <script type="module">
@@ -373,7 +467,7 @@
       appEl.style.display = 'block';
       loadPanel('posts');
     } catch (e) {
-      loginErr.textContent = e.message;
+      loginErr.textContent = '∗ ' + e.message;
     } finally {
       loginBtn.disabled = false;
     }
@@ -389,7 +483,7 @@
   });
 
   // ── panel nav ──
-  const navBtns = document.querySelectorAll('nav button');
+  const navBtns = document.querySelectorAll('.admin-tab');
   function switchPanel(name) {
     navBtns.forEach(b => b.classList.toggle('active', b.dataset.panel === name));
     document.querySelectorAll('.panel').forEach(p => p.classList.toggle('active', p.id === 'panel-' + name));
@@ -419,7 +513,7 @@
         <td title="${p.slug}">${truncate(p.slug, 24)}</td>
         <td title="${p.title}">${truncate(p.title, 40)}</td>
         <td>${fmt(p.updated_at)}</td>
-        <td><button class="btn-danger" data-id="${p.id}">delete</button></td>
+        <td><button class="btn-danger" data-id="${p.id}">[ delete ]</button></td>
       `;
       tr.querySelector('.btn-danger').addEventListener('click', async () => {
         if (!confirm(`Permanently delete "${p.slug}"?`)) return;
@@ -434,12 +528,12 @@
     const file = document.getElementById('post-file').files[0];
     const errEl = document.getElementById('upload-err');
     errEl.textContent = '';
-    if (!file) { errEl.textContent = 'select a file first'; return; }
+    if (!file) { errEl.textContent = '∗ select a file first'; return; }
     const fd = new FormData();
     fd.append('file', file);
     const r = await fetch('/api/admin/posts', { method: 'POST', body: fd });
     const json = await r.json().catch(() => ({}));
-    if (!r.ok) { errEl.textContent = json.error || 'upload failed'; return; }
+    if (!r.ok) { errEl.textContent = '∗ ' + (json.error || 'upload failed'); return; }
     document.getElementById('post-file').value = '';
     loadPosts();
   });
@@ -448,7 +542,6 @@
   async function loadBoard() {
     const r = await fetch('/api/board/threads');
     const { threads } = await r.json();
-    // Fetch via public API since admin has no separate thread list
     const tbody = document.querySelector('#board-table tbody');
     tbody.innerHTML = '';
     document.getElementById('board-empty').style.display = threads.length ? 'none' : '';
@@ -460,7 +553,7 @@
         <td title="${t.body}">${truncate(t.body, 40)}</td>
         <td>${t.replyCount}</td>
         <td>${t.time}</td>
-        <td><button class="btn-danger" data-id="${t.id}">bin</button></td>
+        <td><button class="btn-danger" data-id="${t.id}">[ bin ]</button></td>
       `;
       tr.querySelector('.btn-danger').addEventListener('click', async () => {
         if (!confirm(`Move thread #${t.no} and its ${t.replyCount} replies to bin?`)) return;
@@ -486,8 +579,8 @@
         <td>${fmt(row.deleted_at)}</td>
         <td>${fmt(row.expires_at)}</td>
         <td>
-          <button class="btn-restore" data-id="${row.id}">restore</button>
-          <button class="btn-danger"  data-id="${row.id}">delete</button>
+          <button class="btn-restore" data-id="${row.id}">[ restore ]</button>
+          <button class="btn-danger"  data-id="${row.id}">[ delete ]</button>
         </td>
       `;
       tr.querySelector('.btn-restore').addEventListener('click', async () => {
@@ -529,7 +622,7 @@
         <td>${m.time}</td>
         <td>${m.name}</td>
         <td title="${m.text}">${truncate(m.text, 60)}</td>
-        <td><button class="btn-danger" data-id="${m.id}">delete</button></td>
+        <td><button class="btn-danger" data-id="${m.id}">[ delete ]</button></td>
       `;
       tr.querySelector('.btn-danger').addEventListener('click', async () => {
         await api('DELETE', `/lobby/${m.id}`);
@@ -552,7 +645,7 @@
         <td title="${w.title}">${truncate(w.title, 30)}</td>
         <td>${truncate(w.tech, 20)}</td>
         <td>${fmt(w.updated_at)}</td>
-        <td><button class="btn-danger" data-id="${w.id}">delete</button></td>
+        <td><button class="btn-danger" data-id="${w.id}">[ delete ]</button></td>
       `;
       tr.querySelector('.btn-danger').addEventListener('click', async () => {
         if (!confirm(`Permanently delete "${w.slug}"?`)) return;
@@ -567,12 +660,12 @@
     const file = document.getElementById('work-file').files[0];
     const errEl = document.getElementById('upload-work-err');
     errEl.textContent = '';
-    if (!file) { errEl.textContent = 'select a file first'; return; }
+    if (!file) { errEl.textContent = '∗ select a file first'; return; }
     const fd = new FormData();
     fd.append('file', file);
     const r = await fetch('/api/admin/works', { method: 'POST', body: fd });
     const json = await r.json().catch(() => ({}));
-    if (!r.ok) { errEl.textContent = json.error || 'upload failed'; return; }
+    if (!r.ok) { errEl.textContent = '∗ ' + (json.error || 'upload failed'); return; }
     document.getElementById('work-file').value = '';
     loadWorks();
   });
@@ -588,7 +681,7 @@
       tr.innerHTML = `
         <td style="white-space:nowrap">${fmt(p.created_at)}</td>
         <td title="${p.text}">${truncate(p.text, 80)}</td>
-        <td><button class="btn-danger" data-id="${p.id}">delete</button></td>
+        <td><button class="btn-danger" data-id="${p.id}">[ delete ]</button></td>
       `;
       tr.querySelector('.btn-danger').addEventListener('click', async () => {
         await api('DELETE', `/micro/${p.id}`);
@@ -603,8 +696,8 @@
     const errEl = document.getElementById('micro-err');
     errEl.textContent = '';
     const text = input.value.trim();
-    if (!text) { errEl.textContent = 'text is required'; return; }
-    await api('POST', '/micro', { text }).catch(e => { errEl.textContent = e.message; });
+    if (!text) { errEl.textContent = '∗ text is required'; return; }
+    await api('POST', '/micro', { text }).catch(e => { errEl.textContent = '∗ ' + e.message; });
     input.value = '';
     loadMicro();
   });
@@ -623,9 +716,9 @@
     const content = document.getElementById('about-editor').value;
     const errEl = document.getElementById('about-err');
     errEl.textContent = '';
-    await api('POST', '/about', { content }).catch(e => { errEl.textContent = e.message; return; });
-    errEl.style.color = 'var(--green)';
-    errEl.textContent = 'saved.';
+    await api('POST', '/about', { content }).catch(e => { errEl.textContent = '∗ ' + e.message; return; });
+    errEl.style.color = '#89ad25';
+    errEl.textContent = '∗ saved.';
     setTimeout(() => { errEl.textContent = ''; errEl.style.color = ''; }, 2000);
   });
 
