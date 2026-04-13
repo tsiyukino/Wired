@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>login // wired</title>
+<link rel="stylesheet" href="retro.css">
+<script src="retro-utils.js"></script>
+<style>
+html, body { min-height: 100%; }
+body { background-color: #fcd0fe; display: flex; align-items: center; justify-content: center; min-height: 100vh; }
+.login-box {
+  background: rgba(252,208,254,0.88);
+  border: 2px groove #dbb6af;
+  box-shadow: 2px 1px 5px #dbb6af inset;
+  padding: 28px 32px;
+  width: 320px;
+}
+.login-title {
+  font-family: 'Press Start 2P', monospace;
+  font-size: 8px; color: #6a0d91; letter-spacing: 3px;
+  margin-bottom: 20px; text-align: center;
+}
+.login-box label {
+  font-family: 'Silkscreen', monospace;
+  font-size: 10px; color: #6a0d91;
+  display: block; margin-bottom: 4px; margin-top: 10px;
+}
+.login-box input {
+  width: 100%;
+  background: #fff8ff;
+  border: 2px groove #dbb6af;
+  color: #2a0a3a;
+  font-family: 'IBM Plex Mono', monospace; font-size: 13px;
+  padding: 6px 8px; outline: none; margin-bottom: 2px;
+  box-sizing: border-box;
+}
+.login-box input:focus { border-color: #c677d3; }
+.submit-btn {
+  width: 100%; margin-top: 14px;
+  background: #dddde1;
+  border: 2px groove #c8c9ce;
+  box-shadow: 1px 1px 3px rgba(0,0,0,0.3);
+  color: #2a0a3a;
+  font-family: 'Press Start 2P', monospace;
+  font-size: 7px; letter-spacing: 1px;
+  padding: 7px 14px; cursor: pointer;
+}
+.submit-btn:hover { filter: brightness(1.08); }
+.submit-btn:disabled { opacity: 0.5; cursor: default; }
+.err {
+  font-family: 'Silkscreen', monospace;
+  font-size: 9px; color: #b30000;
+  min-height: 14px; margin-top: 8px; text-align: center;
+}
+</style>
+</head>
+<body>
+<div class="login-box">
+  <div class="login-title">// WIRED LOGIN //</div>
+
+  <label for="username">username</label>
+  <input type="text" id="username" autocomplete="username" autofocus>
+
+  <label for="password">password</label>
+  <input type="password" id="password" autocomplete="current-password">
+
+  <button class="submit-btn" id="login-btn">[ LOGIN ]</button>
+  <div class="err" id="err"></div>
+</div>
+
+<script type="module">
+  const errEl = document.getElementById('err');
+  const btn   = document.getElementById('login-btn');
+
+  async function tryLogin() {
+    errEl.textContent = '';
+    btn.disabled = true;
+    try {
+      const r    = await fetch('/api/user/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          username: document.getElementById('username').value,
+          password: document.getElementById('password').value,
+        }),
+      });
+      const json = await r.json();
+      if (!r.ok) { errEl.textContent = '∗ ' + (json.error || 'login failed'); btn.disabled = false; return; }
+      // Redirect to /me or wherever they came from
+      const next = new URLSearchParams(location.search).get('next') || '/me';
+      location.href = next;
+    } catch {
+      errEl.textContent = '∗ network error';
+      btn.disabled = false;
+    }
+  }
+
+  btn.addEventListener('click', tryLogin);
+  document.getElementById('password').addEventListener('keydown', e => { if (e.key === 'Enter') tryLogin(); });
+</script>
+</body>
+</html>

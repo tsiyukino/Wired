@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>my panel // wired</title>
+<link rel="stylesheet" href="retro.css">
+<script src="retro-utils.js"></script>
+<style>
+html, body { min-height: 100%; }
+body { background-color: #fcd0fe; }
+
+.me-wrap {
+  width: 100%; max-width: 680px;
+  margin: 0 auto;
+  padding: 134px 18px 40px;
+}
+.me-section {
+  background: rgba(252,208,254,0.4);
+  border: 2px groove #dbb6af;
+  box-shadow: 2px 1px 4px #dbb6af inset;
+  padding: 16px 18px;
+  margin-bottom: 18px;
+}
+.me-head {
+  font-family: 'Press Start 2P', monospace;
+  font-size: 8px; color: #6a0d91; letter-spacing: 2px;
+  margin-bottom: 12px; padding-bottom: 6px;
+  border-bottom: 1px solid #dbb6af;
+}
+label {
+  font-family: 'Silkscreen', monospace;
+  font-size: 10px; color: #6a0d91;
+  display: block; margin-bottom: 3px; margin-top: 8px;
+}
+input[type="text"],
+input[type="password"],
+input[type="url"],
+textarea {
+  width: 100%;
+  background: #fff8ff;
+  border: 2px groove #dbb6af;
+  color: #2a0a3a;
+  font-family: 'IBM Plex Mono', monospace; font-size: 12px;
+  padding: 5px 8px; outline: none;
+  box-sizing: border-box;
+}
+textarea { resize: vertical; min-height: 70px; }
+input:focus, textarea:focus { border-color: #c677d3; }
+.save-btn {
+  margin-top: 10px;
+  background: #dddde1;
+  border: 2px groove #c8c9ce;
+  box-shadow: 1px 1px 3px rgba(0,0,0,0.3);
+  color: #2a0a3a;
+  font-family: 'Press Start 2P', monospace;
+  font-size: 7px; letter-spacing: 1px;
+  padding: 5px 14px; cursor: pointer;
+}
+.save-btn:hover { filter: brightness(1.08); }
+.save-btn:disabled { opacity: 0.5; cursor: default; }
+.err  { font-family: 'Silkscreen', monospace; font-size: 9px; color: #b30000; min-height: 14px; margin-top: 6px; }
+.ok   { font-family: 'Silkscreen', monospace; font-size: 9px; color: #5a7a10; min-height: 14px; margin-top: 6px; }
+.avatar-preview { margin-top: 8px; }
+.avatar-preview img { border: 2px groove #dbb6af; max-width: 88px; max-height: 88px; display: block; }
+.topbar {
+  display: flex; justify-content: space-between; align-items: center;
+  margin-bottom: 14px;
+}
+.topbar-title { font-family: 'Press Start 2P', monospace; font-size: 8px; color: #6a0d91; letter-spacing: 2px; }
+.logout-btn {
+  background: #dddde1; border: 2px groove #c8c9ce;
+  color: #b30000; font-family: 'Silkscreen', monospace; font-size: 9px;
+  padding: 3px 8px; cursor: pointer;
+}
+.logout-btn:hover { background: #b30000; color: #fcd0fe; }
+.profile-link { font-family: 'Silkscreen', monospace; font-size: 9px; color: #6a0d91; opacity: 0.7; margin-top: 4px; }
+.profile-link a { color: inherit; }
+</style>
+</head>
+<body class="theme-blog">
+
+<div class="win-chrome">
+  <div class="win-chrome-row1">
+    <button class="win-btn" onclick="goTo('terminal')">🏠 ホーム</button>
+    <span class="win-chrome-title">COPLAND OS NAVIGATOR v4.017 // MY PANEL</span>
+  </div>
+  <div class="win-chrome-row2">
+    <span class="win-addr-label">Address ▼</span>
+    <input type="text" class="win-addr-bar" value="wired://me/" readonly>
+  </div>
+  <div class="win-chrome-row3">
+    <span class="win-nav-icon">👤</span>
+    <button class="win-nav-btn">my panel</button>
+    <span class="blink" style="margin-left:auto;margin-right:8px;font-family:'Press Start 2P',monospace;font-size:8px;color:#6a0d91;">∗ CONNECTED ∗</span>
+  </div>
+</div>
+
+<div class="retro-deco-left"></div>
+<div class="retro-deco-right"></div>
+
+<div class="me-wrap">
+  <div class="topbar">
+    <div class="topbar-title" id="topbar-name">∗ MY PANEL ∗</div>
+    <button class="logout-btn" id="logout-btn">[ LOGOUT ]</button>
+  </div>
+
+  <!-- profile -->
+  <div class="me-section">
+    <div class="me-head">// PROFILE //</div>
+    <div class="profile-link" id="profile-link"></div>
+
+    <label>avatar</label>
+    <div class="avatar-preview" id="avatar-preview"></div>
+    <input type="file" id="avatar-file" accept="image/png,image/gif,image/jpeg,image/webp" style="margin-top:6px;font-size:11px;">
+
+    <label for="display_name">display name</label>
+    <input type="text" id="display_name" maxlength="64">
+
+    <label for="bio">bio</label>
+    <textarea id="bio" maxlength="300"></textarea>
+
+    <label for="site_url">site URL</label>
+    <input type="url" id="site_url" maxlength="200">
+
+    <button class="save-btn" id="profile-save-btn">[ SAVE PROFILE ]</button>
+    <div class="err" id="profile-err"></div>
+  </div>
+
+  <!-- password -->
+  <div class="me-section">
+    <div class="me-head">// CHANGE PASSWORD //</div>
+
+    <label for="cur-pw">current password</label>
+    <input type="password" id="cur-pw" autocomplete="current-password">
+
+    <label for="new-pw">new password</label>
+    <input type="password" id="new-pw" autocomplete="new-password">
+
+    <button class="save-btn" id="pw-save-btn">[ CHANGE PASSWORD ]</button>
+    <div class="err" id="pw-err"></div>
+  </div>
+
+</div>
+
+<script type="module">
+  let currentUser = null;
+
+  async function load() {
+    const r = await fetch('/api/user/me');
+    if (!r.ok) { location.href = '/login'; return; }
+    const { user } = await r.json();
+    currentUser = user;
+
+    document.getElementById('topbar-name').textContent = `∗ ${user.display_name} ∗`;
+    document.getElementById('display_name').value = user.display_name;
+    document.getElementById('bio').value           = user.bio;
+    document.getElementById('site_url').value      = user.site_url;
+    document.getElementById('profile-link').innerHTML =
+      `<a href="/u/${user.username}" target="_blank">[ view profile → /u/${user.username} ]</a>`;
+
+    const preview = document.getElementById('avatar-preview');
+    if (user.avatar_path) {
+      preview.innerHTML = `<img src="/retro/content/avatars/${user.avatar_path}" alt="avatar">`;
+    } else {
+      preview.textContent = '∗ no avatar yet ∗';
+      preview.style.cssText = 'font-family:Silkscreen,monospace;font-size:9px;color:#6a0d91;opacity:0.5;';
+    }
+  }
+
+  document.getElementById('profile-save-btn').addEventListener('click', async () => {
+    const errEl = document.getElementById('profile-err');
+    errEl.textContent = '';
+    errEl.className = 'err';
+    const fd = new FormData();
+    fd.append('display_name', document.getElementById('display_name').value);
+    fd.append('bio',          document.getElementById('bio').value);
+    fd.append('site_url',     document.getElementById('site_url').value);
+    const file = document.getElementById('avatar-file').files[0];
+    if (file) fd.append('avatar', file);
+
+    const r    = await fetch('/api/user/me/profile', { method: 'POST', body: fd });
+    const json = await r.json();
+    if (!r.ok) { errEl.textContent = '∗ ' + (json.error || 'save failed'); return; }
+    errEl.className = 'ok';
+    errEl.textContent = '∗ saved.';
+    setTimeout(() => { errEl.textContent = ''; }, 2000);
+    load();
+  });
+
+  document.getElementById('pw-save-btn').addEventListener('click', async () => {
+    const errEl = document.getElementById('pw-err');
+    errEl.textContent = '';
+    errEl.className = 'err';
+    const r    = await fetch('/api/user/me/password', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        current_password: document.getElementById('cur-pw').value,
+        new_password:     document.getElementById('new-pw').value,
+      }),
+    });
+    const json = await r.json();
+    if (!r.ok) { errEl.textContent = '∗ ' + (json.error || 'failed'); return; }
+    errEl.className = 'ok';
+    errEl.textContent = '∗ password changed.';
+    document.getElementById('cur-pw').value = '';
+    document.getElementById('new-pw').value = '';
+    setTimeout(() => { errEl.textContent = ''; }, 2000);
+  });
+
+  document.getElementById('logout-btn').addEventListener('click', async () => {
+    await fetch('/api/user/logout', { method: 'POST' }).catch(() => {});
+    location.href = '/';
+  });
+
+  load();
+</script>
+</body>
+</html>

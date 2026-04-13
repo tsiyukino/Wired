@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>join // wired</title>
+<link rel="stylesheet" href="retro.css">
+<script src="retro-utils.js"></script>
+<style>
+html, body { min-height: 100%; }
+body { background-color: #fcd0fe; display: flex; align-items: center; justify-content: center; min-height: 100vh; }
+.invite-box {
+  background: rgba(252,208,254,0.88);
+  border: 2px groove #dbb6af;
+  box-shadow: 2px 1px 5px #dbb6af inset;
+  padding: 28px 32px;
+  width: 360px;
+}
+.invite-title {
+  font-family: 'Press Start 2P', monospace;
+  font-size: 8px; color: #6a0d91; letter-spacing: 3px;
+  margin-bottom: 20px; text-align: center;
+}
+.invite-box label {
+  font-family: 'Silkscreen', monospace;
+  font-size: 10px; color: #6a0d91;
+  display: block; margin-bottom: 4px; margin-top: 10px;
+}
+.invite-box input[type="text"],
+.invite-box input[type="password"],
+.invite-box textarea {
+  width: 100%;
+  background: #fff8ff;
+  border: 2px groove #dbb6af;
+  color: #2a0a3a;
+  font-family: 'IBM Plex Mono', monospace; font-size: 12px;
+  padding: 6px 8px; outline: none; margin-bottom: 2px;
+  box-sizing: border-box;
+}
+.invite-box textarea { resize: vertical; min-height: 60px; }
+.invite-box input:focus, .invite-box textarea:focus { border-color: #c677d3; }
+.submit-btn {
+  width: 100%; margin-top: 14px;
+  background: #dddde1;
+  border: 2px groove #c8c9ce;
+  box-shadow: 1px 1px 3px rgba(0,0,0,0.3);
+  color: #2a0a3a;
+  font-family: 'Press Start 2P', monospace;
+  font-size: 7px; letter-spacing: 1px;
+  padding: 7px 14px; cursor: pointer;
+}
+.submit-btn:hover { filter: brightness(1.08); }
+.submit-btn:disabled { opacity: 0.5; cursor: default; }
+.err {
+  font-family: 'Silkscreen', monospace;
+  font-size: 9px; color: #b30000;
+  min-height: 14px; margin-top: 8px; text-align: center;
+}
+.success {
+  font-family: 'Silkscreen', monospace;
+  font-size: 9px; color: #5a7a10; text-align: center;
+  margin-top: 8px; line-height: 1.7;
+}
+.hint { font-family: 'Silkscreen', monospace; font-size: 8px; color: #6a0d91; opacity: 0.55; margin-top: 2px; }
+</style>
+</head>
+<body>
+<div class="invite-box" id="form-wrap">
+  <div class="invite-title">// JOIN WIRED //</div>
+
+  <label for="username">username</label>
+  <input type="text" id="username" autocomplete="username" maxlength="32" placeholder="letters, numbers, _ or -">
+  <div class="hint">2–32 chars. this is your permanent handle.</div>
+
+  <label for="display_name">display name</label>
+  <input type="text" id="display_name" maxlength="64" placeholder="shown on your profile">
+
+  <label for="password">password</label>
+  <input type="password" id="password" autocomplete="new-password" placeholder="min 8 characters">
+
+  <label for="bio">bio <span style="opacity:0.5">(optional)</span></label>
+  <textarea id="bio" maxlength="300" placeholder="a little about yourself"></textarea>
+
+  <label for="site_url">site URL <span style="opacity:0.5">(optional)</span></label>
+  <input type="text" id="site_url" placeholder="https://yoursite.example">
+
+  <button class="submit-btn" id="submit-btn">[ REQUEST ACCESS ]</button>
+  <div class="err" id="err"></div>
+</div>
+
+<div class="invite-box" id="success-wrap" style="display:none;">
+  <div class="invite-title">// ACCESS REQUESTED //</div>
+  <div class="success">
+    your account is pending approval.<br><br>
+    you will be able to log in once the admin approves your request.<br><br>
+    <span style="opacity:0.5">∗ no further action needed ∗</span>
+  </div>
+</div>
+
+<script type="module">
+  // Extract token from path: /invite/:token
+  const token = location.pathname.split('/').pop();
+  const errEl = document.getElementById('err');
+  const btn   = document.getElementById('submit-btn');
+
+  // Validate token on load
+  fetch(`/api/user/invite/${token}`)
+    .then(r => r.json())
+    .then(j => { if (!j.ok) { errEl.textContent = '∗ ' + j.error; btn.disabled = true; } })
+    .catch(() => { errEl.textContent = '∗ could not validate invite'; btn.disabled = true; });
+
+  btn.addEventListener('click', async () => {
+    errEl.textContent = '';
+    btn.disabled = true;
+
+    const body = {
+      token,
+      username:     document.getElementById('username').value,
+      display_name: document.getElementById('display_name').value,
+      password:     document.getElementById('password').value,
+      bio:          document.getElementById('bio').value,
+      site_url:     document.getElementById('site_url').value,
+    };
+
+    try {
+      const r    = await fetch('/api/user/redeem', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
+      const json = await r.json();
+      if (!r.ok) { errEl.textContent = '∗ ' + (json.error || 'something went wrong'); btn.disabled = false; return; }
+      document.getElementById('form-wrap').style.display    = 'none';
+      document.getElementById('success-wrap').style.display = '';
+    } catch {
+      errEl.textContent = '∗ network error';
+      btn.disabled = false;
+    }
+  });
+</script>
+</body>
+</html>

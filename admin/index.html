@@ -317,6 +317,8 @@ tr:hover td { background: rgba(240,168,224,0.45); }
       <button class="admin-tab" data-panel="micro">MICRO</button>
       <button class="admin-tab" data-panel="about">ABOUT</button>
       <button class="admin-tab" data-panel="links">LINKS</button>
+      <button class="admin-tab" data-panel="users">USERS</button>
+      <button class="admin-tab" data-panel="invites">INVITES</button>
       <button class="admin-tab" data-panel="board">BOARD</button>
       <button class="admin-tab" data-panel="bin">BIN</button>
       <button class="admin-tab" data-panel="lobby">LOBBY</button>
@@ -420,6 +422,34 @@ tr:hover td { background: rgba(240,168,224,0.45); }
       </div>
       <div class="admin-err" id="button-err"></div>
       <div id="button-preview" style="margin-top:8px;"></div>
+    </div>
+
+    <!-- users panel -->
+    <div class="panel" id="panel-users">
+      <div class="admin-section-head">// USERS //</div>
+      <div class="admin-notice">Pending accounts need approval before they can log in. Banning immediately invalidates their session.</div>
+      <table id="users-table">
+        <thead><tr><th>ID</th><th>USERNAME</th><th>DISPLAY NAME</th><th>STATUS</th><th>JOINED</th><th></th></tr></thead>
+        <tbody></tbody>
+      </table>
+      <div class="empty" id="users-empty" style="display:none">∗ no users yet ∗</div>
+    </div>
+
+    <!-- invites panel -->
+    <div class="panel" id="panel-invites">
+      <div class="admin-section-head">// INVITES //</div>
+      <div class="admin-notice">Invite links are valid for 24 hours and can only be used once. Share via your preferred channel.</div>
+      <button class="post-btn" id="gen-invite-btn" style="margin-bottom:12px;">[ GENERATE INVITE LINK ]</button>
+      <div class="admin-err" id="invite-gen-err"></div>
+      <div id="invite-new" style="display:none;margin-bottom:14px;">
+        <div style="font-family:'Silkscreen',monospace;font-size:9px;color:#6a0d91;margin-bottom:4px;">new link (click to copy):</div>
+        <div id="invite-new-url" style="font-family:'IBM Plex Mono',monospace;font-size:11px;color:#2a0a3a;background:#fff8ff;border:2px groove #dbb6af;padding:6px 8px;cursor:pointer;word-break:break-all;"></div>
+      </div>
+      <table id="invites-table">
+        <thead><tr><th>ID</th><th>EXPIRES</th><th>USED BY</th><th></th></tr></thead>
+        <tbody></tbody>
+      </table>
+      <div class="empty" id="invites-empty" style="display:none">∗ no invites ∗</div>
     </div>
 
     <!-- board panel -->
@@ -539,8 +569,10 @@ tr:hover td { background: rgba(240,168,224,0.45); }
     if (name === 'works')  loadWorks();
     if (name === 'micro')  loadMicro();
     if (name === 'about')  loadAbout();
-    if (name === 'links')  loadLinks();
-    if (name === 'board')  loadBoard();
+    if (name === 'links')   loadLinks();
+    if (name === 'users')   loadUsers();
+    if (name === 'invites') loadInvites();
+    if (name === 'board')   loadBoard();
     if (name === 'bin')    loadBin();
     if (name === 'lobby')  loadLobby();
   }
@@ -841,6 +873,83 @@ tr:hover td { background: rgba(240,168,224,0.45); }
     document.getElementById('button-label').value = '';
     document.getElementById('button-url').value   = '';
     loadLinks();
+  });
+
+  // ── users ──
+  async function loadUsers() {
+    const { users } = await api('GET', '/users');
+    const tbody = document.querySelector('#users-table tbody');
+    tbody.innerHTML = '';
+    document.getElementById('users-empty').style.display = users.length ? 'none' : '';
+    users.forEach(u => {
+      const tr = document.createElement('tr');
+      const statusColor = u.status === 'active' ? '#5a7a10' : u.status === 'banned' ? '#b30000' : '#6a0d91';
+      tr.innerHTML = `
+        <td>${u.id}</td>
+        <td>${truncate(u.username, 20)}</td>
+        <td>${truncate(u.display_name, 24)}</td>
+        <td style="color:${statusColor};font-family:'Silkscreen',monospace;font-size:9px;">${u.status}</td>
+        <td>${fmt(u.created_at)}</td>
+        <td style="white-space:nowrap;">
+          ${u.status === 'pending' ? `<button class="btn-restore" data-action="approve" data-id="${u.id}">[ approve ]</button>` : ''}
+          ${u.status === 'active'  ? `<button class="btn-danger"  data-action="ban"     data-id="${u.id}">[ ban ]</button>` : ''}
+          ${u.status === 'banned'  ? `<button class="btn-restore" data-action="approve" data-id="${u.id}">[ unban ]</button>` : ''}
+          <button class="btn-danger" data-action="delete" data-id="${u.id}">[ delete ]</button>
+        </td>
+      `;
+      tr.querySelectorAll('[data-action]').forEach(btn => {
+        btn.addEventListener('click', async () => {
+          const { action, id } = btn.dataset;
+          if (action === 'delete' && !confirm(`Permanently delete user "${u.username}"?`)) return;
+          if (action === 'approve') await api('POST', `/users/${id}/approve`);
+          if (action === 'ban')     await api('POST', `/users/${id}/ban`);
+          if (action === 'delete')  await api('DELETE', `/users/${id}`);
+          loadUsers();
+        });
+      });
+      tbody.appendChild(tr);
+    });
+  }
+
+  // ── invites ──
+  async function loadInvites() {
+    const { invites } = await api('GET', '/invites');
+    const tbody = document.querySelector('#invites-table tbody');
+    tbody.innerHTML = '';
+    document.getElementById('invites-empty').style.display = invites.length ? 'none' : '';
+    invites.forEach(inv => {
+      const used = !!inv.used_by;
+      const expired = inv.expires_at < new Date().toISOString();
+      const tr = document.createElement('tr');
+      tr.innerHTML = `
+        <td>${inv.id}</td>
+        <td style="${expired && !used ? 'color:#b30000;' : ''}">${fmt(inv.expires_at)}${expired && !used ? ' (expired)' : ''}</td>
+        <td>${inv.used_by_username ? `@${inv.used_by_username}` : '—'}</td>
+        <td>${!used ? `<button class="btn-danger" data-id="${inv.id}">[ revoke ]</button>` : ''}</td>
+      `;
+      if (!used) {
+        tr.querySelector('.btn-danger').addEventListener('click', async () => {
+          await api('DELETE', `/invites/${inv.id}`);
+          loadInvites();
+        });
+      }
+      tbody.appendChild(tr);
+    });
+  }
+
+  document.getElementById('gen-invite-btn').addEventListener('click', async () => {
+    const errEl  = document.getElementById('invite-gen-err');
+    const newDiv = document.getElementById('invite-new');
+    const urlEl  = document.getElementById('invite-new-url');
+    errEl.textContent = '';
+    newDiv.style.display = 'none';
+    const { invite } = await api('POST', '/invites').catch(e => { errEl.textContent = '∗ ' + e.message; return {}; });
+    if (!invite) return;
+    const link = `${location.origin}/invite/${invite.token}`;
+    urlEl.textContent = link;
+    newDiv.style.display = '';
+    urlEl.onclick = () => { navigator.clipboard.writeText(link); urlEl.style.background = '#e8ffe8'; setTimeout(() => { urlEl.style.background = ''; }, 800); };
+    loadInvites();
   });
 
   // ── boot: check if already logged in ──

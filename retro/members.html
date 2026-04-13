@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>members // wired</title>
+<link rel="stylesheet" href="retro.css">
+<script src="retro-utils.js"></script>
+<style>
+html, body { min-height: 100%; }
+body { background-color: #fcd0fe; }
+.members-wrap {
+  width: 100%; max-width: 680px;
+  margin: 0 auto;
+  padding: 134px 18px 40px;
+}
+.members-notice {
+  background: rgba(252,208,254,0.5);
+  border: 2px groove #dbb6af;
+  box-shadow: 2px 1px 4px #dbb6af inset;
+  padding: 20px 22px;
+  font-family: 'Silkscreen', monospace;
+  font-size: 11px; color: #6a0d91; line-height: 1.9;
+}
+</style>
+</head>
+<body class="theme-blog">
+
+<div class="win-chrome">
+  <div class="win-chrome-row1">
+    <button class="win-btn" onclick="goTo('terminal')">🏠 home</button>
+    <span class="win-chrome-title">COPLAND OS NAVIGATOR v4.017 // MEMBERS</span>
+  </div>
+  <div class="win-chrome-row2">
+    <span class="win-addr-label">Address ▼</span>
+    <input type="text" class="win-addr-bar" value="wired://members/" readonly>
+  </div>
+  <div class="win-chrome-row3">
+    <span class="win-nav-icon">🔐</span>
+    <button class="win-nav-btn">members area</button>
+    <span class="blink" style="margin-left:auto;margin-right:8px;font-family:'Press Start 2P',monospace;font-size:8px;color:#6a0d91;">∗ VERIFIED ∗</span>
+  </div>
+</div>
+
+<div class="retro-deco-left"></div>
+<div class="retro-deco-right"></div>
+
+<div class="members-wrap">
+  <div class="retro-header">
+    <h1>■ members area ■</h1>
+    <div class="subtitle" id="welcome-sub">welcome back.</div>
+  </div>
+
+  <div class="members-notice">
+    ∗ this area is under construction ∗<br><br>
+    more content coming soon.<br>
+    you are here because you are connected to the wired.
+  </div>
+</div>
+
+<script type="module">
+  const r = await fetch('/api/user/me').catch(() => null);
+  if (!r || !r.ok) { location.href = '/login?next=/members'; }
+  else {
+    const { user } = await r.json();
+    document.getElementById('welcome-sub').textContent = `welcome back, ${user.display_name}.`;
+  }
+</script>
+</body>
+</html>

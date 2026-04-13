@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>profile // wired</title>
+<link rel="stylesheet" href="retro.css">
+<script src="retro-utils.js"></script>
+<style>
+html, body { min-height: 100%; }
+body { background-color: #fcd0fe; }
+.profile-wrap {
+  width: 100%; max-width: 560px;
+  margin: 0 auto;
+  padding: 134px 18px 40px;
+}
+.profile-card {
+  background: rgba(252,208,254,0.5);
+  border: 2px groove #dbb6af;
+  box-shadow: 2px 1px 4px #dbb6af inset;
+  padding: 20px 22px;
+}
+.profile-top {
+  display: flex; gap: 16px; align-items: flex-start;
+  margin-bottom: 14px;
+}
+.profile-avatar img {
+  width: 88px; height: 88px; object-fit: cover;
+  border: 2px groove #dbb6af; display: block;
+  image-rendering: pixelated;
+}
+.profile-avatar-empty {
+  width: 88px; height: 88px;
+  border: 2px groove #dbb6af;
+  background: rgba(252,208,254,0.3);
+  display: flex; align-items: center; justify-content: center;
+  font-family: 'Press Start 2P', monospace; font-size: 18px; color: #dbb6af;
+}
+.profile-names { flex: 1; }
+.profile-display {
+  font-family: 'Silkscreen', monospace;
+  font-size: 16px; font-weight: 700; color: #6a0d91;
+  margin-bottom: 4px;
+}
+.profile-username {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 11px; color: #2a0a3a; opacity: 0.6;
+  margin-bottom: 6px;
+}
+.profile-since {
+  font-family: 'Silkscreen', monospace;
+  font-size: 8px; color: #6a0d91; opacity: 0.5;
+}
+.profile-bio {
+  font-size: 12px; color: #2a0a3a; line-height: 1.6;
+  margin-bottom: 10px;
+  font-family: 'IBM Plex Mono', monospace;
+  white-space: pre-wrap;
+}
+.profile-site {
+  font-family: 'Silkscreen', monospace; font-size: 10px; color: #6a0d91;
+}
+.profile-site a { color: #6a0d91; }
+.not-found {
+  font-family: 'Silkscreen', monospace; font-size: 11px; color: #6a0d91; opacity: 0.5;
+  text-align: center; padding: 40px 0;
+}
+</style>
+</head>
+<body class="theme-blog">
+
+<div class="win-chrome">
+  <div class="win-chrome-row1">
+    <button class="win-btn" onclick="history.back()">← back</button>
+    <button class="win-btn" onclick="goTo('terminal')">🏠 home</button>
+    <span class="win-chrome-title" id="chrome-title">COPLAND OS NAVIGATOR v4.017 // PROFILE</span>
+  </div>
+  <div class="win-chrome-row2">
+    <span class="win-addr-label">Address ▼</span>
+    <input type="text" class="win-addr-bar" id="addr-bar" value="wired://u/..." readonly>
+  </div>
+  <div class="win-chrome-row3">
+    <span class="win-nav-icon">👤</span>
+    <button class="win-nav-btn" id="nav-name">...</button>
+    <span class="blink" style="margin-left:auto;margin-right:8px;font-family:'Press Start 2P',monospace;font-size:8px;color:#6a0d91;">∗ ONLINE ∗</span>
+  </div>
+</div>
+
+<div class="retro-deco-left"></div>
+<div class="retro-deco-right"></div>
+
+<div class="profile-wrap">
+  <div class="profile-card" id="profile-card">
+    <div class="not-found">loading...</div>
+  </div>
+</div>
+
+<script type="module">
+  const username = location.pathname.split('/').pop();
+  document.getElementById('addr-bar').value = `wired://u/${username}`;
+
+  const r = await fetch(`/api/user/${username}`).catch(() => null);
+  const card = document.getElementById('profile-card');
+
+  if (!r || !r.ok) {
+    card.innerHTML = `<div class="not-found">∗ user not found ∗</div>`;
+  } else {
+    const { user } = await r.json();
+    document.getElementById('chrome-title').textContent = `COPLAND OS NAVIGATOR v4.017 // ${user.username}`;
+    document.getElementById('nav-name').textContent = user.display_name;
+    document.title = `${user.display_name} // wired`;
+
+    const avatarHtml = user.avatar_path
+      ? `<div class="profile-avatar"><img src="/retro/content/avatars/${esc(user.avatar_path)}" alt="avatar"></div>`
+      : `<div class="profile-avatar"><div class="profile-avatar-empty">?</div></div>`;
+
+    const siteHtml = user.site_url
+      ? `<div class="profile-site">[ <a href="${esc(user.site_url)}" target="_blank" rel="noopener noreferrer">${esc(user.site_url)}</a> ]</div>`
+      : '';
+
+    const since = user.created_at ? user.created_at.slice(0, 10) : '';
+
+    card.innerHTML = `
+      <div class="profile-top">
+        ${avatarHtml}
+        <div class="profile-names">
+          <div class="profile-display">${esc(user.display_name)}</div>
+          <div class="profile-username">@${esc(user.username)}</div>
+          <div class="profile-since">joined ${since}</div>
+        </div>
+      </div>
+      ${user.bio ? `<div class="profile-bio">${esc(user.bio)}</div>` : ''}
+      ${siteHtml}
+    `;
+  }
+
+  function esc(s) {
+    return String(s ?? '')
+      .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
+      .replace(/"/g,'&quot;').replace(/'/g,'&#39;');
+  }
+</script>
+</body>
+</html>

@@ -1,6 +1,7 @@
 import path from 'path';
 import { readFileSync, writeFileSync, unlinkSync } from 'fs';
 import { fileURLToPath } from 'url';
+import crypto from 'crypto';
 import multer from 'multer';
 import { getDb } from '../db.js';
 import config from '../config.js';
@@ -449,6 +450,75 @@ export function registerAdminRoutes(app) {
     if (!row) return res.status(404).json({ error: 'not found' });
     try { unlinkSync(path.join(BUTTONS_DIR, row.image_path)); } catch {}
     db.prepare(`DELETE FROM link_button WHERE id = ?`).run(row.id);
+    res.json({ ok: true });
+  });
+
+  // --- invites ---
+
+  // POST /api/admin/invites — generate a new 24h invite token
+  app.post('/api/admin/invites', requireAdmin, (req, res) => {
+    const db    = getDb();
+    const token = crypto.randomBytes(32).toString('base64url');
+    const now   = new Date();
+    const exp   = new Date(now.getTime() + 24 * 60 * 60 * 1000);
+    db.prepare(`INSERT INTO invites (token, created_at, expires_at) VALUES (?,?,?)`)
+      .run(token, now.toISOString(), exp.toISOString());
+    const invite = db.prepare(`SELECT * FROM invites WHERE token = ?`).get(token);
+    res.status(201).json({ invite });
+  });
+
+  // GET /api/admin/invites
+  app.get('/api/admin/invites', requireAdmin, (req, res) => {
+    const invites = getDb()
+      .prepare(`SELECT i.*, u.username as used_by_username FROM invites i LEFT JOIN users u ON u.id = i.used_by ORDER BY i.id DESC`)
+      .all();
+    res.json({ invites });
+  });
+
+  // DELETE /api/admin/invites/:id — revoke unused invite
+  app.delete('/api/admin/invites/:id', requireAdmin, (req, res) => {
+    const db  = getDb();
+    const row = db.prepare(`SELECT * FROM invites WHERE id = ?`).get(req.params.id);
+    if (!row) return res.status(404).json({ error: 'not found' });
+    if (row.used_by) return res.status(409).json({ error: 'invite already used — cannot revoke' });
+    db.prepare(`DELETE FROM invites WHERE id = ?`).run(row.id);
+    res.json({ ok: true });
+  });
+
+  // --- users ---
+
+  // GET /api/admin/users
+  app.get('/api/admin/users', requireAdmin, (req, res) => {
+    const users = getDb()
+      .prepare(`SELECT id, username, display_name, status, created_at FROM users ORDER BY id DESC`)
+      .all();
+    res.json({ users });
+  });
+
+  // POST /api/admin/users/:id/approve
+  app.post('/api/admin/users/:id/approve', requireAdmin, (req, res) => {
+    const db  = getDb();
+    const row = db.prepare(`SELECT id, status FROM users WHERE id = ?`).get(req.params.id);
+    if (!row) return res.status(404).json({ error: 'not found' });
+    db.prepare(`UPDATE users SET status = 'active' WHERE id = ?`).run(row.id);
+    res.json({ ok: true });
+  });
+
+  // POST /api/admin/users/:id/ban
+  app.post('/api/admin/users/:id/ban', requireAdmin, (req, res) => {
+    const db  = getDb();
+    const row = db.prepare(`SELECT id FROM users WHERE id = ?`).get(req.params.id);
+    if (!row) return res.status(404).json({ error: 'not found' });
+    db.prepare(`UPDATE users SET status = 'banned' WHERE id = ?`).run(row.id);
+    res.json({ ok: true });
+  });
+
+  // DELETE /api/admin/users/:id — permanent removal
+  app.delete('/api/admin/users/:id', requireAdmin, (req, res) => {
+    const db  = getDb();
+    const row = db.prepare(`SELECT id FROM users WHERE id = ?`).get(req.params.id);
+    if (!row) return res.status(404).json({ error: 'not found' });
+    db.prepare(`DELETE FROM users WHERE id = ?`).run(row.id);
     res.json({ ok: true });
   });
 }

@@ -6,12 +6,14 @@ import cookieParser from 'cookie-parser';
 import { WebSocketServer } from 'ws';
 import config from './config.js';
 import { getDb, initSchema, sweepBin } from './db.js';
-import { sessionMiddleware } from './auth.js';
+import { sessionMiddleware, userSessionMiddleware } from './auth.js';
 import { registerBoardRoutes } from './routes/board.js';
 import { registerLobbyRoutes } from './routes/lobby.js';
 import { registerAdminRoutes } from './routes/admin.js';
 import { registerAdminStatic } from './routes/admin-static.js';
 import { registerContentRoutes } from './routes/content.js';
+import { registerUserAuthRoutes } from './routes/user-auth.js';
+import { registerUserProfileRoutes } from './routes/user-profile.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const ROOT = path.resolve(__dirname, '..');
@@ -45,6 +47,19 @@ app.get('/micro',     (req, res) => res.sendFile(path.join(ROOT, 'retro/micro.ht
 app.get('/about',     (req, res) => res.sendFile(path.join(ROOT, 'retro/about.html')));
 app.get('/links',     (req, res) => res.sendFile(path.join(ROOT, 'retro/links.html')));
 
+// User-facing pages
+app.get('/login',     (req, res) => res.sendFile(path.join(ROOT, 'retro/login.html')));
+app.get('/invite/:token', (req, res) => res.sendFile(path.join(ROOT, 'retro/invite.html')));
+app.get('/me',        (req, res) => {
+  if (!req.user) return res.redirect('/login');
+  res.sendFile(path.join(ROOT, 'retro/me.html'));
+});
+app.get('/members',   (req, res) => {
+  if (!req.user) return res.redirect('/login');
+  res.sendFile(path.join(ROOT, 'retro/members.html'));
+});
+app.get('/u/:username', (req, res) => res.sendFile(path.join(ROOT, 'retro/profile.html')));
+
 // Clean URLs — /foo serves /foo.html, /foo/bar serves /foo/bar.html
 // Skips paths that already have an extension, API routes, and WS upgrades.
 app.use((req, res, next) => {
@@ -59,8 +74,9 @@ app.use((req, res, next) => {
 // Static files — serve the project root (minus the excluded paths above)
 app.use(express.static(ROOT));
 
-// Session middleware — attaches req.isAdmin on every request
+// Session middleware — attaches req.isAdmin and req.user on every request
 app.use(sessionMiddleware);
+app.use(userSessionMiddleware);
 
 // Admin panel — secret path serves the SPA; API routes follow
 registerAdminStatic(app, config.adminPath);
@@ -69,6 +85,8 @@ registerAdminRoutes(app);
 // Public API routes
 registerContentRoutes(app);
 registerBoardRoutes(app);
+registerUserAuthRoutes(app);
+registerUserProfileRoutes(app);
 
 // HTTP server (WebSocket shares it)
 const server = http.createServer(app);
