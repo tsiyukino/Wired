@@ -8,7 +8,6 @@
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.9/katex.min.css">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.9/katex.min.js"></script>
 <script src="retro-utils.js"></script>
-<script src="content/posts.js"></script>
 <style>
   html, body { min-height: 100%; }
 </style>
@@ -49,24 +48,27 @@
 <div class="retro-container" id="root"></div>
 
 <script>
-// ── RENDER ───────────────────────────────────────────────────────
-function renderList() {
-  const entries = POSTS.map(p => `
-    <div class="blog-entry" onclick="renderDetail('${p.id}')">
+async function renderList() {
+  let posts = [];
+  try {
+    const r = await fetch('/api/posts');
+    const data = await r.json();
+    posts = data.posts ?? [];
+  } catch (e) {}
+
+  const entries = posts.length ? posts.map(p => `
+    <div class="blog-entry" onclick="renderDetail('${p.slug}')">
       <div class="blog-entry-head">
-        <div class="blog-date">■ ${p.date}</div>
-        <div style="display:flex;align-items:center;gap:4px;">
-          <span class="blog-tags">[ ${p.tags} ]</span>
-          ${p.isNew ? '<span class="badge-new">NEW</span>' : ''}
-        </div>
+        <div class="blog-date">■ ${p.created_at.slice(0,10).replace(/-/g,'.')}</div>
       </div>
       <div class="blog-entry-body">
         <div class="blog-title">${p.title}</div>
-        <div class="blog-excerpt">${p.excerpt}</div>
       </div>
     </div>
     <div class="pixel-hr"></div>
-  `).join('');
+  `).join('') : '<div style="opacity:0.4;padding:24px 0;text-align:center;">∗ no entries yet ∗</div>';
+
+  const lastDate = posts.length ? posts[0].created_at.slice(0,10).replace(/-/g,'.') : '—';
 
   document.getElementById('root').innerHTML = `
     <div class="jp-only-banner">文字サイズ「中」推奨 ∗ タイトルクリックで全文表示</div>
@@ -80,17 +82,13 @@ function renderList() {
 
     ${NAV_HTML}
 
-    <div class="under-construction">
-      <span>∗ UNDER CONSTRUCTION ∗</span>
-    </div>
-
     <div class="retro-marquee">
       <div class="retro-marquee-inner">
         ★ ようこそ！リンクフリーですがご一報いただけると嬉しいです ★ 更新は不定期 ★ 文字サイズ中推奨 ★ タイトルをクリックすると全文が読めます ★ welcome to the wired ★ no matter where you go, everyone is always connected ★
       </div>
     </div>
 
-    <div class="last-updated">Last updated: ${POSTS[0].date}</div>
+    <div class="last-updated">Last updated: ${lastDate}</div>
 
     ${sparkles(['★','∗','☆','∗','★','∗','☆','∗'])}
 
@@ -107,7 +105,6 @@ function renderList() {
     <div class="deco-dots">・ ・ ・ ・ ・</div>
 
     <div class="retro-footer">
-      Copyright (C) [your name] / Since 20XX<br>
       Powered by copper, fiber, and protocol_7<br>
       <span class="blink">∗</span> This page is link-free. リンクフリーです。 <span class="blink">∗</span><br>
       Best viewed at 1024×768 // Copland OS Navigator
@@ -115,32 +112,27 @@ function renderList() {
   `;
 }
 
-async function renderDetail(id) {
-  const p = POSTS.find(x => x.id === id);
-  if (!p) return;
+async function renderDetail(slug) {
+  let post;
+  try {
+    const r = await fetch(`/api/posts/${slug}`);
+    const data = await r.json();
+    post = data.post;
+  } catch (e) {}
+  if (!post) return;
 
-  // Support external markdown files
-  let bodyMd = p.body || '';
-  if (p.bodyFile) {
-    try {
-      const res = await fetch('content/' + p.bodyFile);
-      if (res.ok) bodyMd = await res.text();
-    } catch (e) {
-      bodyMd = `*Error loading ${p.bodyFile}*`;
-    }
-  }
+  const date = post.created_at.slice(0,10).replace(/-/g,'.');
 
   document.getElementById('root').innerHTML = `
     ${NAV_HTML}
     <a class="detail-back" onclick="renderList()">← back to 日記</a>
-    <div class="detail-date">■ ${p.date}</div>
-    <div class="detail-title">${p.title} ${p.isNew ? '<span class="badge-new">NEW</span>' : ''}</div>
+    <div class="detail-date">■ ${date}</div>
+    <div class="detail-title">${post.title}</div>
     <div class="pixel-hr"></div>
-    <div class="detail-body">${renderMarkdown(bodyMd)}</div>
-    <div class="blog-tags" style="margin-top:20px;font-family:'Silkscreen',monospace;font-size:10px;">[ ${p.tags} ]</div>
+    <div class="detail-body">${renderMarkdown(post.body)}</div>
     <div class="pixel-hr" style="margin-top:16px;"></div>
     ${sparkles(['★','・','★','・','★','・','★','・'])}
-    <div class="retro-footer">Copyright (C) [your name]</div>
+    <div class="retro-footer">Powered by copper, fiber, and protocol_7</div>
   `;
   window.scrollTo(0, 0);
 }

@@ -1,5 +1,5 @@
 import path from 'path';
-import { readFileSync } from 'fs';
+import { readFileSync, writeFileSync } from 'fs';
 import { fileURLToPath } from 'url';
 import multer from 'multer';
 import { getDb } from '../db.js';
@@ -8,19 +8,25 @@ import { checkPassword, createSession, clearSession, requireAdmin } from '../aut
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const POSTS_DIR = path.resolve(__dirname, '../../retro/content/posts');
+const WORKS_DIR = path.resolve(__dirname, '../../retro/content/works');
+const ABOUT_JS  = path.resolve(__dirname, '../../retro/content/about.js');
 
-// Multer — accept only .md files, store on disk in retro/content/posts/
-const upload = multer({
-  storage: multer.diskStorage({
-    destination: (_req, _file, cb) => cb(null, POSTS_DIR),
-    filename: (_req, file, cb) => cb(null, file.originalname),
-  }),
-  fileFilter: (_req, file, cb) => {
-    if (file.originalname.endsWith('.md')) cb(null, true);
-    else cb(new Error('only .md files are accepted'));
-  },
-  limits: { fileSize: 1024 * 1024 }, // 1 MB
-});
+function makeUploader(dest) {
+  return multer({
+    storage: multer.diskStorage({
+      destination: (_req, _file, cb) => cb(null, dest),
+      filename: (_req, file, cb) => cb(null, file.originalname),
+    }),
+    fileFilter: (_req, file, cb) => {
+      if (file.originalname.endsWith('.md')) cb(null, true);
+      else cb(new Error('only .md files are accepted'));
+    },
+    limits: { fileSize: 1024 * 1024 },
+  });
+}
+
+const uploadPost = makeUploader(POSTS_DIR);
+const uploadWork = makeUploader(WORKS_DIR);
 
 function isoNow() {
   return new Date().toISOString();
@@ -45,6 +51,12 @@ function slugify(filename) {
 function extractTitle(body, slug) {
   const m = body.match(/^#\s+(.+)/m);
   return m ? m[1].trim() : slug;
+}
+
+// Extract tech: frontmatter line, e.g. "tech: rust / wasm"
+function extractTech(body) {
+  const m = body.match(/^tech:\s*(.+)/m);
+  return m ? m[1].trim() : '';
 }
 
 export function registerAdminRoutes(app) {
@@ -77,7 +89,7 @@ export function registerAdminRoutes(app) {
 
   // POST /api/admin/posts — upload a .md file
   app.post('/api/admin/posts', requireAdmin, (req, res) => {
-    upload.single('file')(req, res, (err) => {
+    uploadPost.single('file')(req, res, (err) => {
       if (err) return res.status(400).json({ error: err.message });
       if (!req.file) return res.status(400).json({ error: 'no file uploaded' });
 
@@ -225,5 +237,114 @@ export function registerAdminRoutes(app) {
     if (!row) return res.status(404).json({ error: 'not found' });
     db.prepare(`DELETE FROM lobby_messages WHERE id = ?`).run(row.id);
     res.json({ ok: true });
+  });
+
+  // --- works ---
+
+  // GET /api/admin/works
+  app.get('/api/admin/works', requireAdmin, (req, res) => {
+    const works = getDb()
+      .prepare(`SELECT id, slug, filename, title, tech, created_at, updated_at FROM works ORDER BY id DESC`)
+      .all();
+    res.json({ works });
+  });
+
+  // POST /api/admin/works — upload a .md file
+  app.post('/api/admin/works', requireAdmin, (req, res) => {
+    uploadWork.single('file')(req, res, (err) => {
+      if (err) return res.status(400).json({ error: err.message });
+      if (!req.file) return res.status(400).json({ error: 'no file uploaded' });
+
+      let body;
+      try {
+        body = readFileSync(req.file.path, 'utf8');
+      } catch (e) {
+        return res.status(500).json({ error: 'failed to read uploaded file' });
+      }
+
+      const slug  = slugify(req.file.originalname);
+      const title = extractTitle(body, slug);
+      const tech  = extractTech(body);
+      const now   = isoNow();
+      const db    = getDb();
+
+      const existing = db.prepare(`SELECT id FROM works WHERE slug = ?`).get(slug);
+      if (existing) {
+        db.prepare(`UPDATE works SET body = ?, filename = ?, title = ?, tech = ?, updated_at = ? WHERE slug = ?`)
+          .run(body, req.file.originalname, title, tech, now, slug);
+      } else {
+        db.prepare(`INSERT INTO works (slug, filename, title, tech, body, created_at, updated_at) VALUES (?,?,?,?,?,?,?)`)
+          .run(slug, req.file.originalname, title, tech, body, now, now);
+      }
+
+      const work = db.prepare(`SELECT * FROM works WHERE slug = ?`).get(slug);
+      res.status(existing ? 200 : 201).json({ work });
+    });
+  });
+
+  // DELETE /api/admin/works/:id
+  app.delete('/api/admin/works/:id', requireAdmin, (req, res) => {
+    const db = getDb();
+    const work = db.prepare(`SELECT id FROM works WHERE id = ?`).get(req.params.id);
+    if (!work) return res.status(404).json({ error: 'not found' });
+    db.prepare(`DELETE FROM works WHERE id = ?`).run(work.id);
+    res.json({ ok: true });
+  });
+
+  // --- micro ---
+
+  // GET /api/admin/micro
+  app.get('/api/admin/micro', requireAdmin, (req, res) => {
+    const posts = getDb()
+      .prepare(`SELECT * FROM micro_posts ORDER BY id DESC`)
+      .all();
+    res.json({ posts });
+  });
+
+  // POST /api/admin/micro
+  app.post('/api/admin/micro', requireAdmin, (req, res) => {
+    const { text } = req.body ?? {};
+    if (!text?.trim()) return res.status(400).json({ error: 'text is required' });
+    const db  = getDb();
+    const now = isoNow();
+    const info = db.prepare(`INSERT INTO micro_posts (text, created_at) VALUES (?, ?)`)
+      .run(text.trim(), now);
+    const post = db.prepare(`SELECT * FROM micro_posts WHERE id = ?`).get(info.lastInsertRowid);
+    res.status(201).json({ post });
+  });
+
+  // DELETE /api/admin/micro/:id
+  app.delete('/api/admin/micro/:id', requireAdmin, (req, res) => {
+    const db = getDb();
+    const row = db.prepare(`SELECT id FROM micro_posts WHERE id = ?`).get(req.params.id);
+    if (!row) return res.status(404).json({ error: 'not found' });
+    db.prepare(`DELETE FROM micro_posts WHERE id = ?`).run(row.id);
+    res.json({ ok: true });
+  });
+
+  // --- about ---
+
+  // GET /api/admin/about
+  app.get('/api/admin/about', requireAdmin, (req, res) => {
+    try {
+      const content = readFileSync(ABOUT_JS, 'utf8');
+      res.json({ content });
+    } catch (e) {
+      res.status(500).json({ error: 'could not read about.js' });
+    }
+  });
+
+  // POST /api/admin/about
+  app.post('/api/admin/about', requireAdmin, (req, res) => {
+    const { content } = req.body ?? {};
+    if (typeof content !== 'string' || !content.trim()) {
+      return res.status(400).json({ error: 'content is required' });
+    }
+    try {
+      writeFileSync(ABOUT_JS, content, 'utf8');
+      res.json({ ok: true });
+    } catch (e) {
+      res.status(500).json({ error: 'could not write about.js' });
+    }
   });
 }

@@ -8,7 +8,6 @@
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.9/katex.min.css">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.9/katex.min.js"></script>
 <script src="retro-utils.js"></script>
-<script src="content/works.js"></script>
 </head>
 <body class="theme-portfolio">
 
@@ -46,25 +45,28 @@
 <div class="retro-container" id="root"></div>
 
 <script>
-function renderList() {
-  const entries = WORKS.map(p => `
-    <div class="blog-entry" onclick="renderDetail('${p.id}')">
+async function renderList() {
+  let works = [];
+  try {
+    const r = await fetch('/api/works');
+    const data = await r.json();
+    works = data.works ?? [];
+  } catch (e) {}
+
+  const entries = works.length ? works.map(w => `
+    <div class="blog-entry" onclick="renderDetail('${w.slug}')">
       <div class="blog-entry-head">
-        <div class="blog-date">◆ ${p.id}</div>
+        <div class="blog-date">◆ ${w.slug}</div>
         <div style="display:flex;align-items:center;gap:4px;">
-          <span class="blog-tags">${p.tech}</span>
-          ${p.isNew ? '<span class="badge-new">NEW</span>' : ''}
+          <span class="blog-tags">${w.tech}</span>
         </div>
       </div>
       <div class="blog-entry-body">
-        <div class="blog-title">${p.title}</div>
-        <div class="blog-excerpt">${p.desc}</div>
+        <div class="blog-title">${w.title}</div>
       </div>
     </div>
     <div class="pixel-hr"></div>
-  `).join('');
-
-  const lastUpdated = WORKS.find(w => w.isNew)?.date || WORKS[0]?.id || '—';
+  `).join('') : '<div style="opacity:0.4;padding:24px 0;text-align:center;">∗ no works yet ∗</div>';
 
   document.getElementById('root').innerHTML = `
     <div class="retro-header">
@@ -95,37 +97,31 @@ function renderList() {
     <div class="deco-dots">◆ ◇ ◆ ◇ ◆</div>
 
     <div class="retro-footer">
-      [your name] / works<br>
       リンクフリー ∗ <span class="blink">∗</span> link-free<br>
       Best viewed with Copland OS Navigator
     </div>
   `;
 }
 
-async function renderDetail(id) {
-  const item = WORKS.find(x => x.id === id);
-  if (!item) return;
-
-  let bodyMd = item.body || '';
-  if (item.bodyFile) {
-    try {
-      const res = await fetch('content/' + item.bodyFile);
-      if (res.ok) bodyMd = await res.text();
-    } catch (e) {
-      bodyMd = `*Error loading ${item.bodyFile}*`;
-    }
-  }
+async function renderDetail(slug) {
+  let work;
+  try {
+    const r = await fetch(`/api/works/${slug}`);
+    const data = await r.json();
+    work = data.work;
+  } catch (e) {}
+  if (!work) return;
 
   document.getElementById('root').innerHTML = `
     ${NAV_HTML}
     <a class="detail-back" onclick="renderList()">← back to 作品集</a>
-    <div class="detail-title">${item.title} ${item.isNew ? '<span class="badge-new">NEW</span>' : ''}</div>
+    <div class="detail-title">${work.title}</div>
     <div class="pixel-hr"></div>
-    <div class="detail-body">${renderMarkdown(bodyMd)}</div>
-    <div class="pf-tech" style="margin-top:16px;">技術: ${item.tech}</div>
+    <div class="detail-body">${renderMarkdown(work.body)}</div>
+    <div class="pf-tech" style="margin-top:16px;">技術: ${work.tech}</div>
     <div class="pixel-hr" style="margin-top:16px;"></div>
     ${sparkles(['◆','◇','◆','◇','◆','◇','◆','◇'])}
-    <div class="retro-footer">[your name] / works</div>
+    <div class="retro-footer">リンクフリー ∗ link-free</div>
   `;
   window.scrollTo(0, 0);
 }

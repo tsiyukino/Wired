@@ -11,6 +11,7 @@ import { registerBoardRoutes } from './routes/board.js';
 import { registerLobbyRoutes } from './routes/lobby.js';
 import { registerAdminRoutes } from './routes/admin.js';
 import { registerAdminStatic } from './routes/admin-static.js';
+import { registerContentRoutes } from './routes/content.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const ROOT = path.resolve(__dirname, '..');
@@ -37,6 +38,12 @@ app.use((req, res, next) => {
 // Root → entry point
 app.get('/', (req, res) => res.sendFile(path.join(ROOT, 'copland-os.html')));
 
+// Direct retro page URLs
+app.get('/blog',      (req, res) => res.sendFile(path.join(ROOT, 'retro/blog.html')));
+app.get('/works',     (req, res) => res.sendFile(path.join(ROOT, 'retro/portfolio.html')));
+app.get('/micro',     (req, res) => res.sendFile(path.join(ROOT, 'retro/micro.html')));
+app.get('/about',     (req, res) => res.sendFile(path.join(ROOT, 'retro/about.html')));
+
 // Clean URLs — /foo serves /foo.html, /foo/bar serves /foo/bar.html
 // Skips paths that already have an extension, API routes, and WS upgrades.
 app.use((req, res, next) => {
@@ -59,6 +66,7 @@ registerAdminStatic(app, config.adminPath);
 registerAdminRoutes(app);
 
 // Public API routes
+registerContentRoutes(app);
 registerBoardRoutes(app);
 
 // HTTP server (WebSocket shares it)

@@ -61,9 +61,6 @@ export function initSchema() {
     );
 
     -- Blog posts uploaded via admin panel.
-    -- slug: URL-safe identifier derived from filename
-    -- filename: original uploaded filename
-    -- body: full markdown content
     CREATE TABLE IF NOT EXISTS blog_posts (
       id         INTEGER PRIMARY KEY AUTOINCREMENT,
       slug       TEXT UNIQUE NOT NULL,
@@ -72,6 +69,25 @@ export function initSchema() {
       body       TEXT NOT NULL,
       created_at TEXT NOT NULL,
       updated_at TEXT NOT NULL
+    );
+
+    -- Portfolio works uploaded via admin panel.
+    CREATE TABLE IF NOT EXISTS works (
+      id         INTEGER PRIMARY KEY AUTOINCREMENT,
+      slug       TEXT UNIQUE NOT NULL,
+      filename   TEXT NOT NULL,
+      title      TEXT NOT NULL,
+      tech       TEXT NOT NULL DEFAULT '',
+      body       TEXT NOT NULL,
+      created_at TEXT NOT NULL,
+      updated_at TEXT NOT NULL
+    );
+
+    -- Micro posts (short thoughts), admin-only creation.
+    CREATE TABLE IF NOT EXISTS micro_posts (
+      id         INTEGER PRIMARY KEY AUTOINCREMENT,
+      text       TEXT NOT NULL,
+      created_at TEXT NOT NULL
     );
   `);
 }

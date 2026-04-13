@@ -223,6 +223,9 @@
       <h1>// lain</h1>
       <nav>
         <button class="active" data-panel="posts">posts</button>
+        <button data-panel="works">works</button>
+        <button data-panel="micro">micro</button>
+        <button data-panel="about">about</button>
         <button data-panel="board">board</button>
         <button data-panel="bin">bin</button>
         <button data-panel="lobby">lobby</button>
@@ -245,6 +248,47 @@
         <tbody></tbody>
       </table>
       <div class="empty" id="posts-empty" style="display:none">no posts yet</div>
+    </div>
+
+    <!-- works panel -->
+    <div class="panel" id="panel-works">
+      <div class="section-title">works</div>
+      <div class="notice">Upload a .md file. Add <code>tech: rust / wasm</code> as the first line for the tech stack field. Re-uploading the same filename overwrites.</div>
+      <div class="upload-area">
+        <label for="work-file">select .md file</label>
+        <input type="file" id="work-file" accept=".md">
+      </div>
+      <button class="primary" id="upload-work-btn" style="width:auto;margin-bottom:24px;">upload</button>
+      <div class="err" id="upload-work-err"></div>
+      <table id="works-table">
+        <thead><tr><th>slug</th><th>title</th><th>tech</th><th>updated</th><th></th></tr></thead>
+        <tbody></tbody>
+      </table>
+      <div class="empty" id="works-empty" style="display:none">no works yet</div>
+    </div>
+
+    <!-- micro panel -->
+    <div class="panel" id="panel-micro">
+      <div class="section-title">micro posts</div>
+      <div style="display:flex;gap:8px;margin-bottom:24px;align-items:flex-start;">
+        <input type="text" id="micro-input" placeholder="short thought..." style="flex:1;margin-bottom:0;">
+        <button class="primary" id="micro-post-btn" style="width:auto;">post</button>
+      </div>
+      <div class="err" id="micro-err"></div>
+      <table id="micro-table">
+        <thead><tr><th>time</th><th>text</th><th></th></tr></thead>
+        <tbody></tbody>
+      </table>
+      <div class="empty" id="micro-empty" style="display:none">no micro posts yet</div>
+    </div>
+
+    <!-- about panel -->
+    <div class="panel" id="panel-about">
+      <div class="section-title">about</div>
+      <div class="notice">Edit the about.js file directly. This is a JS object — keep the <code>const ABOUT = { ... };</code> structure intact.</div>
+      <textarea id="about-editor" style="width:100%;min-height:400px;background:#0a0a0f;border:1px solid var(--border);color:var(--text);font:13px/1.6 'IBM Plex Mono',monospace;padding:12px;resize:vertical;outline:none;margin-bottom:12px;"></textarea>
+      <button class="primary" id="about-save-btn" style="width:auto;">save</button>
+      <div class="err" id="about-err"></div>
     </div>
 
     <!-- board panel -->
@@ -355,6 +399,9 @@
 
   function loadPanel(name) {
     if (name === 'posts')  loadPosts();
+    if (name === 'works')  loadWorks();
+    if (name === 'micro')  loadMicro();
+    if (name === 'about')  loadAbout();
     if (name === 'board')  loadBoard();
     if (name === 'bin')    loadBin();
     if (name === 'lobby')  loadLobby();
@@ -491,6 +538,96 @@
       tbody.appendChild(tr);
     });
   }
+
+  // ── works ──
+  async function loadWorks() {
+    const { works } = await api('GET', '/works');
+    const tbody = document.querySelector('#works-table tbody');
+    tbody.innerHTML = '';
+    document.getElementById('works-empty').style.display = works.length ? 'none' : '';
+    works.forEach(w => {
+      const tr = document.createElement('tr');
+      tr.innerHTML = `
+        <td title="${w.slug}">${truncate(w.slug, 20)}</td>
+        <td title="${w.title}">${truncate(w.title, 30)}</td>
+        <td>${truncate(w.tech, 20)}</td>
+        <td>${fmt(w.updated_at)}</td>
+        <td><button class="btn-danger" data-id="${w.id}">delete</button></td>
+      `;
+      tr.querySelector('.btn-danger').addEventListener('click', async () => {
+        if (!confirm(`Permanently delete "${w.slug}"?`)) return;
+        await api('DELETE', `/works/${w.id}`);
+        loadWorks();
+      });
+      tbody.appendChild(tr);
+    });
+  }
+
+  document.getElementById('upload-work-btn').addEventListener('click', async () => {
+    const file = document.getElementById('work-file').files[0];
+    const errEl = document.getElementById('upload-work-err');
+    errEl.textContent = '';
+    if (!file) { errEl.textContent = 'select a file first'; return; }
+    const fd = new FormData();
+    fd.append('file', file);
+    const r = await fetch('/api/admin/works', { method: 'POST', body: fd });
+    const json = await r.json().catch(() => ({}));
+    if (!r.ok) { errEl.textContent = json.error || 'upload failed'; return; }
+    document.getElementById('work-file').value = '';
+    loadWorks();
+  });
+
+  // ── micro ──
+  async function loadMicro() {
+    const { posts } = await api('GET', '/micro');
+    const tbody = document.querySelector('#micro-table tbody');
+    tbody.innerHTML = '';
+    document.getElementById('micro-empty').style.display = posts.length ? 'none' : '';
+    posts.forEach(p => {
+      const tr = document.createElement('tr');
+      tr.innerHTML = `
+        <td style="white-space:nowrap">${fmt(p.created_at)}</td>
+        <td title="${p.text}">${truncate(p.text, 80)}</td>
+        <td><button class="btn-danger" data-id="${p.id}">delete</button></td>
+      `;
+      tr.querySelector('.btn-danger').addEventListener('click', async () => {
+        await api('DELETE', `/micro/${p.id}`);
+        loadMicro();
+      });
+      tbody.appendChild(tr);
+    });
+  }
+
+  document.getElementById('micro-post-btn').addEventListener('click', async () => {
+    const input = document.getElementById('micro-input');
+    const errEl = document.getElementById('micro-err');
+    errEl.textContent = '';
+    const text = input.value.trim();
+    if (!text) { errEl.textContent = 'text is required'; return; }
+    await api('POST', '/micro', { text }).catch(e => { errEl.textContent = e.message; });
+    input.value = '';
+    loadMicro();
+  });
+
+  document.getElementById('micro-input').addEventListener('keydown', e => {
+    if (e.key === 'Enter') document.getElementById('micro-post-btn').click();
+  });
+
+  // ── about ──
+  async function loadAbout() {
+    const { content } = await api('GET', '/about');
+    document.getElementById('about-editor').value = content;
+  }
+
+  document.getElementById('about-save-btn').addEventListener('click', async () => {
+    const content = document.getElementById('about-editor').value;
+    const errEl = document.getElementById('about-err');
+    errEl.textContent = '';
+    await api('POST', '/about', { content }).catch(e => { errEl.textContent = e.message; return; });
+    errEl.style.color = 'var(--green)';
+    errEl.textContent = 'saved.';
+    setTimeout(() => { errEl.textContent = ''; errEl.style.color = ''; }, 2000);
+  });
 
   // ── boot: check if already logged in ──
   api('GET', '/posts').then(() => {

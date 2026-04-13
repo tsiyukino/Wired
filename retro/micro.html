@@ -6,7 +6,6 @@
 <title>一言 // wired</title>
 <link rel="stylesheet" href="retro.css">
 <script src="retro-utils.js"></script>
-<script src="content/micro.js"></script>
 </head>
 <body class="theme-micro">
 
@@ -44,52 +43,58 @@
 <div class="retro-container" id="root"></div>
 
 <script>
-const items = MICRO_POSTS.map(p => `
-  <div class="micro-item">
-    <div class="micro-time">${p.time} ${p.isNew ? '<span class="badge-new">NEW</span>' : ''}</div>
-    <div class="micro-text">${p.text}</div>
-  </div>
-  <div class="pixel-hr"></div>
-`).join('');
+async function renderMicro() {
+  let posts = [];
+  try {
+    const r = await fetch('/api/micro');
+    const data = await r.json();
+    posts = data.posts ?? [];
+  } catch (e) {}
 
-document.getElementById('root').innerHTML = `
-  <div class="retro-header">
-    <h1>■ 一言 ■</h1>
-    <div class="subtitle">micro-posts // short thoughts</div>
-  </div>
-
-  ${counter()}
-  ${NAV_HTML}
-
-  <div class="under-construction">
-    <span>∗ TRANSMISSION IN PROGRESS ∗</span>
-  </div>
-
-  <div class="retro-marquee">
-    <div class="retro-marquee-inner">
-      ☆ 短い思いつきとか、メモとか ☆ 更新頻度高め ☆ fill with your own words ☆ thoughts from the wired ☆ no matter where you go ☆
+  const items = posts.length ? posts.map(p => `
+    <div class="micro-item">
+      <div class="micro-time">${p.created_at.slice(0,16).replace('T',' ')}</div>
+      <div class="micro-text">${p.text}</div>
     </div>
-  </div>
+    <div class="pixel-hr"></div>
+  `).join('') : '<div style="opacity:0.4;padding:24px 0;text-align:center;">∗ transmission pending ∗</div>';
 
-  ${sparkles(['∗','·','∗','·','∗','·','∗','·'])}
-  <div class="deco-dots">∗ ∗ ∗ ∗ ∗</div>
+  document.getElementById('root').innerHTML = `
+    <div class="retro-header">
+      <h1>■ 一言 ■</h1>
+      <div class="subtitle">micro-posts // short thoughts</div>
+    </div>
 
-  ${items}
+    ${counter()}
+    ${NAV_HTML}
 
-  <div class="kaomoji-strip">
-    <span class="kao blink-slow">(´・ω・\`)</span>
-    <span class="kao">(　-_-)ノ</span>
-    <span class="kao blink-slow">(ﾟдﾟ)</span>
-  </div>
+    <div class="retro-marquee">
+      <div class="retro-marquee-inner">
+        ☆ 短い思いつきとか、メモとか ☆ 更新頻度高め ☆ thoughts from the wired ☆ no matter where you go ☆
+      </div>
+    </div>
 
-  <div class="deco-dots">∗ ∗ ∗ ∗ ∗</div>
+    ${sparkles(['∗','·','∗','·','∗','·','∗','·'])}
+    <div class="deco-dots">∗ ∗ ∗ ∗ ∗</div>
 
-  <div class="retro-footer">
-    [your name] / micro<br>
-    ひとりごと ∗ <span class="blink">∗</span> monologue<br>
-    Best viewed with Copland OS Navigator
-  </div>
-`;
+    ${items}
+
+    <div class="kaomoji-strip">
+      <span class="kao blink-slow">(´・ω・\`)</span>
+      <span class="kao">(　-_-)ノ</span>
+      <span class="kao blink-slow">(ﾟдﾟ)</span>
+    </div>
+
+    <div class="deco-dots">∗ ∗ ∗ ∗ ∗</div>
+
+    <div class="retro-footer">
+      ひとりごと ∗ <span class="blink">∗</span> monologue<br>
+      Best viewed with Copland OS Navigator
+    </div>
+  `;
+}
+
+renderMicro();
 </script>
 </body>
 </html>

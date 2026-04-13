@@ -6,7 +6,6 @@
 <title>自己紹介 // wired</title>
 <link rel="stylesheet" href="retro.css">
 <script src="retro-utils.js"></script>
-<script src="content/about.js"></script>
 </head>
 <body class="theme-about">
 
@@ -44,6 +43,19 @@
 <div class="retro-container" id="root"></div>
 
 <script>
+async function renderAbout() {
+  let ABOUT;
+  try {
+    const r = await fetch('/api/about');
+    const { content } = await r.json();
+    // Execute the about.js content to get the ABOUT object
+    const fn = new Function(content + '; return ABOUT;');
+    ABOUT = fn();
+  } catch (e) {
+    document.getElementById('root').innerHTML = '<div style="opacity:0.4;padding:24px 0;text-align:center;">∗ failed to load ∗</div>';
+    return;
+  }
+
 const linksHtml = ABOUT.links
   .map(l => `<a href="${l.href}">${l.label}</a>`)
   .join(' / ');
@@ -139,6 +151,9 @@ document.getElementById('root').innerHTML = `
     <span class="blink">∗</span> 1024×768 推奨 <span class="blink">∗</span>
   </div>
 `;
+}
+
+renderAbout();
 </script>
 </body>
 </html>

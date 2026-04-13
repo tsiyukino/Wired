@@ -1,5 +1,7 @@
 // ================================================================
-// content/works.js — PORTFOLIO / WORKS
+// content/works.js — SUPERSEDED
+// Works are now stored in the database and served via /api/works.
+// This file is no longer loaded by portfolio.html.
 // ================================================================
 // To add a work:
 //   1. Copy one object and paste it at the TOP of the array.

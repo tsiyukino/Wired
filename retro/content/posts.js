@@ -1,5 +1,7 @@
 // ================================================================
-// content/posts.js — BLOG POSTS
+// content/posts.js — SUPERSEDED
+// Blog posts are now stored in the database and served via /api/posts.
+// This file is no longer loaded by blog.html.
 // ================================================================
 // To add a post:
 //   1. Copy one of the objects below and paste it at the TOP of the array.

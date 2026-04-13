@@ -1,5 +1,7 @@
 // ================================================================
-// content/micro.js — MICRO POSTS (一言)
+// content/micro.js — SUPERSEDED
+// Micro posts are now stored in the database and served via /api/micro.
+// This file is no longer loaded by micro.html.
 // ================================================================
 // To add a micro-post:
 //   1. Paste a new object at the TOP of the array (newest first).
