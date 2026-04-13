@@ -1,5 +1,5 @@
 import path from 'path';
-import { readFileSync, writeFileSync } from 'fs';
+import { readFileSync, writeFileSync, unlinkSync } from 'fs';
 import { fileURLToPath } from 'url';
 import multer from 'multer';
 import { getDb } from '../db.js';
@@ -7,9 +7,10 @@ import config from '../config.js';
 import { checkPassword, createSession, clearSession, requireAdmin } from '../auth.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
-const POSTS_DIR = path.resolve(__dirname, '../../retro/content/posts');
-const WORKS_DIR = path.resolve(__dirname, '../../retro/content/works');
-const ABOUT_JS  = path.resolve(__dirname, '../../retro/content/about.js');
+const POSTS_DIR   = path.resolve(__dirname, '../../retro/content/posts');
+const WORKS_DIR   = path.resolve(__dirname, '../../retro/content/works');
+const BUTTONS_DIR = path.resolve(__dirname, '../../retro/content/buttons');
+const ABOUT_JS    = path.resolve(__dirname, '../../retro/content/about.js');
 
 function makeUploader(dest) {
   return multer({
@@ -24,6 +25,21 @@ function makeUploader(dest) {
     limits: { fileSize: 1024 * 1024 },
   });
 }
+
+const ALLOWED_IMAGE_EXTS = new Set(['.png', '.gif', '.jpg', '.jpeg', '.webp']);
+
+const uploadButton = multer({
+  storage: multer.diskStorage({
+    destination: (_req, _file, cb) => cb(null, BUTTONS_DIR),
+    filename: (_req, file, cb) => cb(null, 'button' + path.extname(file.originalname).toLowerCase()),
+  }),
+  fileFilter: (_req, file, cb) => {
+    const ext = path.extname(file.originalname).toLowerCase();
+    if (ALLOWED_IMAGE_EXTS.has(ext)) cb(null, true);
+    else cb(new Error('only image files are accepted (png, gif, jpg, webp)'));
+  },
+  limits: { fileSize: 256 * 1024 },
+});
 
 const uploadPost = makeUploader(POSTS_DIR);
 const uploadWork = makeUploader(WORKS_DIR);
@@ -346,5 +362,93 @@ export function registerAdminRoutes(app) {
     } catch (e) {
       res.status(500).json({ error: 'could not write about.js' });
     }
+  });
+
+  // --- links ---
+
+  const VALID_KINDS = new Set(['friend', 'webring', 'resource']);
+
+  // GET /api/admin/links
+  app.get('/api/admin/links', requireAdmin, (req, res) => {
+    const links = getDb()
+      .prepare(`SELECT * FROM links ORDER BY kind, sort_order, id`)
+      .all();
+    res.json({ links });
+  });
+
+  // POST /api/admin/links
+  app.post('/api/admin/links', requireAdmin, (req, res) => {
+    const { kind, label, url, description } = req.body ?? {};
+    if (!VALID_KINDS.has(kind)) return res.status(400).json({ error: 'invalid kind' });
+    if (!label?.trim())         return res.status(400).json({ error: 'label is required' });
+    if (!url?.trim())           return res.status(400).json({ error: 'url is required' });
+    const db  = getDb();
+    const now = isoNow();
+    const info = db.prepare(`INSERT INTO links (kind, label, url, description, sort_order, created_at) VALUES (?,?,?,?,0,?)`)
+      .run(kind, label.trim(), url.trim(), (description ?? '').trim(), now);
+    const link = db.prepare(`SELECT * FROM links WHERE id = ?`).get(info.lastInsertRowid);
+    res.status(201).json({ link });
+  });
+
+  // DELETE /api/admin/links/:id
+  app.delete('/api/admin/links/:id', requireAdmin, (req, res) => {
+    const db  = getDb();
+    const row = db.prepare(`SELECT id FROM links WHERE id = ?`).get(req.params.id);
+    if (!row) return res.status(404).json({ error: 'not found' });
+    db.prepare(`DELETE FROM links WHERE id = ?`).run(row.id);
+    res.json({ ok: true });
+  });
+
+  // --- 88x31 button ---
+
+  // GET /api/admin/button
+  app.get('/api/admin/button', requireAdmin, (req, res) => {
+    const row = getDb().prepare(`SELECT * FROM link_button LIMIT 1`).get();
+    res.json({ button: row ?? null });
+  });
+
+  // POST /api/admin/button — upload image + set label/url
+  app.post('/api/admin/button', requireAdmin, (req, res) => {
+    uploadButton.single('image')(req, res, (err) => {
+      if (err) return res.status(400).json({ error: err.message });
+      const { label, url } = req.body ?? {};
+      const db  = getDb();
+      const now = isoNow();
+      const existing = db.prepare(`SELECT * FROM link_button LIMIT 1`).get();
+
+      if (req.file) {
+        // Delete old image if it differs
+        if (existing && existing.image_path !== req.file.filename) {
+          try { unlinkSync(path.join(BUTTONS_DIR, existing.image_path)); } catch {}
+        }
+        const imagePath = req.file.filename;
+        if (existing) {
+          db.prepare(`UPDATE link_button SET label=?, url=?, image_path=?, created_at=? WHERE id=?`)
+            .run(label?.trim() || existing.label, url?.trim() || existing.url, imagePath, now, existing.id);
+        } else {
+          db.prepare(`INSERT INTO link_button (label, url, image_path, created_at) VALUES (?,?,?,?)`)
+            .run(label?.trim() || 'WIRED', url?.trim() || '/', imagePath, now);
+        }
+      } else if (existing && (label || url)) {
+        // Update label/url only, no new image
+        db.prepare(`UPDATE link_button SET label=?, url=? WHERE id=?`)
+          .run(label?.trim() || existing.label, url?.trim() || existing.url, existing.id);
+      } else {
+        return res.status(400).json({ error: 'no image uploaded and no existing button' });
+      }
+
+      const button = db.prepare(`SELECT * FROM link_button LIMIT 1`).get();
+      res.json({ button });
+    });
+  });
+
+  // DELETE /api/admin/button
+  app.delete('/api/admin/button', requireAdmin, (req, res) => {
+    const db  = getDb();
+    const row = db.prepare(`SELECT * FROM link_button LIMIT 1`).get();
+    if (!row) return res.status(404).json({ error: 'not found' });
+    try { unlinkSync(path.join(BUTTONS_DIR, row.image_path)); } catch {}
+    db.prepare(`DELETE FROM link_button WHERE id = ?`).run(row.id);
+    res.json({ ok: true });
   });
 }

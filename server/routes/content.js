@@ -59,4 +59,12 @@ export function registerContentRoutes(app) {
       res.status(500).json({ error: 'could not read about.js' });
     }
   });
+
+  // GET /api/links
+  app.get('/api/links', (req, res) => {
+    const db     = getDb();
+    const links  = db.prepare(`SELECT * FROM links ORDER BY kind, sort_order, id`).all();
+    const button = db.prepare(`SELECT * FROM link_button LIMIT 1`).get() ?? null;
+    res.json({ links, button });
+  });
 }

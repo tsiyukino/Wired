@@ -43,6 +43,7 @@ app.get('/blog',      (req, res) => res.sendFile(path.join(ROOT, 'retro/blog.htm
 app.get('/works',     (req, res) => res.sendFile(path.join(ROOT, 'retro/portfolio.html')));
 app.get('/micro',     (req, res) => res.sendFile(path.join(ROOT, 'retro/micro.html')));
 app.get('/about',     (req, res) => res.sendFile(path.join(ROOT, 'retro/about.html')));
+app.get('/links',     (req, res) => res.sendFile(path.join(ROOT, 'retro/links.html')));
 
 // Clean URLs — /foo serves /foo.html, /foo/bar serves /foo/bar.html
 // Skips paths that already have an extension, API routes, and WS upgrades.

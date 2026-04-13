@@ -35,11 +35,19 @@
   font-weight: 700;
   color: #6a0d91;
 }
+.links-list .link-name a { color: inherit; text-decoration: none; }
+.links-list .link-name a:hover { text-decoration: underline; }
 .links-list .link-desc {
   font-size: 11px;
   color: #2a0a3a;
   opacity: 0.7;
   margin-top: 2px;
+}
+.btn-88x31-wrap {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 10px;
 }
 .btn-88x31 {
   display: inline-block;
@@ -51,11 +59,13 @@
   color: #6a0d91;
   text-align: center;
   line-height: 31px;
-  margin: 3px;
   cursor: pointer;
   vertical-align: middle;
   letter-spacing: 1px;
+  text-decoration: none;
+  overflow: hidden;
 }
+.btn-88x31 img { display: block; width: 88px; height: 31px; image-rendering: pixelated; }
 .btn-88x31:hover { filter: brightness(1.1); }
 .webring-box {
   background: rgba(252,208,254,0.5);
@@ -66,6 +76,12 @@
   font-size: 11px;
   color: #6a0d91;
   margin: 14px 0;
+}
+.webring-box a { color: #6a0d91; }
+.empty-note {
+  font-family: 'Silkscreen', monospace;
+  font-size: 10px; color: #6a0d91; opacity: 0.45;
+  padding: 12px 0;
 }
 </style>
 </head>
@@ -126,20 +142,8 @@
   <!-- FRIENDS -->
   <div class="links-section">
     <div class="links-section-title">// friends //</div>
-    <ul class="links-list">
-      <li>
-        <div class="link-name">[ placeholder ]</div>
-        <div class="link-desc">your friend's site goes here // URL pending</div>
-      </li>
-      <li>
-        <div class="link-name">[ placeholder ]</div>
-        <div class="link-desc">another friend // URL pending</div>
-      </li>
-      <li>
-        <div class="link-name">[ placeholder ]</div>
-        <div class="link-desc">more links to come // URL pending</div>
-      </li>
-    </ul>
+    <ul class="links-list" id="list-friend"></ul>
+    <div class="empty-note" id="empty-friend" style="display:none">∗ no friends yet ∗</div>
   </div>
 
   <div class="pixel-hr"></div>
@@ -147,25 +151,19 @@
   <!-- WEBRINGS -->
   <div class="links-section">
     <div class="links-section-title">// webrings //</div>
-    <div class="webring-box">
-      ← <span style="opacity:0.5">[ webring name ]</span> →<br>
-      <span style="font-size:9px;opacity:0.6;">webring placeholder // not yet joined</span>
-    </div>
+    <div id="list-webring"></div>
+    <div class="empty-note" id="empty-webring" style="display:none">∗ no webrings yet ∗</div>
   </div>
 
   <div class="pixel-hr"></div>
 
-  <!-- 88x31 BUTTONS -->
+  <!-- 88x31 BUTTON -->
   <div class="links-section">
     <div class="links-section-title">// 88×31 //</div>
-    <div style="margin-top:10px;">
-      <span class="btn-88x31">YOUR SITE</span>
-      <span class="btn-88x31">PLACEHOLDER</span>
-      <span class="btn-88x31">WIRED.LOCAL</span>
-      <span class="btn-88x31">ADD ME?</span>
-    </div>
+    <div class="btn-88x31-wrap" id="button-slot"></div>
+    <div class="empty-note" id="empty-button" style="display:none">∗ no button yet ∗</div>
     <div style="font-size:10px;opacity:0.5;margin-top:10px;font-family:'Silkscreen',monospace;">
-      88×31 buttons go here // swap with friends
+      right-click → save image to add to your site
     </div>
   </div>
 
@@ -174,16 +172,8 @@
   <!-- RESOURCES -->
   <div class="links-section">
     <div class="links-section-title">// resources //</div>
-    <ul class="links-list">
-      <li>
-        <div class="link-name">[ placeholder ]</div>
-        <div class="link-desc">useful site or resource // URL pending</div>
-      </li>
-      <li>
-        <div class="link-name">[ placeholder ]</div>
-        <div class="link-desc">another resource // URL pending</div>
-      </li>
-    </ul>
+    <ul class="links-list" id="list-resource"></ul>
+    <div class="empty-note" id="empty-resource" style="display:none">∗ no resources yet ∗</div>
   </div>
 
   <div class="kaomoji-strip" style="margin-top:12px;">
@@ -205,6 +195,68 @@
 <script>
   document.getElementById('counter-slot').innerHTML = counter();
   document.getElementById('sparkle-slot').innerHTML = sparkles(['★','☆','★','☆','★','☆','★','☆']);
+
+  function renderLinks(links, button) {
+    const byKind = { friend: [], webring: [], resource: [] };
+    for (const l of links) byKind[l.kind]?.push(l);
+
+    // friends + resources — simple list items
+    for (const kind of ['friend', 'resource']) {
+      const ul    = document.getElementById('list-' + kind);
+      const empty = document.getElementById('empty-' + kind);
+      const items = byKind[kind];
+      if (!items.length) { empty.style.display = ''; continue; }
+      ul.innerHTML = items.map(l => `
+        <li>
+          <div class="link-name"><a href="${esc(l.url)}" target="_blank" rel="noopener noreferrer">[ ${esc(l.label)} ]</a></div>
+          ${l.description ? `<div class="link-desc">${esc(l.description)}</div>` : ''}
+        </li>
+      `).join('');
+    }
+
+    // webrings — each gets a styled box
+    const wringEl  = document.getElementById('list-webring');
+    const wringEmp = document.getElementById('empty-webring');
+    if (!byKind.webring.length) {
+      wringEmp.style.display = '';
+    } else {
+      wringEl.innerHTML = byKind.webring.map(l => `
+        <div class="webring-box">
+          <a href="${esc(l.url)}" target="_blank" rel="noopener noreferrer">${esc(l.label)}</a><br>
+          ${l.description ? `<span style="font-size:9px;opacity:0.6;">${esc(l.description)}</span>` : ''}
+        </div>
+      `).join('');
+    }
+
+    // 88x31 button
+    const slot  = document.getElementById('button-slot');
+    const bempty = document.getElementById('empty-button');
+    if (button) {
+      slot.innerHTML = `
+        <a class="btn-88x31" href="${esc(button.url)}" title="${esc(button.label)}">
+          <img src="/retro/content/buttons/${esc(button.image_path)}" alt="${esc(button.label)}">
+        </a>
+      `;
+    } else {
+      bempty.style.display = '';
+    }
+  }
+
+  function esc(s) {
+    return String(s ?? '')
+      .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
+      .replace(/"/g,'&quot;').replace(/'/g,'&#39;');
+  }
+
+  fetch('/api/links')
+    .then(r => r.json())
+    .then(({ links, button }) => renderLinks(links, button))
+    .catch(() => {
+      ['friend','webring','resource','button'].forEach(k => {
+        const e = document.getElementById('empty-' + k);
+        if (e) e.style.display = '';
+      });
+    });
 </script>
 </body>
 </html>

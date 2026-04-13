@@ -89,6 +89,28 @@ export function initSchema() {
       text       TEXT NOT NULL,
       created_at TEXT NOT NULL
     );
+
+    -- Links page: friends, webrings, resources.
+    -- kind: 'friend' | 'webring' | 'resource'
+    CREATE TABLE IF NOT EXISTS links (
+      id         INTEGER PRIMARY KEY AUTOINCREMENT,
+      kind       TEXT NOT NULL CHECK(kind IN ('friend','webring','resource')),
+      label      TEXT NOT NULL,
+      url        TEXT NOT NULL,
+      description TEXT NOT NULL DEFAULT '',
+      sort_order INTEGER NOT NULL DEFAULT 0,
+      created_at TEXT NOT NULL
+    );
+
+    -- Single 88x31 button representing this site.
+    -- At most one row; image served as a static file.
+    CREATE TABLE IF NOT EXISTS link_button (
+      id         INTEGER PRIMARY KEY AUTOINCREMENT,
+      label      TEXT NOT NULL DEFAULT 'WIRED',
+      url        TEXT NOT NULL DEFAULT '/',
+      image_path TEXT NOT NULL,
+      created_at TEXT NOT NULL
+    );
   `);
 }
 
