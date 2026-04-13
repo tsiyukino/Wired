@@ -1118,7 +1118,10 @@ const commands = {
   },
   me() {
     lnHTML('<span class="term-dim">loading user panel...</span>');
-    setTimeout(() => showRetro('me'), 250);
+    fetch('/api/user/me').then(r => {
+      if (r.ok) { setTimeout(() => showRetro('me'), 250); }
+      else       { setTimeout(() => showRetro('login'), 250); }
+    }).catch(() => setTimeout(() => showRetro('login'), 250));
   },
 
   board(args) {

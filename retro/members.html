@@ -60,8 +60,7 @@ body { background-color: #fcd0fe; }
 
 <script type="module">
   const r = await fetch('/api/user/me').catch(() => null);
-  if (!r || !r.ok) { goTo('login'); }
-  else {
+  if (r?.ok) {
     const { user } = await r.json();
     document.getElementById('welcome-sub').textContent = `welcome back, ${user.display_name}.`;
   }
