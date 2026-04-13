@@ -9,7 +9,6 @@
 <style>
 html, body { min-height: 100%; }
 body { background-color: #fcd0fe; }
-
 .me-wrap {
   width: 100%; max-width: 680px;
   margin: 0 auto;
@@ -74,19 +73,25 @@ input:focus, textarea:focus { border-color: #c677d3; }
   padding: 3px 8px; cursor: pointer;
 }
 .logout-btn:hover { background: #b30000; color: #fcd0fe; }
-.profile-link { font-family: 'Silkscreen', monospace; font-size: 9px; color: #6a0d91; opacity: 0.7; margin-top: 4px; }
-.profile-link a { color: inherit; }
+.profile-link { font-family: 'Silkscreen', monospace; font-size: 9px; color: #6a0d91; opacity: 0.7; margin-top: 4px; cursor: pointer; }
+.profile-link:hover { opacity: 1; }
 </style>
 </head>
 <body class="theme-blog">
 
 <div class="win-chrome">
   <div class="win-chrome-row1">
+    <button class="win-btn" onclick="goTo('terminal')">← 戻る</button>
     <button class="win-btn" onclick="goTo('terminal')">🏠 ホーム</button>
-    <span class="win-chrome-title">COPLAND OS NAVIGATOR v4.017 // MY PANEL</span>
+    <button class="win-btn" onclick="goTo('blog')">日記</button>
+    <button class="win-btn" onclick="goTo('portfolio')">作品</button>
+    <button class="win-btn" onclick="goTo('micro')">一言</button>
+    <button class="win-btn" onclick="goTo('about')">自己紹介</button>
+    <button class="win-btn" onclick="goTo('links')">リンク</button>
+    <span class="win-chrome-title">COPLAND OS NAVIGATOR v4.017</span>
   </div>
   <div class="win-chrome-row2">
-    <span class="win-addr-label">Address ▼</span>
+    <span class="win-addr-label">アドレス ▼</span>
     <input type="text" class="win-addr-bar" value="wired://me/" readonly>
   </div>
   <div class="win-chrome-row3">
@@ -105,7 +110,6 @@ input:focus, textarea:focus { border-color: #c677d3; }
     <button class="logout-btn" id="logout-btn">[ LOGOUT ]</button>
   </div>
 
-  <!-- profile -->
   <div class="me-section">
     <div class="me-head">// PROFILE //</div>
     <div class="profile-link" id="profile-link"></div>
@@ -127,7 +131,6 @@ input:focus, textarea:focus { border-color: #c677d3; }
     <div class="err" id="profile-err"></div>
   </div>
 
-  <!-- password -->
   <div class="me-section">
     <div class="me-head">// CHANGE PASSWORD //</div>
 
@@ -140,24 +143,26 @@ input:focus, textarea:focus { border-color: #c677d3; }
     <button class="save-btn" id="pw-save-btn">[ CHANGE PASSWORD ]</button>
     <div class="err" id="pw-err"></div>
   </div>
-
 </div>
 
 <script type="module">
-  let currentUser = null;
-
   async function load() {
     const r = await fetch('/api/user/me');
-    if (!r.ok) { location.href = '/login'; return; }
+    if (!r.ok) { goTo('login'); return; }
     const { user } = await r.json();
-    currentUser = user;
 
     document.getElementById('topbar-name').textContent = `∗ ${user.display_name} ∗`;
     document.getElementById('display_name').value = user.display_name;
     document.getElementById('bio').value           = user.bio;
     document.getElementById('site_url').value      = user.site_url;
-    document.getElementById('profile-link').innerHTML =
-      `<a href="/u/${user.username}" target="_blank">[ view profile → /u/${user.username} ]</a>`;
+
+    const profileLink = document.getElementById('profile-link');
+    profileLink.textContent = `[ view profile → @${user.username} ]`;
+    profileLink.onclick = () => {
+      if (window.parent && window.parent !== window) {
+        window.parent.postMessage({ action: 'navigate', section: 'profile', data: { username: user.username } }, '*');
+      }
+    };
 
     const preview = document.getElementById('avatar-preview');
     if (user.avatar_path) {
@@ -170,28 +175,24 @@ input:focus, textarea:focus { border-color: #c677d3; }
 
   document.getElementById('profile-save-btn').addEventListener('click', async () => {
     const errEl = document.getElementById('profile-err');
-    errEl.textContent = '';
-    errEl.className = 'err';
+    errEl.textContent = ''; errEl.className = 'err';
     const fd = new FormData();
     fd.append('display_name', document.getElementById('display_name').value);
     fd.append('bio',          document.getElementById('bio').value);
     fd.append('site_url',     document.getElementById('site_url').value);
     const file = document.getElementById('avatar-file').files[0];
     if (file) fd.append('avatar', file);
-
     const r    = await fetch('/api/user/me/profile', { method: 'POST', body: fd });
     const json = await r.json();
     if (!r.ok) { errEl.textContent = '∗ ' + (json.error || 'save failed'); return; }
-    errEl.className = 'ok';
-    errEl.textContent = '∗ saved.';
+    errEl.className = 'ok'; errEl.textContent = '∗ saved.';
     setTimeout(() => { errEl.textContent = ''; }, 2000);
     load();
   });
 
   document.getElementById('pw-save-btn').addEventListener('click', async () => {
     const errEl = document.getElementById('pw-err');
-    errEl.textContent = '';
-    errEl.className = 'err';
+    errEl.textContent = ''; errEl.className = 'err';
     const r    = await fetch('/api/user/me/password', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -202,8 +203,7 @@ input:focus, textarea:focus { border-color: #c677d3; }
     });
     const json = await r.json();
     if (!r.ok) { errEl.textContent = '∗ ' + (json.error || 'failed'); return; }
-    errEl.className = 'ok';
-    errEl.textContent = '∗ password changed.';
+    errEl.className = 'ok'; errEl.textContent = '∗ password changed.';
     document.getElementById('cur-pw').value = '';
     document.getElementById('new-pw').value = '';
     setTimeout(() => { errEl.textContent = ''; }, 2000);
@@ -211,7 +211,7 @@ input:focus, textarea:focus { border-color: #c677d3; }
 
   document.getElementById('logout-btn').addEventListener('click', async () => {
     await fetch('/api/user/logout', { method: 'POST' }).catch(() => {});
-    location.href = '/';
+    goTo('terminal');
   });
 
   load();

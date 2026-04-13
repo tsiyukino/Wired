@@ -614,6 +614,15 @@ html, body {
 <iframe id="retro-links"
   style="display:none;position:relative;z-index:10;width:100%;height:100%;border:none;"
   src="retro/links.html"></iframe>
+<iframe id="retro-login"
+  style="display:none;position:relative;z-index:10;width:100%;height:100%;border:none;"
+  src="retro/login.html"></iframe>
+<iframe id="retro-me"
+  style="display:none;position:relative;z-index:10;width:100%;height:100%;border:none;"
+  src="retro/me.html"></iframe>
+<iframe id="retro-profile"
+  style="display:none;position:relative;z-index:10;width:100%;height:100%;border:none;"
+  src="retro/profile.html"></iframe>
 
 <script>
 // ========== CONTENT DATABASE ==========
@@ -867,14 +876,17 @@ const retroFrames = {
   micro:     document.getElementById('retro-micro'),
   about:     document.getElementById('retro-about'),
   links:     document.getElementById('retro-links'),
+  login:     document.getElementById('retro-login'),
+  me:        document.getElementById('retro-me'),
+  profile:   document.getElementById('retro-profile'),
 };
 
 // Listen for navigation messages from iframe pages
 window.addEventListener('message', (e) => {
   if (!e.data || e.data.action !== 'navigate') return;
-  const section = e.data.section;
+  const { section, data } = e.data;
   if (section === 'terminal') { backToTerminal(); }
-  else { showRetro(section); }
+  else { showRetro(section, data); }
 });
 
 let bootDone = false;
@@ -959,7 +971,7 @@ async function boot() {
 }
 
 // ========== COMMANDS ==========
-const commandList = ['help','blog','works','portfolio','micro','about','links','navi','board','lobby','clear','whoami','uptime','ping','ls','connect','lain','sudo','glitch','date','cat','history','fortune','ssh','neofetch'];
+const commandList = ['help','blog','works','portfolio','micro','about','links','login','me','navi','board','lobby','clear','whoami','uptime','ping','ls','connect','lain','sudo','glitch','date','cat','history','fortune','ssh','neofetch'];
 
 // ========== VIRTUAL FILESYSTEM (for cat command) ==========
 const vfs = {
@@ -1099,6 +1111,14 @@ const commands = {
   links() {
     lnHTML('<span class="term-dim">loading link collection...</span>');
     setTimeout(() => showRetro('links'), 250);
+  },
+  login() {
+    lnHTML('<span class="term-dim">opening login...</span>');
+    setTimeout(() => showRetro('login'), 250);
+  },
+  me() {
+    lnHTML('<span class="term-dim">loading user panel...</span>');
+    setTimeout(() => showRetro('me'), 250);
   },
 
   board(args) {
@@ -1455,7 +1475,7 @@ function flashTransition(cb) {
 // ========== RETRO PAGE SYSTEM ==========
 let activeFrame = null;
 
-function showRetro(section) {
+function showRetro(section, data) {
   const frame = retroFrames[section];
   if (!frame) return;
   flashTransition(() => {
@@ -1464,6 +1484,8 @@ function showRetro(section) {
     if (activeFrame && activeFrame !== frame) activeFrame.style.display = 'none';
     frame.style.display = 'block';
     activeFrame = frame;
+    // Pass extra data (e.g. username for profile page) after the frame is visible
+    if (data) frame.contentWindow.postMessage({ action: 'load', data }, '*');
   });
 }
 

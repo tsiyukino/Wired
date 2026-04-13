@@ -60,7 +60,7 @@ body { background-color: #fcd0fe; }
 
 <script type="module">
   const r = await fetch('/api/user/me').catch(() => null);
-  if (!r || !r.ok) { location.href = '/login?next=/members'; }
+  if (!r || !r.ok) { goTo('login'); }
   else {
     const { user } = await r.json();
     document.getElementById('welcome-sub').textContent = `welcome back, ${user.display_name}.`;

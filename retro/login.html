@@ -53,6 +53,12 @@ body { background-color: #fcd0fe; display: flex; align-items: center; justify-co
   font-size: 9px; color: #b30000;
   min-height: 14px; margin-top: 8px; text-align: center;
 }
+.back-link {
+  font-family: 'Silkscreen', monospace;
+  font-size: 9px; color: #6a0d91; opacity: 0.6;
+  text-align: center; margin-top: 12px; cursor: pointer;
+}
+.back-link:hover { opacity: 1; }
 </style>
 </head>
 <body>
@@ -67,11 +73,15 @@ body { background-color: #fcd0fe; display: flex; align-items: center; justify-co
 
   <button class="submit-btn" id="login-btn">[ LOGIN ]</button>
   <div class="err" id="err"></div>
+  <div class="back-link" onclick="goTo('terminal')">← back to terminal</div>
 </div>
 
 <script type="module">
   const errEl = document.getElementById('err');
   const btn   = document.getElementById('login-btn');
+
+  // If already logged in, go straight to me panel
+  fetch('/api/user/me').then(r => { if (r.ok) goTo('me'); }).catch(() => {});
 
   async function tryLogin() {
     errEl.textContent = '';
@@ -87,9 +97,12 @@ body { background-color: #fcd0fe; display: flex; align-items: center; justify-co
       });
       const json = await r.json();
       if (!r.ok) { errEl.textContent = '∗ ' + (json.error || 'login failed'); btn.disabled = false; return; }
-      // Redirect to /me or wherever they came from
-      const next = new URLSearchParams(location.search).get('next') || '/me';
-      location.href = next;
+      // Reload the me iframe so it picks up the new session, then navigate
+      if (window.parent && window.parent !== window) {
+        const meFrame = window.parent.document.getElementById('retro-me');
+        if (meFrame) meFrame.src = meFrame.src;
+      }
+      goTo('me');
     } catch {
       errEl.textContent = '∗ network error';
       btn.disabled = false;

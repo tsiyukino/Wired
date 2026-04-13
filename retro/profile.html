@@ -61,8 +61,8 @@ body { background-color: #fcd0fe; }
   font-family: 'Silkscreen', monospace; font-size: 10px; color: #6a0d91;
 }
 .profile-site a { color: #6a0d91; }
-.not-found {
-  font-family: 'Silkscreen', monospace; font-size: 11px; color: #6a0d91; opacity: 0.5;
+.status-msg {
+  font-family: 'Silkscreen', monospace; font-size: 10px; color: #6a0d91; opacity: 0.45;
   text-align: center; padding: 40px 0;
 }
 </style>
@@ -71,12 +71,17 @@ body { background-color: #fcd0fe; }
 
 <div class="win-chrome">
   <div class="win-chrome-row1">
-    <button class="win-btn" onclick="history.back()">← back</button>
-    <button class="win-btn" onclick="goTo('terminal')">🏠 home</button>
-    <span class="win-chrome-title" id="chrome-title">COPLAND OS NAVIGATOR v4.017 // PROFILE</span>
+    <button class="win-btn" onclick="goTo('terminal')">← 戻る</button>
+    <button class="win-btn" onclick="goTo('terminal')">🏠 ホーム</button>
+    <button class="win-btn" onclick="goTo('blog')">日記</button>
+    <button class="win-btn" onclick="goTo('portfolio')">作品</button>
+    <button class="win-btn" onclick="goTo('micro')">一言</button>
+    <button class="win-btn" onclick="goTo('about')">自己紹介</button>
+    <button class="win-btn" onclick="goTo('links')">リンク</button>
+    <span class="win-chrome-title" id="chrome-title">COPLAND OS NAVIGATOR v4.017</span>
   </div>
   <div class="win-chrome-row2">
-    <span class="win-addr-label">Address ▼</span>
+    <span class="win-addr-label">アドレス ▼</span>
     <input type="text" class="win-addr-bar" id="addr-bar" value="wired://u/..." readonly>
   </div>
   <div class="win-chrome-row3">
@@ -91,24 +96,31 @@ body { background-color: #fcd0fe; }
 
 <div class="profile-wrap">
   <div class="profile-card" id="profile-card">
-    <div class="not-found">loading...</div>
+    <div class="status-msg">∗ waiting for connection ∗</div>
   </div>
 </div>
 
 <script type="module">
-  const username = location.pathname.split('/').pop();
-  document.getElementById('addr-bar').value = `wired://u/${username}`;
+  function esc(s) {
+    return String(s ?? '')
+      .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
+      .replace(/"/g,'&quot;').replace(/'/g,'&#39;');
+  }
 
-  const r = await fetch(`/api/user/${username}`).catch(() => null);
-  const card = document.getElementById('profile-card');
+  async function loadProfile(username) {
+    const card = document.getElementById('profile-card');
+    document.getElementById('addr-bar').value    = `wired://u/${username}`;
+    document.getElementById('chrome-title').textContent = `COPLAND OS NAVIGATOR v4.017 // @${username}`;
+    document.getElementById('nav-name').textContent     = `@${username}`;
+    card.innerHTML = `<div class="status-msg">connecting...</div>`;
 
-  if (!r || !r.ok) {
-    card.innerHTML = `<div class="not-found">∗ user not found ∗</div>`;
-  } else {
+    const r = await fetch(`/api/user/${username}`).catch(() => null);
+    if (!r || !r.ok) {
+      card.innerHTML = `<div class="status-msg">∗ user not found ∗</div>`;
+      return;
+    }
     const { user } = await r.json();
-    document.getElementById('chrome-title').textContent = `COPLAND OS NAVIGATOR v4.017 // ${user.username}`;
     document.getElementById('nav-name').textContent = user.display_name;
-    document.title = `${user.display_name} // wired`;
 
     const avatarHtml = user.avatar_path
       ? `<div class="profile-avatar"><img src="/retro/content/avatars/${esc(user.avatar_path)}" alt="avatar"></div>`
@@ -118,15 +130,13 @@ body { background-color: #fcd0fe; }
       ? `<div class="profile-site">[ <a href="${esc(user.site_url)}" target="_blank" rel="noopener noreferrer">${esc(user.site_url)}</a> ]</div>`
       : '';
 
-    const since = user.created_at ? user.created_at.slice(0, 10) : '';
-
     card.innerHTML = `
       <div class="profile-top">
         ${avatarHtml}
         <div class="profile-names">
           <div class="profile-display">${esc(user.display_name)}</div>
           <div class="profile-username">@${esc(user.username)}</div>
-          <div class="profile-since">joined ${since}</div>
+          <div class="profile-since">joined ${(user.created_at ?? '').slice(0, 10)}</div>
         </div>
       </div>
       ${user.bio ? `<div class="profile-bio">${esc(user.bio)}</div>` : ''}
@@ -134,11 +144,16 @@ body { background-color: #fcd0fe; }
     `;
   }
 
-  function esc(s) {
-    return String(s ?? '')
-      .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
-      .replace(/"/g,'&quot;').replace(/'/g,'&#39;');
-  }
+  // Listen for the username being passed from the OS
+  window.addEventListener('message', (e) => {
+    if (e.data?.action === 'load' && e.data.data?.username) {
+      loadProfile(e.data.data.username);
+    }
+  });
+
+  // Also handle direct URL access: /u/:username
+  const parts = location.pathname.split('/');
+  if (parts[1] === 'u' && parts[2]) loadProfile(parts[2]);
 </script>
 </body>
 </html>
