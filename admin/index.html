@@ -316,6 +316,7 @@ tr:hover td { background: rgba(240,168,224,0.45); }
       <button class="admin-tab" data-panel="works">WORKS</button>
       <button class="admin-tab" data-panel="micro">MICRO</button>
       <button class="admin-tab" data-panel="about">ABOUT</button>
+      <button class="admin-tab" data-panel="links">LINKS</button>
       <button class="admin-tab" data-panel="board">BOARD</button>
       <button class="admin-tab" data-panel="bin">BIN</button>
       <button class="admin-tab" data-panel="lobby">LOBBY</button>
@@ -377,6 +378,48 @@ tr:hover td { background: rgba(240,168,224,0.45); }
       <textarea id="about-editor"></textarea>
       <button class="post-btn" id="about-save-btn">[ SAVE ]</button>
       <div class="admin-err" id="about-err"></div>
+    </div>
+
+    <!-- links panel -->
+    <div class="panel" id="panel-links">
+      <div class="admin-section-head">// LINKS //</div>
+
+      <div class="admin-notice">Add friends, webrings, and resources. The 88×31 button is your site's own button — upload one image.</div>
+
+      <!-- add form -->
+      <div class="upload-area" style="flex-direction:column;align-items:flex-start;gap:8px;">
+        <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;width:100%;">
+          <select id="link-kind" style="background:#fff8ff;border:2px groove #dbb6af;color:#2a0a3a;font-family:'IBM Plex Mono',monospace;font-size:12px;padding:5px 8px;">
+            <option value="friend">friend</option>
+            <option value="webring">webring</option>
+            <option value="resource">resource</option>
+          </select>
+          <input type="text" id="link-label" placeholder="label" style="width:130px;">
+          <input type="text" id="link-url"   placeholder="https://..." style="flex:1;min-width:180px;">
+          <input type="text" id="link-desc"  placeholder="description (optional)" style="flex:1;min-width:180px;">
+          <button class="post-btn" id="link-add-btn">[ ADD ]</button>
+        </div>
+      </div>
+      <div class="admin-err" id="link-err"></div>
+
+      <table id="links-table">
+        <thead><tr><th>KIND</th><th>LABEL</th><th>URL</th><th>DESC</th><th></th></tr></thead>
+        <tbody></tbody>
+      </table>
+      <div class="empty" id="links-empty" style="display:none">∗ no links yet ∗</div>
+
+      <div class="pixel-hr" style="margin:20px 0 14px;"></div>
+      <div class="admin-section-head">// 88×31 BUTTON //</div>
+      <div class="admin-notice">Upload your site's 88×31 button image (png/gif/jpg/webp, max 256 KB). Overwrites previous.</div>
+      <div class="upload-area" style="gap:8px;flex-wrap:wrap;align-items:center;">
+        <label for="button-file">image ▶</label>
+        <input type="file" id="button-file" accept="image/png,image/gif,image/jpeg,image/webp">
+        <input type="text" id="button-label" placeholder="label (e.g. WIRED)" style="width:130px;">
+        <input type="text" id="button-url"   placeholder="link URL" style="width:200px;">
+        <button class="post-btn" id="button-upload-btn">[ UPLOAD ]</button>
+      </div>
+      <div class="admin-err" id="button-err"></div>
+      <div id="button-preview" style="margin-top:8px;"></div>
     </div>
 
     <!-- board panel -->
@@ -496,6 +539,7 @@ tr:hover td { background: rgba(240,168,224,0.45); }
     if (name === 'works')  loadWorks();
     if (name === 'micro')  loadMicro();
     if (name === 'about')  loadAbout();
+    if (name === 'links')  loadLinks();
     if (name === 'board')  loadBoard();
     if (name === 'bin')    loadBin();
     if (name === 'lobby')  loadLobby();
@@ -720,6 +764,83 @@ tr:hover td { background: rgba(240,168,224,0.45); }
     errEl.style.color = '#89ad25';
     errEl.textContent = '∗ saved.';
     setTimeout(() => { errEl.textContent = ''; errEl.style.color = ''; }, 2000);
+  });
+
+  // ── links ──
+  async function loadLinks() {
+    const { links, button } = await api('GET', '/links');
+    const tbody = document.querySelector('#links-table tbody');
+    tbody.innerHTML = '';
+    document.getElementById('links-empty').style.display = links.length ? 'none' : '';
+    links.forEach(l => {
+      const tr = document.createElement('tr');
+      tr.innerHTML = `
+        <td><span class="tag">${l.kind}</span></td>
+        <td title="${l.label}">${truncate(l.label, 20)}</td>
+        <td title="${l.url}">${truncate(l.url, 36)}</td>
+        <td title="${l.description}">${truncate(l.description, 36)}</td>
+        <td><button class="btn-danger" data-id="${l.id}">[ delete ]</button></td>
+      `;
+      tr.querySelector('.btn-danger').addEventListener('click', async () => {
+        if (!confirm(`Delete link "${l.label}"?`)) return;
+        await api('DELETE', `/links/${l.id}`);
+        loadLinks();
+      });
+      tbody.appendChild(tr);
+    });
+
+    // button preview
+    const preview = document.getElementById('button-preview');
+    if (button) {
+      preview.innerHTML = `
+        <div style="font-family:'Silkscreen',monospace;font-size:9px;color:#6a0d91;margin-bottom:6px;">current button:</div>
+        <img src="/retro/content/buttons/${button.image_path}" style="border:2px groove #dbb6af;display:block;margin-bottom:6px;">
+        <button class="btn-danger" id="button-delete-btn">[ delete button ]</button>
+      `;
+      document.getElementById('button-delete-btn').addEventListener('click', async () => {
+        if (!confirm('Delete the 88×31 button?')) return;
+        await api('DELETE', '/button');
+        loadLinks();
+      });
+    } else {
+      preview.innerHTML = '<div style="font-family:\'Silkscreen\',monospace;font-size:9px;color:#6a0d91;opacity:0.5;">∗ no button uploaded ∗</div>';
+    }
+  }
+
+  document.getElementById('link-add-btn').addEventListener('click', async () => {
+    const errEl = document.getElementById('link-err');
+    errEl.textContent = '';
+    const kind  = document.getElementById('link-kind').value;
+    const label = document.getElementById('link-label').value.trim();
+    const url   = document.getElementById('link-url').value.trim();
+    const description = document.getElementById('link-desc').value.trim();
+    if (!label) { errEl.textContent = '∗ label is required'; return; }
+    if (!url)   { errEl.textContent = '∗ url is required'; return; }
+    await api('POST', '/links', { kind, label, url, description })
+      .catch(e => { errEl.textContent = '∗ ' + e.message; });
+    document.getElementById('link-label').value = '';
+    document.getElementById('link-url').value   = '';
+    document.getElementById('link-desc').value  = '';
+    loadLinks();
+  });
+
+  document.getElementById('button-upload-btn').addEventListener('click', async () => {
+    const errEl = document.getElementById('button-err');
+    errEl.textContent = '';
+    const file  = document.getElementById('button-file').files[0];
+    const label = document.getElementById('button-label').value.trim();
+    const url   = document.getElementById('button-url').value.trim();
+    const fd = new FormData();
+    if (file)  fd.append('image', file);
+    if (label) fd.append('label', label);
+    if (url)   fd.append('url',   url);
+    const r    = await fetch('/api/admin/button', { method: 'POST', body: fd });
+    const json = await r.json().catch(() => ({}));
+    if (!r.ok) { errEl.textContent = '∗ ' + (json.error || 'upload failed'); return; }
+    document.getElementById('button-file').value  = '';
+    document.getElementById('button-label').value = '';
+    document.getElementById('button-url').value   = '';
+    loadLinks();
   });
 
   // ── boot: check if already logged in ──
