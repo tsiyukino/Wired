@@ -89,16 +89,15 @@
 
 <div class="win-chrome">
   <div class="win-chrome-row1">
-    <button class="win-btn" onclick="goTo('terminal')">← 戻る</button>
-    <button class="win-btn">→ 進む</button>
-    <button class="win-btn" onclick="location.reload()">⟳ 更新</button>
-    <button class="win-btn" onclick="goTo('terminal')">🏠 ホーム</button>
-    <span style="display:inline-block;width:1px;height:28px;background:#aaa;margin:0 4px;"></span>
-    <button class="win-btn" onclick="goTo('blog')">日記</button>
-    <button class="win-btn" onclick="goTo('portfolio')">作品</button>
-    <button class="win-btn" onclick="goTo('micro')">一言</button>
-    <button class="win-btn" onclick="goTo('about')">自己紹介</button>
-    <button class="win-btn" onclick="goTo('links')">リンク</button>
+    <button class="win-btn" onclick="goTo('terminal')" title="terminal"></button>
+    <button class="win-btn" onclick="location.reload()" title="reload"></button>
+    <button class="win-btn" onclick="goTo('terminal')" title="home"></button>
+    <span class="win-btn-sep"></span>
+    <button class="win-btn-link" onclick="goTo('blog')">diary</button>
+    <button class="win-btn-link" onclick="goTo('portfolio')">works</button>
+    <button class="win-btn-link" onclick="goTo('micro')">micro</button>
+    <button class="win-btn-link" onclick="goTo('about')">about</button>
+    <button class="win-btn-link active" onclick="goTo('links')">links</button>
     <span class="win-chrome-title">COPLAND OS NAVIGATOR v4.017</span>
   </div>
   <div class="win-chrome-row2">
@@ -106,13 +105,19 @@
     <input type="text" class="win-addr-bar" value="http://www.wired.local/links/" readonly>
   </div>
   <div class="win-chrome-row3">
-    <span class="win-nav-icon">🌐</span>
+    <span class="win-nav-icon"></span>
     <button class="win-nav-btn" onclick="goTo('links')">★ リンク集</button>
     <span style="opacity:0.3">|</span>
     <button class="win-nav-btn" onclick="goTo('terminal')">[ terminal ]</button>
     <span class="blink" style="margin-left:auto;margin-right:8px;font-family:'Press Start 2P',monospace;font-size:8px;color:#6a0d91;">∗ ONLINE ∗</span>
   </div>
 </div>
+<script>
+document.querySelector('.win-chrome-row1 .win-btn:nth-child(1)').innerHTML = ICON_BACK;
+document.querySelector('.win-chrome-row1 .win-btn:nth-child(2)').innerHTML = ICON_REFRESH;
+document.querySelector('.win-chrome-row1 .win-btn:nth-child(3)').innerHTML = ICON_HOME;
+document.querySelector('.win-nav-icon').innerHTML = ICON_GLOBE;
+</script>
 
 <div class="retro-deco-left"></div>
 <div class="retro-deco-right"></div>

@@ -207,370 +207,11 @@ html, body {
 }
 .term-link:hover { border-bottom-color: var(--term-accent); }
 
-/* ========== RETRO PAGES ========== */
-#retro-page {
-  display: none;
-  width: 100%; height: 100%;
-  overflow-y: auto;
-  position: relative; z-index: 10;
-}
 
-.retro-wrapper { min-height: 100vh; position: relative; }
 
-/* ---- DEMO-DERIVED RETRO THEMES ---- */
-/* Each theme uses dithered SVG backgrounds from demo-lowfi.html,
-   Press Start 2P for headings, Silkscreen for nav, pixel HRs, stripe sidebars */
-
-/* ── BLOG: pink dither ── */
-.theme-blog {
-  background-color: #ffccdd;
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='4' height='4'%3E%3Crect width='4' height='4' fill='%23ffccdd'/%3E%3Crect x='0' y='0' width='2' height='2' fill='%23ff99bb'/%3E%3Crect x='2' y='2' width='2' height='2' fill='%23ff99bb'/%3E%3C/svg%3E");
-  background-size: 4px 4px;
-  image-rendering: pixelated;
-  color: #4a2030;
-}
-.theme-blog a { color: #aa0044; }
-.theme-blog a:hover { text-decoration: underline; }
-.theme-blog .retro-deco-left,
-.theme-blog .retro-deco-right {
-  background: repeating-linear-gradient(0deg, #ff99bb, #ff99bb 6px, #ff66aa 6px, #ff66aa 12px);
-}
-.theme-blog .retro-deco-left  { border-right: 2px solid #cc6688; }
-.theme-blog .retro-deco-right { border-left:  2px solid #cc6688; }
-
-/* ── PORTFOLIO: green dot-matrix ── */
-.theme-portfolio {
-  background-color: #e0f0e0;
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='8' height='8'%3E%3Crect width='8' height='8' fill='%23e0f0e0'/%3E%3Crect x='3' y='3' width='1' height='1' fill='%2390c890' opacity='0.5'/%3E%3C/svg%3E");
-  background-size: 8px 8px;
-  image-rendering: pixelated;
-  color: #1a3a1a;
-}
-.theme-portfolio a { color: #2a7a2a; }
-.theme-portfolio a:hover { text-decoration: underline; }
-.theme-portfolio .retro-deco-left,
-.theme-portfolio .retro-deco-right {
-  background: repeating-linear-gradient(0deg, #b0d8b0, #b0d8b0 6px, #70a070 6px, #70a070 12px);
-}
-.theme-portfolio .retro-deco-left  { border-right: 2px solid #70a070; }
-.theme-portfolio .retro-deco-right { border-left:  2px solid #70a070; }
-
-/* ── MICRO: purple crosshatch ── */
-.theme-micro {
-  background-color: #e8e0ff;
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='8' height='8'%3E%3Crect width='8' height='8' fill='%23e8e0ff'/%3E%3Crect x='0' y='0' width='1' height='8' fill='%23c8b8e8' opacity='0.6'/%3E%3Crect x='0' y='0' width='8' height='1' fill='%23c8b8e8' opacity='0.6'/%3E%3C/svg%3E");
-  background-size: 8px 8px;
-  image-rendering: pixelated;
-  color: #2a1a4a;
-}
-.theme-micro a { color: #6a3aaa; }
-.theme-micro a:hover { text-decoration: underline; }
-.theme-micro .retro-deco-left,
-.theme-micro .retro-deco-right {
-  background: repeating-linear-gradient(0deg, #c8b8e8, #c8b8e8 6px, #9080b0 6px, #9080b0 12px);
-}
-.theme-micro .retro-deco-left  { border-right: 2px solid #9080b0; }
-.theme-micro .retro-deco-right { border-left:  2px solid #9080b0; }
-
-/* ── ABOUT: warm brick/tan ── */
-.theme-about {
-  background-color: #fff4d8;
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='8'%3E%3Crect width='16' height='8' fill='%23fff4d8'/%3E%3Crect x='0' y='0' width='7' height='3' fill='%23f0e8c0'/%3E%3Crect x='8' y='0' width='8' height='3' fill='%23f0e8c0'/%3E%3Crect x='0' y='4' width='4' height='3' fill='%23ece0b8'/%3E%3Crect x='4' y='4' width='8' height='3' fill='%23ece0b8'/%3E%3C/svg%3E");
-  background-size: 16px 8px;
-  image-rendering: pixelated;
-  color: #3a2a0a;
-}
-.theme-about a { color: #8a5a0a; }
-.theme-about a:hover { text-decoration: underline; }
-.theme-about .retro-deco-left,
-.theme-about .retro-deco-right {
-  background: repeating-linear-gradient(0deg, #f0d888, #f0d888 6px, #c0a850 6px, #c0a850 12px);
-}
-.theme-about .retro-deco-left  { border-right: 2px solid #c0a850; }
-.theme-about .retro-deco-right { border-left:  2px solid #c0a850; }
-
-/* ---- Shared retro sidebar strips ---- */
-.retro-deco-left {
-  position: fixed; left: 0; top: 0;
-  width: 24px; height: 100%; z-index: 1;
-}
-.retro-deco-right {
-  position: fixed; right: 0; top: 0;
-  width: 24px; height: 100%; z-index: 1;
-}
-
-/* ---- Container ---- */
-.retro-container {
-  max-width: 680px;
-  margin: 0 auto;
-  padding: 10px 16px 40px;
-}
-
-/* ---- Header: Press Start 2P ---- */
-.retro-header {
-  text-align: center;
-  padding: 18px 0 10px;
-  border-bottom: 3px double currentColor;
-  margin-bottom: 12px;
-}
-.retro-header h1 {
-  font-family: 'Press Start 2P', monospace;
-  font-size: 12px;
-  font-weight: 400;
-  line-height: 1.8;
-  letter-spacing: 2px;
-  image-rendering: pixelated;
-}
-.retro-header .subtitle {
-  font-family: 'Silkscreen', monospace;
-  font-size: 8px; opacity: 0.55;
-  margin-top: 8px; letter-spacing: 2px;
-}
-
-/* ---- Nav: Silkscreen ---- */
-.retro-nav {
-  text-align: center;
-  font-family: 'Silkscreen', monospace;
-  font-size: 9px;
-  letter-spacing: 1px;
-  padding: 8px 0;
-  border-bottom: 1px solid rgba(128,128,128,0.25);
-  margin-bottom: 14px;
-}
-.retro-nav a {
-  color: inherit; text-decoration: none;
-  cursor: pointer; margin: 0 6px; font-weight: 700;
-}
-.retro-nav a:hover { text-decoration: underline; }
-.retro-nav .sep { opacity: 0.25; }
-
-/* ---- Counter ---- */
-.retro-counter {
-  text-align: center;
-  font-family: 'Press Start 2P', monospace;
-  font-size: 7px;
-  opacity: 0.5; margin: 6px 0; letter-spacing: 1px;
-  image-rendering: pixelated;
-}
-
-/* ---- Pixel HR (from demo) ---- */
-.pixel-hr {
-  height: 4px; width: 100%; margin: 10px 0;
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='8' height='4'%3E%3Crect x='0' y='0' width='4' height='4' fill='%23cc99aa'/%3E%3Crect x='4' y='0' width='4' height='4' fill='%23ff99cc'/%3E%3C/svg%3E");
-  background-size: 8px 4px; background-repeat: repeat-x;
-  image-rendering: pixelated;
-}
-.theme-portfolio .pixel-hr {
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='4'%3E%3Crect x='0' y='0' width='4' height='4' fill='%2370a070'/%3E%3Crect x='4' y='0' width='4' height='4' fill='%23b0d8b0'/%3E%3Crect x='8' y='0' width='4' height='4' fill='%2370a070'/%3E%3C/svg%3E");
-  background-size: 12px 4px;
-}
-.theme-micro .pixel-hr {
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='6' height='6'%3E%3Crect width='6' height='6' fill='%239080b0'/%3E%3Crect x='0' y='0' width='2' height='2' fill='%23c8b8e8'/%3E%3Crect x='2' y='2' width='2' height='2' fill='%23c8b8e8'/%3E%3Crect x='4' y='4' width='2' height='2' fill='%23c8b8e8'/%3E%3C/svg%3E");
-  background-size: 6px 6px; height: 6px;
-}
-.theme-about .pixel-hr {
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='8' height='4'%3E%3Crect x='0' y='0' width='4' height='4' fill='%23c0a850'/%3E%3Crect x='4' y='0' width='4' height='4' fill='%23f0d888'/%3E%3C/svg%3E");
-  background-size: 8px 4px;
-}
-
-/* ---- Blog list entries ---- */
-.blog-entry {
-  margin-bottom: 0; padding-bottom: 0;
-  border-bottom: none;
-  cursor: pointer;
-}
-.blog-entry:hover .blog-entry-head { opacity: 0.85; }
-.blog-entry-head {
-  background: #ff99bb;
-  border-bottom: 1px solid #cc6688;
-  padding: 3px 8px;
-  display: flex; justify-content: space-between; align-items: center;
-}
-.theme-portfolio .blog-entry-head { background: #b0d8b0; border-color: #70a070; }
-.theme-micro     .blog-entry-head { background: #c8b8e8; border-color: #9080b0; }
-.theme-about     .blog-entry-head { background: #f0d888; border-color: #c0a850; }
-
-.blog-entry-body {
-  background: rgba(255,255,255,0.4);
-  border: 1px solid #cc99aa;
-  border-top: none;
-  padding: 7px 8px 10px;
-  margin-bottom: 10px;
-}
-.theme-portfolio .blog-entry-body { border-color: #70a070; }
-.theme-micro     .blog-entry-body { border-color: #9080b0; }
-.theme-about     .blog-entry-body { border-color: #c0a850; }
-
-.blog-date {
-  font-family: 'Press Start 2P', monospace;
-  font-size: 6px; font-weight: 400;
-  opacity: 0.75; letter-spacing: 1px;
-  image-rendering: pixelated;
-}
-.blog-tags { font-family: 'Silkscreen', monospace; font-size: 8px; opacity: 0.6; }
-
-.blog-title {
-  font-family: 'Silkscreen', monospace;
-  font-size: 13px; font-weight: 700;
-  margin-bottom: 5px; letter-spacing: 0.5px;
-}
-.blog-excerpt { font-size: 11px; line-height: 1.7; opacity: 0.7; font-weight: 300; }
-
-/* ---- Footer ---- */
-.retro-footer {
-  font-family: 'Press Start 2P', monospace;
-  font-size: 7px; font-weight: 400;
-  text-align: center; opacity: 0.35;
-  line-height: 2.2;
-  image-rendering: pixelated;
-  padding: 18px 0 8px;
-  border-top: 1px dashed rgba(128,128,128,0.3);
-  margin-top: 28px; letter-spacing: 0.5px;
-}
-
-.retro-marquee {
-  font-size: 10px; opacity: 0.45;
-  overflow: hidden; white-space: nowrap; margin: 5px 0;
-}
-.retro-marquee-inner {
-  display: inline-block;
-  animation: marquee-scroll 25s linear infinite;
-}
-@keyframes marquee-scroll {
-  0% { transform: translateX(100%); }
-  100% { transform: translateX(-100%); }
-}
-
-.last-updated { text-align: right; font-size: 10px; opacity: 0.35; margin-bottom: 8px; }
-.deco-dots { text-align: center; font-size: 10px; opacity: 0.25; letter-spacing: 4px; margin: 8px 0; }
-.jp-only-banner { text-align: center; font-size: 9px; opacity: 0.35; letter-spacing: 1px; margin-bottom: 6px; font-style: italic; }
-
-.retro-wrapper hr {
-  border: none;
-  border-top: 1px dashed rgba(128,128,128,0.25);
-  margin: 10px 0;
-}
-
-/* ---- Blog list ---- */
-.blog-entry {
-  margin-bottom: 16px; padding-bottom: 14px;
-  border-bottom: 1px dashed rgba(128,128,128,0.2);
-  cursor: pointer;
-}
-.blog-entry:last-child { border-bottom: none; }
-.blog-entry:hover { opacity: 0.8; }
-.blog-date { font-size: 10px; font-weight: 500; opacity: 0.45; margin-bottom: 2px; letter-spacing: 1px; }
-.blog-title { font-size: 14px; font-weight: 500; margin-bottom: 5px; letter-spacing: 0.3px; }
-.blog-excerpt { font-size: 12px; line-height: 1.7; opacity: 0.65; font-weight: 300; }
-.blog-tags { font-size: 9px; opacity: 0.4; margin-top: 4px; letter-spacing: 0.5px; }
-
-/* ---- Blog detail ---- */
-.detail-back {
-  font-size: 11px; cursor: pointer; opacity: 0.5;
-  margin-bottom: 14px; display: inline-block;
-  font-family: 'IBM Plex Mono', monospace;
-}
-.detail-back:hover { opacity: 1; text-decoration: underline; }
-
-.detail-date { font-size: 10px; opacity: 0.4; letter-spacing: 1px; margin-bottom: 4px; }
-.detail-title {
-  font-family: 'Silkscreen', monospace;
-  font-size: 16px; font-weight: 700;
-  margin-bottom: 12px; letter-spacing: 0.5px;
-  line-height: 1.5;
-}
-
-.detail-body {
-  font-size: 13px; line-height: 2;
-  font-weight: 300; letter-spacing: 0.2px;
-}
-.detail-body h1 { font-size: 17px; font-weight: 500; margin: 20px 0 8px; }
-.detail-body h2 { font-size: 15px; font-weight: 500; margin: 16px 0 6px; }
-.detail-body h3 { font-size: 14px; font-weight: 500; margin: 12px 0 4px; }
-.detail-body p { margin-bottom: 12px; }
-.detail-body strong { font-weight: 500; }
-.detail-body em { font-style: italic; }
-.detail-body code {
-  font-family: 'IBM Plex Mono', monospace;
-  font-size: 12px;
-  padding: 1px 4px;
-  border-radius: 2px;
-}
-.theme-blog .detail-body code { background: rgba(200,100,140,0.15); }
-.theme-portfolio .detail-body code { background: rgba(60,160,60,0.15); }
-
-.detail-body pre {
-  font-family: 'IBM Plex Mono', monospace;
-  font-size: 12px; line-height: 1.6;
-  padding: 10px 12px;
-  margin: 10px 0;
-  overflow-x: auto;
-  border: 1px solid rgba(128,128,128,0.2);
-}
-.theme-blog .detail-body pre { background: rgba(200,100,140,0.08); }
-.theme-portfolio .detail-body pre { background: rgba(60,160,60,0.08); }
-
-.detail-body blockquote {
-  border-left: 3px solid rgba(128,128,128,0.3);
-  padding-left: 12px;
-  margin: 10px 0;
-  opacity: 0.75;
-  font-style: italic;
-}
-
-.detail-body ul, .detail-body ol {
-  margin: 8px 0 8px 20px;
-}
-.detail-body li { margin-bottom: 4px; }
-
-.detail-body img {
-  max-width: 100%;
-  margin: 10px 0;
-}
-
-/* KaTeX inline */
-.detail-body .math-inline { font-style: normal; }
-.detail-body .math-block {
-  display: block; text-align: center;
-  margin: 12px 0; font-size: 14px;
-}
-
-/* ---- Portfolio list ---- */
-.pf-item {
-  margin-bottom: 14px; padding: 10px;
-  border: 1px solid rgba(128,128,128,0.15);
-  background: rgba(255,255,255,0.35);
-  cursor: pointer;
-}
-.pf-item:hover { opacity: 0.8; }
-.pf-title { font-size: 13px; font-weight: 500; margin-bottom: 3px; }
-.pf-desc { font-size: 11px; line-height: 1.6; opacity: 0.7; font-weight: 300; }
-.pf-tech { font-size: 9px; margin-top: 4px; opacity: 0.45; letter-spacing: 0.5px; }
-
-/* ---- Micro ---- */
-.micro-item {
-  margin-bottom: 8px; padding: 7px 8px;
-  background: rgba(255,255,255,0.35);
-  border: 1px solid rgba(144,128,176,0.35);
-}
-.micro-time { font-family: 'Press Start 2P', monospace; font-size: 6px; opacity: 0.5; letter-spacing: 1px; margin-bottom: 6px; image-rendering: pixelated; }
-.micro-text { font-size: 12px; line-height: 1.7; font-weight: 300; }
-
-/* ---- About ---- */
-.about-section { margin-bottom: 14px; }
-.about-label { font-family: 'Press Start 2P', monospace; font-size: 7px; font-weight: 400; opacity: 0.5; letter-spacing: 1.5px; text-transform: uppercase; margin-bottom: 4px; image-rendering: pixelated; }
-.about-value { font-size: 13px; line-height: 1.7; font-weight: 300; }
-
-/* Scrollbar retro */
-#retro-page::-webkit-scrollbar { width: 10px; }
-#retro-page::-webkit-scrollbar-track { background: rgba(0,0,0,0.05); }
-#retro-page::-webkit-scrollbar-thumb { background: rgba(0,0,0,0.12); }
 
 ::selection { background: var(--term-accent); color: #fff; }
 </style>
-<!-- KaTeX for LaTeX rendering -->
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.9/katex.min.css">
-<script src="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.9/katex.min.js"></script>
 </head>
 <body>
 
@@ -595,34 +236,6 @@ html, body {
   </div>
 </div>
 
-<!-- RETRO PAGES — iframes pre-loaded, shown/hidden instantly (no reload flash) -->
-<iframe id="retro-navi"
-  style="display:none;position:relative;z-index:10;width:100%;height:100%;border:none;"
-  src="retro/navi-boot.html"></iframe>
-<iframe id="retro-blog"
-  style="display:none;position:relative;z-index:10;width:100%;height:100%;border:none;"
-  src="retro/blog.html"></iframe>
-<iframe id="retro-portfolio"
-  style="display:none;position:relative;z-index:10;width:100%;height:100%;border:none;"
-  src="retro/portfolio.html"></iframe>
-<iframe id="retro-micro"
-  style="display:none;position:relative;z-index:10;width:100%;height:100%;border:none;"
-  src="retro/micro.html"></iframe>
-<iframe id="retro-about"
-  style="display:none;position:relative;z-index:10;width:100%;height:100%;border:none;"
-  src="retro/about.html"></iframe>
-<iframe id="retro-links"
-  style="display:none;position:relative;z-index:10;width:100%;height:100%;border:none;"
-  src="retro/links.html"></iframe>
-<iframe id="retro-login"
-  style="display:none;position:relative;z-index:10;width:100%;height:100%;border:none;"
-  src="retro/login.html"></iframe>
-<iframe id="retro-me"
-  style="display:none;position:relative;z-index:10;width:100%;height:100%;border:none;"
-  src="retro/me.html"></iframe>
-<iframe id="retro-profile"
-  style="display:none;position:relative;z-index:10;width:100%;height:100%;border:none;"
-  src="retro/profile.html"></iframe>
 
 <script>
 // ========== CONTENT DATABASE ==========
@@ -868,29 +481,7 @@ const termPage = document.getElementById('terminal-page');
 const welcomeBanner = document.getElementById('welcome-banner');
 const scrollArea = document.getElementById('term-scroll-area');
 
-const retroFrames = {
-  navi:      document.getElementById('retro-navi'),
-  blog:      document.getElementById('retro-blog'),
-  portfolio: document.getElementById('retro-portfolio'),
-  works:     document.getElementById('retro-portfolio'),
-  micro:     document.getElementById('retro-micro'),
-  about:     document.getElementById('retro-about'),
-  links:     document.getElementById('retro-links'),
-  login:     document.getElementById('retro-login'),
-  me:        document.getElementById('retro-me'),
-  profile:   document.getElementById('retro-profile'),
-};
-
-// Listen for navigation messages from iframe pages
-window.addEventListener('message', (e) => {
-  if (!e.data || e.data.action !== 'navigate') return;
-  const { section, data } = e.data;
-  if (section === 'terminal') { backToTerminal(); }
-  else { showRetro(section, data); }
-});
-
 let bootDone = false;
-let currentSection = 'terminal';
 let commandHistory = [];
 let historyIndex = -1;
 const startTime = Date.now();
@@ -949,19 +540,7 @@ async function boot() {
   welcomeBanner.innerHTML = `<span class="term-bright">  welcome to the wired.</span>
 <span class="term-dim">  no matter where you go, everyone is always connected.</span>
 
-<span class="term-dim">  type</span> <span class="term-accent">help</span> <span class="term-dim">to see available commands, or click a section below:</span>
-
-  <span class="term-link" onclick="runCmd('blog')">[blog]</span>     <span class="term-dim">— 日記・雑記</span>
-  <span class="term-link" onclick="runCmd('works')">[works]</span>    <span class="term-dim">— portfolio</span>
-  <span class="term-link" onclick="runCmd('micro')">[micro]</span>    <span class="term-dim">— 一言</span>
-  <span class="term-link" onclick="runCmd('about')">[about]</span>    <span class="term-dim">— 自己紹介</span>
-  <span class="term-link" onclick="runCmd('links')">[links]</span>    <span class="term-dim">— リンク集</span>
-
-  <span class="term-dim">────────────────────────────</span>
-  <span class="term-link" onclick="runCmd('board')">[board]</span>    <span class="term-dim">— /wired/ anonymous board</span>
-  <span class="term-link" onclick="runCmd('board --cli')">[board --cli]</span> <span class="term-dim">— CLI interface</span>
-  <span class="term-link" onclick="runCmd('lobby')">[lobby]</span>    <span class="term-dim">— anonymous chat lobby</span>
-  <span class="term-link" onclick="runCmd('lobby --cli')">[lobby --cli]</span> <span class="term-dim">— CLI interface</span>
+<span class="term-dim">  type </span><span class="term-accent">help</span><span class="term-dim"> to see available commands.</span>
 `;
   welcomeBanner.style.display = 'block';
 
@@ -971,7 +550,7 @@ async function boot() {
 }
 
 // ========== COMMANDS ==========
-const commandList = ['help','blog','works','portfolio','micro','about','links','login','me','navi','board','lobby','clear','whoami','uptime','ping','ls','connect','lain','sudo','glitch','date','cat','history','fortune','ssh','neofetch'];
+const commandList = ['help','blog','works','portfolio','micro','about','links','login','me','navi','board','lobby','de','clear','whoami','uptime','ping','ls','connect','lain','sudo','glitch','date','cat','history','fortune','ssh','neofetch'];
 
 // ========== VIRTUAL FILESYSTEM (for cat command) ==========
 const vfs = {
@@ -1061,17 +640,19 @@ const commands = {
     ln('');
     lnHTML('<span class="term-bright">available commands:</span>');
     ln('');
-    lnHTML('  <span class="term-accent">blog</span>       <span class="term-dim">open blog / 日記</span>');
-    lnHTML('  <span class="term-accent">works</span>      <span class="term-dim">open portfolio / 作品集</span>');
-    lnHTML('  <span class="term-accent">micro</span>      <span class="term-dim">open micro-posts / 一言</span>');
-    lnHTML('  <span class="term-accent">about</span>      <span class="term-dim">about me / 自己紹介</span>');
-    lnHTML('  <span class="term-accent">links</span>      <span class="term-dim">open link collection / リンク集</span>');
+    lnHTML('  <span class="term-accent">blog</span>       <span class="term-dim">日記・雑記</span>');
+    lnHTML('  <span class="term-accent">works</span>      <span class="term-dim">portfolio / 作品集</span>');
+    lnHTML('  <span class="term-accent">micro</span>      <span class="term-dim">一言</span>');
+    lnHTML('  <span class="term-accent">about</span>      <span class="term-dim">自己紹介</span>');
+    lnHTML('  <span class="term-accent">links</span>      <span class="term-dim">リンク集</span>');
     lnHTML('  <span class="term-accent">navi</span>       <span class="term-dim">NAVI interface [offline]</span>');
     ln('');
     lnHTML('  <span class="term-accent">board</span>      <span class="term-dim">anonymous imageboard / /wired/</span>');
-    lnHTML('  <span class="term-accent">board --cli</span><span class="term-dim">  CLI-only board interface</span>');
+    lnHTML('  <span class="term-accent">board --cli</span><span class="term-dim">  CLI interface</span>');
     lnHTML('  <span class="term-accent">lobby</span>      <span class="term-dim">anonymous chat lobby</span>');
-    lnHTML('  <span class="term-accent">lobby --cli</span><span class="term-dim">  CLI-only lobby interface</span>');
+    lnHTML('  <span class="term-accent">lobby --cli</span><span class="term-dim">  CLI interface</span>');
+    ln('');
+    lnHTML('  <span class="term-accent">de</span>         <span class="term-dim">desktop environment [coming soon]</span>');
     ln('');
     lnHTML('  <span class="term-accent">ls</span>         <span class="term-dim">list directory</span>');
     lnHTML('  <span class="term-accent">cat [file]</span> <span class="term-dim">read a file</span>');
@@ -1088,40 +669,42 @@ const commands = {
   },
 
   navi() {
-    lnHTML('<span class="term-yellow">[WARN]</span> <span class="term-dim">NAVI module is offline. loading placeholder...</span>');
-    setTimeout(() => showRetro('navi'), 400);
+    lnHTML('<span class="term-yellow">[WARN]</span> <span class="term-dim">NAVI module is offline.</span>');
   },
   blog() {
     lnHTML('<span class="term-dim">connecting to blog...</span>');
-    setTimeout(() => showRetro('blog'), 250);
+    setTimeout(() => { window.location.href = '/blog'; }, 250);
   },
   works() {
     lnHTML('<span class="term-dim">loading portfolio...</span>');
-    setTimeout(() => showRetro('portfolio'), 250);
+    setTimeout(() => { window.location.href = '/works'; }, 250);
   },
   portfolio() { commands.works(); },
   micro() {
     lnHTML('<span class="term-dim">loading micro-posts...</span>');
-    setTimeout(() => showRetro('micro'), 250);
+    setTimeout(() => { window.location.href = '/micro'; }, 250);
   },
   about() {
     lnHTML('<span class="term-dim">loading about...</span>');
-    setTimeout(() => showRetro('about'), 250);
+    setTimeout(() => { window.location.href = '/about'; }, 250);
   },
   links() {
     lnHTML('<span class="term-dim">loading link collection...</span>');
-    setTimeout(() => showRetro('links'), 250);
+    setTimeout(() => { window.location.href = '/links'; }, 250);
   },
   login() {
     lnHTML('<span class="term-dim">opening login...</span>');
-    setTimeout(() => showRetro('login'), 250);
+    setTimeout(() => { window.location.href = '/login'; }, 250);
   },
   me() {
     lnHTML('<span class="term-dim">loading user panel...</span>');
     fetch('/api/user/me').then(r => {
-      if (r.ok) { setTimeout(() => showRetro('me'), 250); }
-      else       { setTimeout(() => showRetro('login'), 250); }
-    }).catch(() => setTimeout(() => showRetro('login'), 250));
+      if (r.ok) { setTimeout(() => { window.location.href = '/me'; }, 250); }
+      else       { setTimeout(() => { window.location.href = '/login'; }, 250); }
+    }).catch(() => setTimeout(() => { window.location.href = '/login'; }, 250));
+  },
+  de() {
+    lnHTML('<span class="term-yellow">[WARN]</span> <span class="term-dim">desktop environment not yet available.</span>');
   },
 
   board(args) {
@@ -1445,7 +1028,6 @@ const idleDelays = [45000, 90000, 180000, 300000];
 function scheduleIdle() {
   if (idleStage >= idleDelays.length) return;
   idleTimer = setTimeout(() => {
-    if (currentSection !== 'terminal') { scheduleIdle(); return; }
     const pool = idleMessages[idleStage];
     pool[Math.floor(Math.random() * pool.length)]();
     ln('');
@@ -1474,38 +1056,6 @@ function flashTransition(cb) {
     crtFlash.style.opacity = '0';
   }, 60);
 }
-
-// ========== RETRO PAGE SYSTEM ==========
-let activeFrame = null;
-
-function showRetro(section, data) {
-  const frame = retroFrames[section];
-  if (!frame) return;
-  flashTransition(() => {
-    currentSection = section;
-    termPage.style.display = 'none';
-    if (activeFrame && activeFrame !== frame) activeFrame.style.display = 'none';
-    frame.style.display = 'block';
-    activeFrame = frame;
-    // Pass extra data (e.g. username for profile page) after the frame is visible
-    if (data) frame.contentWindow.postMessage({ action: 'load', data }, '*');
-  });
-}
-
-function backToTerminal() {
-  flashTransition(() => {
-    currentSection = 'terminal';
-    if (activeFrame) { activeFrame.style.display = 'none'; activeFrame = null; }
-    termPage.style.display = 'flex';
-    input.focus();
-    scrollArea.scrollTop = scrollArea.scrollHeight;
-  });
-}
-
-// ========== KEYBOARD ==========
-document.addEventListener('keydown', (e) => {
-  if (e.key === 'Escape' && currentSection !== 'terminal') backToTerminal();
-});
 
 // ========== INIT ==========
 window.addEventListener('load', () => setTimeout(() => { boot(); }, 300));

@@ -43,16 +43,70 @@ const NAV_HTML = `<div class="retro-nav">
   <a onclick="goTo('blog')">[日記]</a><span class="sep"> | </span><a onclick="goTo('portfolio')">[作品]</a><span class="sep"> | </span><a onclick="goTo('micro')">[一言]</a><span class="sep"> | </span><a onclick="goTo('about')">[自己紹介]</a><span class="sep"> | </span><a onclick="goTo('links')">[リンク]</a><span class="sep"> | </span><a onclick="goTo('terminal')">[terminal]</a>
 </div>`;
 
-// Navigation handler — pages post a message to the parent terminal,
-// or fall back to window.history if opened standalone
+// Section → canonical path
+const SECTION_PATHS = {
+  terminal:  '/',
+  blog:      '/blog',
+  portfolio: '/works',
+  works:     '/works',
+  micro:     '/micro',
+  about:     '/about',
+  links:     '/links',
+};
+
 function goTo(section) {
-  if (window.parent && window.parent !== window) {
-    window.parent.postMessage({ action: 'navigate', section }, '*');
-  } else {
-    // standalone: redirect to root and let the shell handle the section
-    window.location.href = `/#${section}`;
-  }
+  window.location.href = SECTION_PATHS[section] ?? '/';
 }
+
+// ── Pixel SVG icons ────────────────────────────────────────────────
+// 16×16 pixel art drawn as SVG rects. No emoji, no external assets.
+
+const ICON_BACK = `<svg width="16" height="16" viewBox="0 0 16 16" xmlns="http://www.w3.org/2000/svg" style="image-rendering:pixelated">
+  <rect x="2" y="7" width="8" height="2" fill="#333"/>
+  <rect x="2" y="5" width="2" height="2" fill="#333"/>
+  <rect x="4" y="3" width="2" height="2" fill="#333"/>
+  <rect x="2" y="9" width="2" height="2" fill="#333"/>
+  <rect x="4" y="11" width="2" height="2" fill="#333"/>
+  <rect x="6" y="5" width="6" height="6" fill="none"/>
+  <rect x="10" y="5" width="2" height="6" fill="#333"/>
+  <rect x="8" y="5" width="2" height="2" fill="#333"/>
+  <rect x="8" y="9" width="2" height="2" fill="#333"/>
+</svg>`;
+
+const ICON_REFRESH = `<svg width="16" height="16" viewBox="0 0 16 16" xmlns="http://www.w3.org/2000/svg" style="image-rendering:pixelated">
+  <rect x="5" y="2" width="6" height="2" fill="#333"/>
+  <rect x="3" y="4" width="2" height="2" fill="#333"/>
+  <rect x="11" y="4" width="2" height="2" fill="#333"/>
+  <rect x="2" y="6" width="2" height="4" fill="#333"/>
+  <rect x="12" y="6" width="2" height="4" fill="#333"/>
+  <rect x="3" y="10" width="2" height="2" fill="#333"/>
+  <rect x="5" y="12" width="6" height="2" fill="#333"/>
+  <rect x="11" y="10" width="2" height="2" fill="#333"/>
+  <rect x="9" y="1" width="4" height="2" fill="#333"/>
+  <rect x="11" y="3" width="2" height="2" fill="#333"/>
+</svg>`;
+
+const ICON_HOME = `<svg width="16" height="16" viewBox="0 0 16 16" xmlns="http://www.w3.org/2000/svg" style="image-rendering:pixelated">
+  <rect x="7" y="2" width="2" height="2" fill="#333"/>
+  <rect x="5" y="4" width="6" height="2" fill="#333"/>
+  <rect x="3" y="6" width="10" height="2" fill="#333"/>
+  <rect x="4" y="8" width="8" height="6" fill="#333"/>
+  <rect x="6" y="10" width="4" height="4" fill="#dddee7"/>
+</svg>`;
+
+const ICON_GLOBE = `<svg width="14" height="14" viewBox="0 0 14 14" xmlns="http://www.w3.org/2000/svg" style="image-rendering:pixelated">
+  <rect x="4" y="1" width="6" height="1" fill="#336"/>
+  <rect x="2" y="2" width="2" height="1" fill="#336"/><rect x="10" y="2" width="2" height="1" fill="#336"/>
+  <rect x="1" y="3" width="1" height="1" fill="#336"/><rect x="12" y="3" width="1" height="1" fill="#336"/>
+  <rect x="1" y="4" width="1" height="6" fill="#336"/><rect x="12" y="4" width="1" height="6" fill="#336"/>
+  <rect x="2" y="10" width="2" height="1" fill="#336"/><rect x="10" y="10" width="2" height="1" fill="#336"/>
+  <rect x="4" y="11" width="6" height="1" fill="#336"/>
+  <rect x="2" y="3" width="10" height="8" fill="#aac4e8"/>
+  <rect x="6" y="1" width="2" height="12" fill="#336"/>
+  <rect x="2" y="6" width="10" height="1" fill="#336"/>
+  <rect x="3" y="3" width="2" height="8" fill="#7aaad4"/>
+  <rect x="9" y="3" width="2" height="8" fill="#7aaad4"/>
+</svg>`;
 
 // Simple markdown renderer (shared)
 function renderMarkdown(src) {
