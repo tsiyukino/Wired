@@ -378,8 +378,8 @@ a:hover { text-decoration: underline; }
    SPARKLES — staggered step blink, pink/purple
 ================================================================ */
 .sparkle-row {
-  display: flex; gap: 8px; align-items: center;
-  font-size: 20px; margin: 8px 0;
+  display: flex; gap: 6px; align-items: center;
+  font-size: 13px; margin: 8px 0;
   justify-content: center;
 }
 .spark { animation: spark-blink 1.2s step-end infinite; color: #c677d3; }
