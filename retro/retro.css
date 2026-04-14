@@ -222,10 +222,10 @@ a:hover { text-decoration: underline; }
   font-weight: 400;
   line-height: 1.9;
   letter-spacing: 3px;
-  color: #00aa38;
+  color: #7700bb;
   text-shadow:
-    2px 3px 4px rgba(0,0,0,0.5),
-    -1px -1px 3px rgba(179,135,209,0.25);
+    2px 3px 4px rgba(0,0,0,0.4),
+    -1px -1px 3px rgba(179,135,209,0.3);
 }
 .retro-header .subtitle {
   font-family: 'Silkscreen', monospace;
@@ -480,8 +480,8 @@ a:hover { text-decoration: underline; }
   font-family: 'Silkscreen', monospace;
   font-size: 17px; font-weight: 700;
   margin-bottom: 6px; letter-spacing: 0.5px;
-  color: #00aa38;
-  text-shadow: 1px 1px 2px rgba(0,0,0,0.4);
+  color: #7700bb;
+  text-shadow: 1px 1px 2px rgba(0,0,0,0.35);
 }
 .blog-excerpt { font-size: 13px; line-height: 1.7; color: #2a0a3a; opacity: 0.8; }
 
@@ -506,8 +506,8 @@ a:hover { text-decoration: underline; }
   font-family: 'Silkscreen', monospace;
   font-size: 22px; font-weight: 700;
   margin-bottom: 14px; line-height: 1.5; letter-spacing: 0.5px;
-  color: #00aa38;
-  text-shadow: 2px 2px 4px rgba(0,0,0,0.45);
+  color: #7700bb;
+  text-shadow: 2px 2px 4px rgba(0,0,0,0.4);
 }
 .detail-body {
   font-size: 15px; line-height: 2; font-weight: 300; letter-spacing: 0.2px;
@@ -516,8 +516,8 @@ a:hover { text-decoration: underline; }
 .detail-body h1 {
   font-family: 'Press Start 2P'; font-size: 13px; font-weight:400;
   margin: 22px 0 10px; line-height:1.8;
-  color: #00aa38;
-  text-shadow: 1px 2px 3px rgba(0,0,0,0.4);
+  color: #7700bb;
+  text-shadow: 1px 2px 3px rgba(0,0,0,0.35);
 }
 .detail-body h2 {
   font-family: 'Silkscreen'; font-size: 18px; font-weight:700;
@@ -668,7 +668,7 @@ a:hover { text-decoration: underline; }
 .theme-micro .retro-deco-right { border-left:  2px solid #6a0d91; }
 .theme-micro .hit-digit { color: #c677d3; }
 .theme-micro .spark { color: #9b3fb5; }
-.theme-micro .retro-header h1 { color: #00aa38; text-shadow: 2px 3px 4px rgba(0,0,0,0.45); }
+.theme-micro .retro-header h1 { color: #7700bb; text-shadow: 2px 3px 4px rgba(0,0,0,0.4); }
 .theme-micro .pixel-hr {
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='6' height='6'%3E%3Crect width='6' height='6' fill='%236a0d91'/%3E%3Crect x='0' y='0' width='2' height='2' fill='%23e8d0ff'/%3E%3Crect x='2' y='2' width='2' height='2' fill='%23e8d0ff'/%3E%3Crect x='4' y='4' width='2' height='2' fill='%23e8d0ff'/%3E%3C/svg%3E");
   background-size: 6px 6px; height: 6px;
