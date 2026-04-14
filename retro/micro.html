@@ -69,6 +69,7 @@ async function renderMicro() {
   document.getElementById('root').innerHTML = `
     <div class="retro-header">
       <h1>■ 一言 ■</h1>
+      ${sparklesN('∗', '·', 12)}
       <div class="subtitle">micro-posts // short thoughts</div>
     </div>
 
@@ -81,7 +82,6 @@ async function renderMicro() {
       </div>
     </div>
 
-    ${sparkles(['∗','·','∗','·','∗','·','∗','·'])}
     <div class="deco-dots">∗ ∗ ∗ ∗ ∗</div>
 
     ${items}

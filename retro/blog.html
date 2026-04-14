@@ -80,6 +80,7 @@ async function renderList() {
   document.getElementById('root').innerHTML = `
     <div class="retro-header">
       <h1>■ 日記・雑記 ■</h1>
+      ${sparklesN('★', '∗', 12)}
       <div class="subtitle">blog // the wired remembers everything</div>
     </div>
 
@@ -94,8 +95,6 @@ async function renderList() {
     </div>
 
     <div class="last-updated">Last updated: ${lastDate}</div>
-
-    ${sparkles(['★','∗','☆','∗','★','∗','☆','∗'])}
 
     <div class="deco-dots">・ ・ ・ ・ ・</div>
 

@@ -33,9 +33,15 @@ function counter() {
   return placeholder;
 }
 
-// Sparkle row
+// Sparkle row — pass a chars array, or a [char, char] pair + count to repeat
 function sparkles(chars = ['★','☆','★','☆','★','☆','★','☆']) {
   return `<div class="sparkle-row">${chars.map(c => `<span class="spark">${c}</span>`).join('')}</div>`;
+}
+
+function sparklesN(a, b, n) {
+  const chars = [];
+  for (let i = 0; i < n; i++) chars.push(i % 2 === 0 ? a : b);
+  return sparkles(chars);
 }
 
 // Shared nav (injected into pages)

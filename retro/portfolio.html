@@ -76,6 +76,7 @@ async function renderList() {
   document.getElementById('root').innerHTML = `
     <div class="retro-header">
       <h1>■ 作品集 ■</h1>
+      ${sparklesN('◆', '◇', 12)}
       <div class="subtitle">works // portfolio</div>
     </div>
 
@@ -88,7 +89,6 @@ async function renderList() {
       </div>
     </div>
 
-    ${sparkles(['◆','◇','◆','◇','◆','◇','◆','◇'])}
     <div class="deco-dots">◆ ◇ ◆ ◇ ◆</div>
 
     ${entries}
