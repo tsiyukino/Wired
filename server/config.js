@@ -42,6 +42,7 @@ const config = Object.freeze({
   adminPasswordHash,
   sessionSecret:     sessionSecret || 'dev-secret-do-not-use-in-prod',
   binTtlDays:        parseInt(process.env.BIN_TTL_DAYS || '7', 10),
+  newTagDays:        parseInt(process.env.NEW_TAG_DAYS || '3', 10),
 });
 
 export default config;

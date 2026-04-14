@@ -602,15 +602,10 @@ tr:hover td { background: rgba(240,168,224,0.45); }
         <td title="${p.title}">${truncate(p.title, 40)}</td>
         <td>${fmt(p.updated_at)}</td>
         <td>
-          <button class="btn-toggle ${p.is_new ? 'btn-toggle-on' : ''}" data-action="new" data-id="${p.id}">[NEW]</button>
           <button class="btn-toggle ${p.pinned ? 'btn-toggle-on' : ''}" data-action="pin" data-id="${p.id}">[PIN]</button>
           <button class="btn-danger" data-id="${p.id}">[ delete ]</button>
         </td>
       `;
-      tr.querySelector('[data-action="new"]').addEventListener('click', async () => {
-        await api('PATCH', `/posts/${p.id}`, { is_new: p.is_new ? 0 : 1 });
-        loadPosts();
-      });
       tr.querySelector('[data-action="pin"]').addEventListener('click', async () => {
         await api('PATCH', `/posts/${p.id}`, { pinned: p.pinned ? 0 : 1 });
         loadPosts();
@@ -746,15 +741,10 @@ tr:hover td { background: rgba(240,168,224,0.45); }
         <td>${truncate(w.tech, 20)}</td>
         <td>${fmt(w.updated_at)}</td>
         <td>
-          <button class="btn-toggle ${w.is_new ? 'btn-toggle-on' : ''}" data-action="new" data-id="${w.id}">[NEW]</button>
           <button class="btn-toggle ${w.pinned ? 'btn-toggle-on' : ''}" data-action="pin" data-id="${w.id}">[PIN]</button>
           <button class="btn-danger" data-id="${w.id}">[ delete ]</button>
         </td>
       `;
-      tr.querySelector('[data-action="new"]').addEventListener('click', async () => {
-        await api('PATCH', `/works/${w.id}`, { is_new: w.is_new ? 0 : 1 });
-        loadWorks();
-      });
       tr.querySelector('[data-action="pin"]').addEventListener('click', async () => {
         await api('PATCH', `/works/${w.id}`, { pinned: w.pinned ? 0 : 1 });
         loadWorks();
@@ -794,15 +784,10 @@ tr:hover td { background: rgba(240,168,224,0.45); }
         <td style="white-space:nowrap">${fmt(p.created_at)}</td>
         <td title="${p.text}">${truncate(p.text, 80)}</td>
         <td>
-          <button class="btn-toggle ${p.is_new ? 'btn-toggle-on' : ''}" data-action="new" data-id="${p.id}">[NEW]</button>
           <button class="btn-toggle ${p.pinned ? 'btn-toggle-on' : ''}" data-action="pin" data-id="${p.id}">[PIN]</button>
           <button class="btn-danger" data-id="${p.id}">[ delete ]</button>
         </td>
       `;
-      tr.querySelector('[data-action="new"]').addEventListener('click', async () => {
-        await api('PATCH', `/micro/${p.id}`, { is_new: p.is_new ? 0 : 1 });
-        loadMicro();
-      });
       tr.querySelector('[data-action="pin"]').addEventListener('click', async () => {
         await api('PATCH', `/micro/${p.id}`, { pinned: p.pinned ? 0 : 1 });
         loadMicro();

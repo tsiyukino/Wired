@@ -2,6 +2,7 @@ import path from 'path';
 import { readFileSync } from 'fs';
 import { fileURLToPath } from 'url';
 import { getDb } from '../db.js';
+import config from '../config.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const ABOUT_JS  = path.resolve(__dirname, '../../retro/content/about.js');
@@ -10,9 +11,12 @@ export function registerContentRoutes(app) {
 
   // GET /api/posts
   app.get('/api/posts', (req, res) => {
+    const cutoff = new Date(Date.now() - config.newTagDays * 86400000).toISOString();
     const posts = getDb()
-      .prepare(`SELECT id, slug, title, is_new, pinned, created_at, updated_at FROM blog_posts ORDER BY pinned DESC, id DESC`)
-      .all();
+      .prepare(`SELECT id, slug, title, pinned, created_at, updated_at,
+                  (created_at >= ?) AS is_new
+                FROM blog_posts ORDER BY pinned DESC, id DESC`)
+      .all(cutoff);
     res.json({ posts });
   });
 
@@ -27,9 +31,12 @@ export function registerContentRoutes(app) {
 
   // GET /api/works
   app.get('/api/works', (req, res) => {
+    const cutoff = new Date(Date.now() - config.newTagDays * 86400000).toISOString();
     const works = getDb()
-      .prepare(`SELECT id, slug, title, tech, is_new, pinned, created_at, updated_at FROM works ORDER BY pinned DESC, id DESC`)
-      .all();
+      .prepare(`SELECT id, slug, title, tech, pinned, created_at, updated_at,
+                  (created_at >= ?) AS is_new
+                FROM works ORDER BY pinned DESC, id DESC`)
+      .all(cutoff);
     res.json({ works });
   });
 
@@ -44,9 +51,12 @@ export function registerContentRoutes(app) {
 
   // GET /api/micro
   app.get('/api/micro', (req, res) => {
+    const cutoff = new Date(Date.now() - config.newTagDays * 86400000).toISOString();
     const posts = getDb()
-      .prepare(`SELECT * FROM micro_posts ORDER BY pinned DESC, id DESC`)
-      .all();
+      .prepare(`SELECT id, text, pinned, created_at,
+                  (created_at >= ?) AS is_new
+                FROM micro_posts ORDER BY pinned DESC, id DESC`)
+      .all(cutoff);
     res.json({ posts });
   });
 

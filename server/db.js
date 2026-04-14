@@ -67,7 +67,6 @@ export function initSchema() {
       filename   TEXT NOT NULL,
       title      TEXT NOT NULL,
       body       TEXT NOT NULL,
-      is_new     INTEGER NOT NULL DEFAULT 0,
       pinned     INTEGER NOT NULL DEFAULT 0,
       created_at TEXT NOT NULL,
       updated_at TEXT NOT NULL
@@ -81,7 +80,6 @@ export function initSchema() {
       title      TEXT NOT NULL,
       tech       TEXT NOT NULL DEFAULT '',
       body       TEXT NOT NULL,
-      is_new     INTEGER NOT NULL DEFAULT 0,
       pinned     INTEGER NOT NULL DEFAULT 0,
       created_at TEXT NOT NULL,
       updated_at TEXT NOT NULL
@@ -91,7 +89,6 @@ export function initSchema() {
     CREATE TABLE IF NOT EXISTS micro_posts (
       id         INTEGER PRIMARY KEY AUTOINCREMENT,
       text       TEXT NOT NULL,
-      is_new     INTEGER NOT NULL DEFAULT 0,
       pinned     INTEGER NOT NULL DEFAULT 0,
       created_at TEXT NOT NULL
     );
@@ -157,11 +154,8 @@ export function initSchema() {
   // SQLite ADD COLUMN is safe to run repeatedly — it errors only if the column
   // already exists, so we suppress that specific error.
   const migrations = [
-    `ALTER TABLE blog_posts  ADD COLUMN is_new INTEGER NOT NULL DEFAULT 0`,
     `ALTER TABLE blog_posts  ADD COLUMN pinned INTEGER NOT NULL DEFAULT 0`,
-    `ALTER TABLE works       ADD COLUMN is_new INTEGER NOT NULL DEFAULT 0`,
     `ALTER TABLE works       ADD COLUMN pinned INTEGER NOT NULL DEFAULT 0`,
-    `ALTER TABLE micro_posts ADD COLUMN is_new INTEGER NOT NULL DEFAULT 0`,
     `ALTER TABLE micro_posts ADD COLUMN pinned INTEGER NOT NULL DEFAULT 0`,
   ];
   for (const sql of migrations) {
