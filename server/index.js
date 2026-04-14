@@ -29,6 +29,10 @@ app.use(cookieParser());
 // Trust Cloudflare's forwarded IP for rate limiting
 app.set('trust proxy', 1);
 
+// Session middleware must run before any route that inspects req.user
+app.use(sessionMiddleware);
+app.use(userSessionMiddleware);
+
 // Block Reference/ and legacy files before static middleware sees them
 app.use((req, res, next) => {
   if (req.path.startsWith('/Reference/') || EXCLUDED.has(req.path)) {
@@ -73,10 +77,6 @@ app.use((req, res, next) => {
 
 // Static files — serve the project root (minus the excluded paths above)
 app.use(express.static(ROOT));
-
-// Session middleware — attaches req.isAdmin and req.user on every request
-app.use(sessionMiddleware);
-app.use(userSessionMiddleware);
 
 // Admin panel — secret path serves the SPA; API routes follow
 registerAdminStatic(app, config.adminPath);
