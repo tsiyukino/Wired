@@ -201,12 +201,12 @@ a:hover { text-decoration: underline; }
    SIDEBAR DECO STRIPS — striped left/right borders
 ================================================================ */
 .retro-deco-left {
-  position: fixed; left: 0; top: 117px;
-  width: 18px; height: calc(100% - 117px); z-index: 10;
+  position: fixed; left: 0; top: 96px;
+  width: 18px; height: calc(100% - 96px); z-index: 10;
 }
 .retro-deco-right {
-  position: fixed; right: 0; top: 117px;
-  width: 18px; height: calc(100% - 117px); z-index: 10;
+  position: fixed; right: 0; top: 96px;
+  width: 18px; height: calc(100% - 96px); z-index: 10;
 }
 
 /* ================================================================

@@ -40,7 +40,7 @@ function sparkles(chars = ['★','☆','★','☆','★','☆','★','☆']) {
 
 // Shared nav (injected into pages)
 const NAV_HTML = `<div class="retro-nav">
-  <a onclick="goTo('blog')">[日記]</a><span class="sep"> | </span><a onclick="goTo('portfolio')">[作品]</a><span class="sep"> | </span><a onclick="goTo('micro')">[一言]</a><span class="sep"> | </span><a onclick="goTo('about')">[自己紹介]</a><span class="sep"> | </span><a onclick="goTo('links')">[リンク]</a><span class="sep"> | </span><a onclick="goTo('terminal')">[terminal]</a>
+  <a onclick="goTo('blog')">[日記]</a><span class="sep"> | </span><a onclick="goTo('portfolio')">[作品]</a><span class="sep"> | </span><a onclick="goTo('micro')">[一言]</a><span class="sep"> | </span><a onclick="goTo('about')">[自己紹介]</a><span class="sep"> | </span><a onclick="goTo('links')">[リンク]</a>
 </div>`;
 
 // Section → canonical path
