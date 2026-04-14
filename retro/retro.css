@@ -222,7 +222,7 @@ a:hover { text-decoration: underline; }
   font-weight: 400;
   line-height: 1.9;
   letter-spacing: 3px;
-  color: #6a8a1a;
+  color: #5a7a00;
   text-shadow:
     2px 3px 4px rgba(0,0,0,0.5),
     -1px -1px 3px rgba(179,135,209,0.25);
@@ -480,7 +480,7 @@ a:hover { text-decoration: underline; }
   font-family: 'Silkscreen', monospace;
   font-size: 17px; font-weight: 700;
   margin-bottom: 6px; letter-spacing: 0.5px;
-  color: #6a8a1a;
+  color: #5a7a00;
   text-shadow: 1px 1px 2px rgba(0,0,0,0.4);
 }
 .blog-excerpt { font-size: 13px; line-height: 1.7; color: #2a0a3a; opacity: 0.8; }
@@ -506,7 +506,7 @@ a:hover { text-decoration: underline; }
   font-family: 'Silkscreen', monospace;
   font-size: 22px; font-weight: 700;
   margin-bottom: 14px; line-height: 1.5; letter-spacing: 0.5px;
-  color: #6a8a1a;
+  color: #5a7a00;
   text-shadow: 2px 2px 4px rgba(0,0,0,0.45);
 }
 .detail-body {
@@ -516,7 +516,7 @@ a:hover { text-decoration: underline; }
 .detail-body h1 {
   font-family: 'Press Start 2P'; font-size: 13px; font-weight:400;
   margin: 22px 0 10px; line-height:1.8;
-  color: #6a8a1a;
+  color: #5a7a00;
   text-shadow: 1px 2px 3px rgba(0,0,0,0.4);
 }
 .detail-body h2 {
@@ -635,7 +635,7 @@ a:hover { text-decoration: underline; }
 }
 .theme-portfolio .retro-deco-left  { border-right: 2px solid #5a7a10; }
 .theme-portfolio .retro-deco-right { border-left:  2px solid #5a7a10; }
-.theme-portfolio .retro-header h1 { color: #6a8a1a; text-shadow: 2px 3px 4px rgba(0,0,0,0.5); }
+.theme-portfolio .retro-header h1 { color: #5a7a00; text-shadow: 2px 3px 4px rgba(0,0,0,0.5); }
 .theme-portfolio .blog-entry-head { background: #c8e860; border-color: #89ad25; }
 .theme-portfolio .pixel-hr {
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='4'%3E%3Crect x='0' y='0' width='4' height='4' fill='%2389ad25'/%3E%3Crect x='4' y='0' width='4' height='4' fill='%23c8e860'/%3E%3Crect x='8' y='0' width='4' height='4' fill='%2389ad25'/%3E%3C/svg%3E");
@@ -643,7 +643,7 @@ a:hover { text-decoration: underline; }
 }
 .theme-portfolio .hit-digit { color: #89ad25; }
 .theme-portfolio .spark { color: #89ad25; }
-.theme-portfolio .blog-title { color: #6a8a1a; }
+.theme-portfolio .blog-title { color: #5a7a00; }
 .theme-portfolio .retro-nav { background: #d4f070; }
 .theme-portfolio .retro-marquee { background: #c8e860; color: #2a3a0a; border-color: #89ad25; }
 .theme-portfolio ::-webkit-scrollbar-thumb { background: #89ad25; }
