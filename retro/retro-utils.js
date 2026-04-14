@@ -53,6 +53,9 @@ const SECTION_PATHS = {
   micro:     '/micro',
   about:     '/about',
   links:     '/links',
+  login:     '/login',
+  me:        '/me',
+  members:   '/members',
 };
 
 function goTo(section) {

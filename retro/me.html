@@ -148,7 +148,7 @@ input:focus, textarea:focus { border-color: #c677d3; }
 <script type="module">
   async function load() {
     const r = await fetch('/api/user/me');
-    if (!r.ok) return; // not logged in — stay blank until navigated here intentionally
+    if (!r.ok) { goTo('login'); return; }
     const { user } = await r.json();
 
     document.getElementById('topbar-name').textContent = `∗ ${user.display_name} ∗`;
