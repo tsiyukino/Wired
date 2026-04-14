@@ -685,9 +685,7 @@ const commands = {
     lnHTML('  <span class="term-accent">navi</span>       <span class="term-dim">NAVI interface [offline]</span>');
     ln('');
     lnHTML('  <span class="term-accent">board</span>      <span class="term-dim">anonymous imageboard / /wired/</span>');
-    lnHTML('  <span class="term-accent">board --cli</span><span class="term-dim">  CLI interface</span>');
     lnHTML('  <span class="term-accent">lobby</span>      <span class="term-dim">anonymous chat lobby</span>');
-    lnHTML('  <span class="term-accent">lobby --cli</span><span class="term-dim">  CLI interface</span>');
     ln('');
     lnHTML('  <span class="term-accent">de</span>         <span class="term-dim">desktop environment [coming soon]</span>');
     ln('');
@@ -768,10 +766,16 @@ const commands = {
   },
 
   board(args) {
-    const cli = (args || '').trim() === '--cli';
-    if (cli) {
+    const arg = (args || '').trim();
+    if (arg === '--cli') {
       lnHTML('<span class="term-dim">launching board CLI...</span>');
       setTimeout(() => { window.location.href = '/board/cli'; }, 300);
+    } else if (arg === 'help') {
+      ln('');
+      lnHTML('<span class="term-bright">board</span>');
+      lnHTML('  <span class="term-accent">board</span>        <span class="term-dim">open GUI board</span>');
+      lnHTML('  <span class="term-accent">board --cli</span>  <span class="term-dim">CLI interface</span>');
+      ln('');
     } else {
       lnHTML('<span class="term-dim">connecting to /wired/ board...</span>');
       setTimeout(() => { window.location.href = '/board'; }, 300);
@@ -779,10 +783,16 @@ const commands = {
   },
 
   lobby(args) {
-    const cli = (args || '').trim() === '--cli';
-    if (cli) {
+    const arg = (args || '').trim();
+    if (arg === '--cli') {
       lnHTML('<span class="term-dim">launching lobby CLI...</span>');
       setTimeout(() => { window.location.href = '/lobby/cli'; }, 300);
+    } else if (arg === 'help') {
+      ln('');
+      lnHTML('<span class="term-bright">lobby</span>');
+      lnHTML('  <span class="term-accent">lobby</span>        <span class="term-dim">open GUI lobby</span>');
+      lnHTML('  <span class="term-accent">lobby --cli</span>  <span class="term-dim">CLI interface</span>');
+      ln('');
     } else {
       lnHTML('<span class="term-dim">connecting to wired lobby...</span>');
       setTimeout(() => { window.location.href = '/lobby'; }, 300);
