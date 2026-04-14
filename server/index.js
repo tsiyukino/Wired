@@ -33,9 +33,9 @@ app.set('trust proxy', 1);
 app.use(sessionMiddleware);
 app.use(userSessionMiddleware);
 
-// Block Reference/ and legacy files before static middleware sees them
+// Block Reference/, legacy files, and direct access to admin/ source files
 app.use((req, res, next) => {
-  if (req.path.startsWith('/Reference/') || EXCLUDED.has(req.path)) {
+  if (req.path.startsWith('/Reference/') || req.path.startsWith('/admin/') || EXCLUDED.has(req.path)) {
     return res.status(404).end();
   }
   next();
@@ -64,6 +64,11 @@ app.get('/members',   (req, res) => {
 });
 app.get('/u/:username', (req, res) => res.sendFile(path.join(ROOT, 'retro/profile.html')));
 
+// Admin panel — must be registered before clean-URL and static middleware so
+// the secret path is matched first and /admin is never served directly.
+registerAdminStatic(app, config.adminPath);
+registerAdminRoutes(app);
+
 // Clean URLs — /foo serves /foo.html, /foo/bar serves /foo/bar.html
 // Skips paths that already have an extension, API routes, and WS upgrades.
 app.use((req, res, next) => {
@@ -75,12 +80,8 @@ app.use((req, res, next) => {
   });
 });
 
-// Static files — serve the project root (minus the excluded paths above)
-app.use(express.static(ROOT));
-
-// Admin panel — secret path serves the SPA; API routes follow
-registerAdminStatic(app, config.adminPath);
-registerAdminRoutes(app);
+// Static files — directory indexes disabled so /admin never serves admin/index.html directly.
+app.use(express.static(ROOT, { index: false }));
 
 // Public API routes
 registerContentRoutes(app);
