@@ -56,7 +56,11 @@ async function renderMicro() {
 
   const items = posts.length ? posts.map(p => `
     <div class="micro-item">
-      <div class="micro-time">${p.created_at.slice(0,16).replace('T',' ')}</div>
+      <div class="micro-time">
+        ${p.created_at.slice(0,16).replace('T',' ')}
+        ${p.pinned ? '<span class="badge-pin">PIN</span>' : ''}
+        ${p.is_new ? '<span class="badge-new">NEW</span>' : ''}
+      </div>
       <div class="micro-text">${p.text}</div>
     </div>
     <div class="pixel-hr"></div>

@@ -365,6 +365,15 @@ a:hover { text-decoration: underline; }
   50%      { background: #c677d3; border-color: #fcd0fe; }
 }
 
+.badge-pin {
+  display: inline-block;
+  background: #001a7a; color: #7af0ff;
+  font-family: 'Press Start 2P', monospace;
+  font-size: 9px; padding: 3px 7px;
+  border: 2px solid #7af0ff;
+  vertical-align: middle; margin-left: 6px;
+}
+
 /* ================================================================
    SPARKLES — staggered step blink, pink/purple
 ================================================================ */

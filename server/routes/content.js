@@ -11,7 +11,7 @@ export function registerContentRoutes(app) {
   // GET /api/posts
   app.get('/api/posts', (req, res) => {
     const posts = getDb()
-      .prepare(`SELECT id, slug, title, created_at, updated_at FROM blog_posts ORDER BY id DESC`)
+      .prepare(`SELECT id, slug, title, is_new, pinned, created_at, updated_at FROM blog_posts ORDER BY pinned DESC, id DESC`)
       .all();
     res.json({ posts });
   });
@@ -28,7 +28,7 @@ export function registerContentRoutes(app) {
   // GET /api/works
   app.get('/api/works', (req, res) => {
     const works = getDb()
-      .prepare(`SELECT id, slug, title, tech, created_at, updated_at FROM works ORDER BY id DESC`)
+      .prepare(`SELECT id, slug, title, tech, is_new, pinned, created_at, updated_at FROM works ORDER BY pinned DESC, id DESC`)
       .all();
     res.json({ works });
   });
@@ -45,7 +45,7 @@ export function registerContentRoutes(app) {
   // GET /api/micro
   app.get('/api/micro', (req, res) => {
     const posts = getDb()
-      .prepare(`SELECT * FROM micro_posts ORDER BY id DESC`)
+      .prepare(`SELECT * FROM micro_posts ORDER BY pinned DESC, id DESC`)
       .all();
     res.json({ posts });
   });

@@ -128,13 +128,37 @@ export function registerAdminRoutes(app) {
         db.prepare(`UPDATE blog_posts SET body = ?, filename = ?, title = ?, updated_at = ? WHERE slug = ?`)
           .run(body, req.file.originalname, title, now, slug);
       } else {
-        db.prepare(`INSERT INTO blog_posts (slug, filename, title, body, created_at, updated_at) VALUES (?,?,?,?,?,?)`)
-          .run(slug, req.file.originalname, title, body, now, now);
+        // New upload: mark it NEW, clear NEW on all others
+        db.transaction(() => {
+          db.prepare(`UPDATE blog_posts SET is_new = 0`).run();
+          db.prepare(`INSERT INTO blog_posts (slug, filename, title, body, is_new, pinned, created_at, updated_at) VALUES (?,?,?,?,1,0,?,?)`)
+            .run(slug, req.file.originalname, title, body, now, now);
+        })();
       }
 
       const post = db.prepare(`SELECT * FROM blog_posts WHERE slug = ?`).get(slug);
       res.status(existing ? 200 : 201).json({ post });
     });
+  });
+
+  // PATCH /api/admin/posts/:id — toggle is_new or pinned
+  app.patch('/api/admin/posts/:id', requireAdmin, (req, res) => {
+    const db  = getDb();
+    const row = db.prepare(`SELECT id FROM blog_posts WHERE id = ?`).get(req.params.id);
+    if (!row) return res.status(404).json({ error: 'not found' });
+    const { is_new, pinned } = req.body ?? {};
+    if (is_new !== undefined) {
+      // Only one post can be NEW at a time
+      db.transaction(() => {
+        db.prepare(`UPDATE blog_posts SET is_new = 0`).run();
+        if (is_new) db.prepare(`UPDATE blog_posts SET is_new = 1 WHERE id = ?`).run(row.id);
+      })();
+    }
+    if (pinned !== undefined) {
+      db.prepare(`UPDATE blog_posts SET pinned = ? WHERE id = ?`).run(pinned ? 1 : 0, row.id);
+    }
+    const post = db.prepare(`SELECT id, slug, title, is_new, pinned, created_at, updated_at FROM blog_posts WHERE id = ?`).get(row.id);
+    res.json({ post });
   });
 
   // DELETE /api/admin/posts/:id
@@ -290,13 +314,35 @@ export function registerAdminRoutes(app) {
         db.prepare(`UPDATE works SET body = ?, filename = ?, title = ?, tech = ?, updated_at = ? WHERE slug = ?`)
           .run(body, req.file.originalname, title, tech, now, slug);
       } else {
-        db.prepare(`INSERT INTO works (slug, filename, title, tech, body, created_at, updated_at) VALUES (?,?,?,?,?,?,?)`)
-          .run(slug, req.file.originalname, title, tech, body, now, now);
+        db.transaction(() => {
+          db.prepare(`UPDATE works SET is_new = 0`).run();
+          db.prepare(`INSERT INTO works (slug, filename, title, tech, body, is_new, pinned, created_at, updated_at) VALUES (?,?,?,?,?,1,0,?,?)`)
+            .run(slug, req.file.originalname, title, tech, body, now, now);
+        })();
       }
 
       const work = db.prepare(`SELECT * FROM works WHERE slug = ?`).get(slug);
       res.status(existing ? 200 : 201).json({ work });
     });
+  });
+
+  // PATCH /api/admin/works/:id — toggle is_new or pinned
+  app.patch('/api/admin/works/:id', requireAdmin, (req, res) => {
+    const db  = getDb();
+    const row = db.prepare(`SELECT id FROM works WHERE id = ?`).get(req.params.id);
+    if (!row) return res.status(404).json({ error: 'not found' });
+    const { is_new, pinned } = req.body ?? {};
+    if (is_new !== undefined) {
+      db.transaction(() => {
+        db.prepare(`UPDATE works SET is_new = 0`).run();
+        if (is_new) db.prepare(`UPDATE works SET is_new = 1 WHERE id = ?`).run(row.id);
+      })();
+    }
+    if (pinned !== undefined) {
+      db.prepare(`UPDATE works SET pinned = ? WHERE id = ?`).run(pinned ? 1 : 0, row.id);
+    }
+    const work = db.prepare(`SELECT id, slug, title, tech, is_new, pinned, created_at, updated_at FROM works WHERE id = ?`).get(row.id);
+    res.json({ work });
   });
 
   // DELETE /api/admin/works/:id
@@ -324,10 +370,33 @@ export function registerAdminRoutes(app) {
     if (!text?.trim()) return res.status(400).json({ error: 'text is required' });
     const db  = getDb();
     const now = isoNow();
-    const info = db.prepare(`INSERT INTO micro_posts (text, created_at) VALUES (?, ?)`)
-      .run(text.trim(), now);
-    const post = db.prepare(`SELECT * FROM micro_posts WHERE id = ?`).get(info.lastInsertRowid);
+    let post;
+    db.transaction(() => {
+      db.prepare(`UPDATE micro_posts SET is_new = 0`).run();
+      const info = db.prepare(`INSERT INTO micro_posts (text, is_new, pinned, created_at) VALUES (?,1,0,?)`)
+        .run(text.trim(), now);
+      post = db.prepare(`SELECT * FROM micro_posts WHERE id = ?`).get(info.lastInsertRowid);
+    })();
     res.status(201).json({ post });
+  });
+
+  // PATCH /api/admin/micro/:id — toggle is_new or pinned
+  app.patch('/api/admin/micro/:id', requireAdmin, (req, res) => {
+    const db  = getDb();
+    const row = db.prepare(`SELECT id FROM micro_posts WHERE id = ?`).get(req.params.id);
+    if (!row) return res.status(404).json({ error: 'not found' });
+    const { is_new, pinned } = req.body ?? {};
+    if (is_new !== undefined) {
+      db.transaction(() => {
+        db.prepare(`UPDATE micro_posts SET is_new = 0`).run();
+        if (is_new) db.prepare(`UPDATE micro_posts SET is_new = 1 WHERE id = ?`).run(row.id);
+      })();
+    }
+    if (pinned !== undefined) {
+      db.prepare(`UPDATE micro_posts SET pinned = ? WHERE id = ?`).run(pinned ? 1 : 0, row.id);
+    }
+    const post = db.prepare(`SELECT * FROM micro_posts WHERE id = ?`).get(row.id);
+    res.json({ post });
   });
 
   // DELETE /api/admin/micro/:id

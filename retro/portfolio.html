@@ -62,6 +62,8 @@ async function renderList() {
         <div class="blog-date">◆ ${w.slug}</div>
         <div style="display:flex;align-items:center;gap:4px;">
           <span class="blog-tags">${w.tech}</span>
+          ${w.pinned ? '<span class="badge-pin">PIN</span>' : ''}
+          ${w.is_new ? '<span class="badge-new">NEW</span>' : ''}
         </div>
       </div>
       <div class="blog-entry-body">
@@ -118,7 +120,7 @@ async function renderDetail(slug) {
   document.getElementById('root').innerHTML = `
     ${NAV_HTML}
     <a class="detail-back" onclick="renderList()">← back to 作品集</a>
-    <div class="detail-title">${work.title}</div>
+    <div class="detail-title">${work.title} ${work.is_new ? '<span class="badge-new">NEW</span>' : ''}</div>
     <div class="pixel-hr"></div>
     <div class="detail-body">${renderMarkdown(work.body)}</div>
     <div class="pf-tech" style="margin-top:16px;">技術: ${work.tech}</div>

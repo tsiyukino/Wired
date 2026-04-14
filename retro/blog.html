@@ -63,6 +63,10 @@ async function renderList() {
     <div class="blog-entry" onclick="renderDetail('${p.slug}')">
       <div class="blog-entry-head">
         <div class="blog-date">■ ${p.created_at.slice(0,10).replace(/-/g,'.')}</div>
+        <div style="display:flex;align-items:center;gap:4px;">
+          ${p.pinned ? '<span class="badge-pin">PIN</span>' : ''}
+          ${p.is_new ? '<span class="badge-new">NEW</span>' : ''}
+        </div>
       </div>
       <div class="blog-entry-body">
         <div class="blog-title">${p.title}</div>
@@ -128,7 +132,7 @@ async function renderDetail(slug) {
     ${NAV_HTML}
     <a class="detail-back" onclick="renderList()">← back to 日記</a>
     <div class="detail-date">■ ${date}</div>
-    <div class="detail-title">${post.title}</div>
+    <div class="detail-title">${post.title} ${post.is_new ? '<span class="badge-new">NEW</span>' : ''}</div>
     <div class="pixel-hr"></div>
     <div class="detail-body">${renderMarkdown(post.body)}</div>
     <div class="pixel-hr" style="margin-top:16px;"></div>
