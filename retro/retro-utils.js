@@ -9,12 +9,28 @@ function hitCounter(n) {
 }
 
 function counter() {
-  const key = 'wired_hit_counter';
-  let n = parseInt(localStorage.getItem(key) || '0', 10);
-  if (!n) n = Math.floor(Math.random() * 900 + 100) + 50000;
-  n += 1;
-  localStorage.setItem(key, String(n));
-  return `<div class="retro-counter">あなたは ${hitCounter(n)} 人目の訪問者です</div>`;
+  const dashSpans = Array.from({length: 6}, () => `<span class="hit-digit">-</span>`).join('');
+  const placeholder = `<div class="retro-counter">あなたは <span class="hit-counter">${dashSpans}</span> 人目の訪問者です</div>`;
+
+  const render = (n) => {
+    document.querySelectorAll('.retro-counter').forEach(el => {
+      el.outerHTML = `<div class="retro-counter">あなたは ${hitCounter(n)} 人目の訪問者です</div>`;
+    });
+  };
+
+  const alreadyVisited = sessionStorage.getItem('wired_visited');
+  const url = alreadyVisited ? '/api/visitors' : '/api/visitors/hit';
+  const opts = alreadyVisited ? {} : { method: 'POST' };
+
+  fetch(url, opts)
+    .then(r => r.json())
+    .then(data => {
+      if (!alreadyVisited) sessionStorage.setItem('wired_visited', '1');
+      render(data.count);
+    })
+    .catch(() => {}); // leave placeholder on network failure
+
+  return placeholder;
 }
 
 // Sparkle row

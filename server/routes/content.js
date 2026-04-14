@@ -67,4 +67,18 @@ export function registerContentRoutes(app) {
     const button = db.prepare(`SELECT * FROM link_button LIMIT 1`).get() ?? null;
     res.json({ links, button });
   });
+
+  // GET /api/visitors — read current count without incrementing
+  app.get('/api/visitors', (req, res) => {
+    const row = getDb().prepare(`SELECT visitor_count FROM site_stats WHERE id = 1`).get();
+    res.json({ count: row ? row.visitor_count : 0 });
+  });
+
+  // POST /api/visitors/hit — increment count, return new value
+  app.post('/api/visitors/hit', (req, res) => {
+    const db = getDb();
+    db.prepare(`UPDATE site_stats SET visitor_count = visitor_count + 1 WHERE id = 1`).run();
+    const row = db.prepare(`SELECT visitor_count FROM site_stats WHERE id = 1`).get();
+    res.json({ count: row.visitor_count });
+  });
 }

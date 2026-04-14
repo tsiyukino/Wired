@@ -102,6 +102,12 @@ export function initSchema() {
       created_at TEXT NOT NULL
     );
 
+    -- Global site statistics. Always exactly one row (id = 1).
+    CREATE TABLE IF NOT EXISTS site_stats (
+      id            INTEGER PRIMARY KEY CHECK(id = 1),
+      visitor_count INTEGER NOT NULL DEFAULT 0
+    );
+
     -- Single 88x31 button representing this site.
     -- At most one row; image served as a static file.
     CREATE TABLE IF NOT EXISTS link_button (
@@ -138,6 +144,8 @@ export function initSchema() {
       created_at   TEXT NOT NULL
     );
   `);
+
+  db.prepare(`INSERT OR IGNORE INTO site_stats (id, visitor_count) VALUES (1, 0)`).run();
 }
 
 // Purge bin rows whose expires_at is in the past.
