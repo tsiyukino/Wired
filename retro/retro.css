@@ -379,7 +379,7 @@ a:hover { text-decoration: underline; }
 ================================================================ */
 .sparkle-row {
   display: flex; gap: 6px; align-items: center;
-  font-size: 13px; margin: 8px 0;
+  font-size: 16px; margin: 8px 0;
   justify-content: center;
 }
 .spark { animation: spark-blink 1.2s step-end infinite; color: #c677d3; }
@@ -456,7 +456,7 @@ a:hover { text-decoration: underline; }
   font-size: 10px; color: #6a0d91; opacity: 0.55; margin-bottom: 12px;
 }
 .deco-dots {
-  text-align: center; font-size: 13px;
+  text-align: center; font-size: 16px;
   color: #c677d3; letter-spacing: 6px; margin: 12px 0;
 }
 .jp-only-banner {
@@ -468,7 +468,7 @@ a:hover { text-decoration: underline; }
    KAOMOJI STRIP
 ================================================================ */
 .kaomoji-strip {
-  font-size: 13px; line-height: 2.4;
+  font-size: 16px; line-height: 2.4;
   font-family: 'IBM Plex Mono', monospace;
   letter-spacing: 2px; text-align: center;
   margin: 10px 0; color: #6a0d91;
