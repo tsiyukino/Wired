@@ -486,6 +486,34 @@ let commandHistory = [];
 let historyIndex = -1;
 const startTime = Date.now();
 
+let currentUser = null; // null = visitor; object = logged-in user
+
+function promptStr() {
+  return currentUser ? `${currentUser.username}@wired:~$` : 'visitor@wired:~$';
+}
+
+function promptClass() {
+  return currentUser ? 'term-accent' : 'term-green';
+}
+
+function updatePrompt() {
+  const el = document.querySelector('.term-prompt');
+  if (el) {
+    el.textContent = promptStr();
+    el.style.color = currentUser ? '#c677d3' : '';
+  }
+}
+
+async function refreshSession() {
+  try {
+    const r = await fetch('/api/user/me');
+    currentUser = r.ok ? (await r.json()).user : null;
+  } catch {
+    currentUser = null;
+  }
+  updatePrompt();
+}
+
 function ln(text = '', cls = '') {
   const span = document.createElement('span');
   span.className = 'term-line';
@@ -545,12 +573,13 @@ async function boot() {
   welcomeBanner.style.display = 'block';
 
   bootDone = true;
+  await refreshSession();
   input.focus();
   scheduleIdle();
 }
 
 // ========== COMMANDS ==========
-const commandList = ['help','blog','works','portfolio','micro','about','links','login','me','navi','board','lobby','de','clear','whoami','uptime','ping','ls','connect','lain','sudo','glitch','date','cat','history','fortune','ssh','neofetch'];
+const commandList = ['help','blog','works','portfolio','micro','about','links','login','logout','me','navi','board','lobby','de','clear','whoami','uptime','ping','ls','connect','lain','sudo','glitch','date','cat','history','fortune','ssh','neofetch'];
 
 // ========== VIRTUAL FILESYSTEM (for cat command) ==========
 const vfs = {
@@ -598,7 +627,7 @@ const vfs = {
     ['  everyone is always connected.', ''],
     ['', ''],
   ],
-  'wired.txt': [
+  'wired.txt': () => [
     ['', ''],
     ['  THE WIRED — INTERNAL MEMO', 'bright'],
     ['  date: [TIMESTAMP CORRUPTED]', 'dim'],
@@ -606,16 +635,24 @@ const vfs = {
     ['  The Wired is not the internet.', ''],
     ['  The internet is a shadow of the Wired.', ''],
     ['', ''],
-    ['  access level : visitor', 'dim'],
-    ['  node ID      : <span class="term-accent">unassigned</span>', 'h'],
+    [`  access level : ${currentUser ? 'user' : 'visitor'}`, 'dim'],
+    [`  node ID      : <span class="term-accent">${currentUser ? escapeHtml(currentUser.username) : 'unassigned'}</span>`, 'h'],
     ['  signal       : <span class="term-green">stable</span>', 'h'],
     ['', ''],
   ],
-  'authorized.txt': [
+  'authorized.txt': () => currentUser ? [
+    ['', ''],
+    ['  AUTHORIZED USER RECORD', 'bright'],
+    [`  user     : ${currentUser.username}`, 'dim'],
+    [`  name     : ${currentUser.display_name || currentUser.username}`, 'dim'],
+    ['  access   : <span class="term-green">user</span>', 'h'],
+    ['  node     : <span class="term-accent">assigned</span>', 'h'],
+    ['', ''],
+  ] : [
     ['', ''],
     ['  <span class="term-red">ACCESS DENIED</span>', 'h'],
     ['  <span class="term-dim">this file requires user-level authorization.</span>', 'h'],
-    ['  <span class="term-dim">visitors cannot read this document.</span>', 'h'],
+    ['  <span class="term-dim">login first: type </span><span class="term-accent">login</span>', 'h'],
     ['', ''],
   ],
 };
@@ -653,6 +690,10 @@ const commands = {
     lnHTML('  <span class="term-accent">lobby --cli</span><span class="term-dim">  CLI interface</span>');
     ln('');
     lnHTML('  <span class="term-accent">de</span>         <span class="term-dim">desktop environment [coming soon]</span>');
+    ln('');
+    lnHTML('  <span class="term-accent">login</span>      <span class="term-dim">log in to your account</span>');
+    lnHTML('  <span class="term-accent">logout</span>     <span class="term-dim">end your session</span>');
+    lnHTML('  <span class="term-accent">me</span>         <span class="term-dim">open your panel</span>');
     ln('');
     lnHTML('  <span class="term-accent">ls</span>         <span class="term-dim">list directory</span>');
     lnHTML('  <span class="term-accent">cat [file]</span> <span class="term-dim">read a file</span>');
@@ -693,8 +734,27 @@ const commands = {
     setTimeout(() => { window.location.href = '/links'; }, 250);
   },
   login() {
+    if (currentUser) {
+      lnHTML(`<span class="term-dim">already logged in as </span><span class="term-accent">${escapeHtml(currentUser.username)}</span>`);
+      lnHTML('<span class="term-dim">type </span><span class="term-accent">logout</span><span class="term-dim"> to sign out, or </span><span class="term-accent">me</span><span class="term-dim"> to open your panel.</span>');
+      return;
+    }
     lnHTML('<span class="term-dim">opening login...</span>');
     setTimeout(() => { window.location.href = '/login'; }, 250);
+  },
+  async logout() {
+    if (!currentUser) {
+      lnHTML('<span class="term-dim">not logged in.</span>');
+      return;
+    }
+    lnHTML('<span class="term-dim">signing out...</span>');
+    try {
+      await fetch('/api/user/logout', { method: 'POST' });
+    } catch {}
+    currentUser = null;
+    updatePrompt();
+    lnHTML('<span class="term-green">[OK]</span> <span class="term-dim">session ended.</span>');
+    ln('');
   },
   me() {
     lnHTML('<span class="term-dim">loading user panel...</span>');
@@ -755,12 +815,13 @@ const commands = {
       lnHTML('<span class="term-dim">try: cat readme.txt</span>');
       return;
     }
-    const doc = vfs[file];
-    if (!doc) {
+    const entry = vfs[file];
+    if (!entry) {
       lnHTML(`<span class="term-red">cat: ${escapeHtml(file)}: no such file</span>`);
       lnHTML('<span class="term-dim">type <span class="term-accent">ls</span> to list available files</span>');
       return;
     }
+    const doc = typeof entry === 'function' ? entry() : entry;
     for (const [text, type] of doc) {
       if (type === 'h') lnHTML(text);
       else if (type === 'dim') lnHTML(`<span class="term-dim">${text}</span>`);
@@ -806,10 +867,18 @@ const commands = {
 
   whoami() {
     ln('');
-    lnHTML('<span class="term-bright">visitor</span> <span class="term-dim">@</span> <span class="term-accent">wired.local</span>');
-    lnHTML('<span class="term-dim">role     : visitor  </span><span class="term-yellow">// not authorized as user</span>');
-    lnHTML('<span class="term-dim">protocol : 7  //  layer: 02  //  access: guest</span>');
-    lnHTML('<span class="term-dim">node     : unassigned</span>');
+    if (currentUser) {
+      lnHTML(`<span class="term-accent">${escapeHtml(currentUser.username)}</span> <span class="term-dim">@</span> <span class="term-accent">wired.local</span>`);
+      lnHTML(`<span class="term-dim">name     : </span><span class="term-bright">${escapeHtml(currentUser.display_name || currentUser.username)}</span>`);
+      lnHTML('<span class="term-dim">role     : </span><span class="term-green">user  // authorized</span>');
+      lnHTML('<span class="term-dim">protocol : 7  //  layer: 02  //  access: user</span>');
+      lnHTML('<span class="term-dim">node     : </span><span class="term-accent">assigned</span>');
+    } else {
+      lnHTML('<span class="term-bright">visitor</span> <span class="term-dim">@</span> <span class="term-accent">wired.local</span>');
+      lnHTML('<span class="term-dim">role     : visitor  </span><span class="term-yellow">// not authorized as user</span>');
+      lnHTML('<span class="term-dim">protocol : 7  //  layer: 02  //  access: guest</span>');
+      lnHTML('<span class="term-dim">node     : unassigned</span>');
+    }
     ln('');
   },
 
@@ -851,7 +920,8 @@ const commands = {
   },
 
   sudo() {
-    lnHTML('<span class="term-red">sudo: visitor is not in the sudoers file.</span>');
+    const who = currentUser ? currentUser.username : 'visitor';
+    lnHTML(`<span class="term-red">sudo: ${escapeHtml(who)} is not in the sudoers file.</span>`);
     lnHTML('<span class="term-dim">this incident has been logged.</span>');
   },
 
@@ -861,24 +931,28 @@ const commands = {
     lnHTML(`<span class="term-dim">SSH ${escapeHtml(target)} — attempting connection...</span>`);
     setTimeout(() => lnHTML('<span class="term-dim">› authenticating...</span>'), 350);
     setTimeout(() => lnHTML('<span class="term-yellow">[WARN]</span> <span class="term-dim">host key not in known_hosts</span>'), 700);
-    setTimeout(() => lnHTML('<span class="term-red">[DENIED]</span> <span class="term-dim">visitor accounts cannot establish remote sessions</span>'), 1100);
+    setTimeout(() => lnHTML(`<span class="term-red">[DENIED]</span> <span class="term-dim">${currentUser ? escapeHtml(currentUser.username) : 'visitor'} lacks the clearance for remote sessions</span>`), 1100);
     setTimeout(() => lnHTML('<span class="term-dim">connection closed by remote host.</span>'), 1500);
     setTimeout(() => ln(''), 1700);
   },
 
   neofetch() {
+    const who = currentUser ? escapeHtml(currentUser.username) : 'visitor';
+    const accessColor = currentUser ? 'term-green' : 'term-yellow';
+    const accessLabel = currentUser ? 'user' : 'visitor';
+    const nodeLabel   = currentUser ? 'assigned' : 'unassigned';
     ln('');
     lnHTML('  <span class="term-accent">  ▄████████████▄</span>');
-    lnHTML('  <span class="term-accent">  █ COPLAND OS █</span>   <span class="term-bright">visitor</span><span class="term-dim">@</span><span class="term-accent">wired.local</span>');
+    lnHTML(`  <span class="term-accent">  █ COPLAND OS █</span>   <span class="term-bright">${who}</span><span class="term-dim">@</span><span class="term-accent">wired.local</span>`);
     lnHTML('  <span class="term-accent">  █ ─────────  █</span>   <span class="term-dim">──────────────────────────</span>');
     lnHTML(`  <span class="term-accent">  █  NAVI      █</span>   <span class="term-dim">OS     :</span> Copland OS v4.017.2`);
     lnHTML(`  <span class="term-accent">  █  TACHIBANA █</span>   <span class="term-dim">HOST   :</span> wired.local`);
     lnHTML(`  <span class="term-accent">  █  LABS      █</span>   <span class="term-dim">SHELL  :</span> wired_sh 2.31`);
     lnHTML(`  <span class="term-accent">  ▀████████████▀</span>   <span class="term-dim">LAYER  :</span> 02`);
     lnHTML(`  <span class="term-dim">                   PROTOCOL:</span> 7`);
-    lnHTML(`  <span class="term-dim">                   ACCESS :</span> <span class="term-yellow">visitor</span>`);
+    lnHTML(`  <span class="term-dim">                   ACCESS :</span> <span class="${accessColor}">${accessLabel}</span>`);
     lnHTML(`  <span class="term-dim">                   SIGNAL :</span> <span class="term-green">stable</span>`);
-    lnHTML(`  <span class="term-dim">                   NODE   :</span> unassigned`);
+    lnHTML(`  <span class="term-dim">                   NODE   :</span> ${nodeLabel}`);
     ln('');
     lnHTML('  <span style="color:#ff0080">█</span><span style="color:#ff4400">█</span><span style="color:#ffaa00">█</span><span style="color:#aaff00">█</span><span style="color:#00ffaa">█</span><span style="color:#00aaff">█</span><span style="color:#7a9ec2">█</span><span style="color:#b0b0b0">█</span>');
     ln('');
@@ -918,7 +992,7 @@ async function runCmd(cmd) {
   resetIdle();
   const trimmed = cmd.trim();
   if (!trimmed) return;
-  lnHTML(`<span class="term-green">visitor@wired:~$</span> ${escapeHtml(cmd)}`);
+  lnHTML(`<span class="${promptClass()}">${escapeHtml(promptStr())}</span> ${escapeHtml(cmd)}`);
   const [name, ...argParts] = trimmed.toLowerCase().split(/\s+/);
   const args = argParts.join(' ');
   if (commands[name]) {
@@ -954,7 +1028,7 @@ input.addEventListener('keydown', (e) => {
     if (matches.length === 1) {
       input.value = matches[0];
     } else if (matches.length > 1) {
-      lnHTML(`<span class="term-green">visitor@wired:~$</span> ${escapeHtml(input.value)}`);
+      lnHTML(`<span class="${promptClass()}">${escapeHtml(promptStr())}</span> ${escapeHtml(input.value)}`);
       lnHTML('<span class="term-dim">' + matches.join('  ') + '</span>');
       ln('');
     }
