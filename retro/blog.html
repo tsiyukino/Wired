@@ -74,8 +74,6 @@ async function renderList() {
   const lastDate = posts.length ? posts[0].created_at.slice(0,10).replace(/-/g,'.') : '—';
 
   document.getElementById('root').innerHTML = `
-    <div class="jp-only-banner">文字サイズ「中」推奨 ∗ タイトルクリックで全文表示</div>
-
     <div class="retro-header">
       <h1>■ 日記・雑記 ■</h1>
       <div class="subtitle">blog // the wired remembers everything</div>
@@ -87,7 +85,7 @@ async function renderList() {
 
     <div class="retro-marquee">
       <div class="retro-marquee-inner">
-        ★ ようこそ！リンクフリーですがご一報いただけると嬉しいです ★ 更新は不定期 ★ 文字サイズ中推奨 ★ タイトルをクリックすると全文が読めます ★ welcome to the wired ★ no matter where you go, everyone is always connected ★
+        ★ ようこそ！リンクフリーですがご一報いただけると嬉しいです ★ 更新は不定期 ★ welcome to the wired ★ no matter where you go, everyone is always connected ★
       </div>
     </div>
 
