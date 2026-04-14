@@ -296,12 +296,12 @@ const CMD = {
   },
 
   clear() { outEl.innerHTML = ''; },
-  gui()   { window.location.href = 'index.html'; },
-  lobby() { window.location.href = '../lobby/cli.html'; },
+  gui()   { window.location.href = '/board'; },
+  lobby() { window.location.href = '/lobby/cli'; },
   exit()  {
     if (window.parent && window.parent !== window)
       window.parent.postMessage({ action: 'navigate', section: 'terminal' }, '*');
-    else window.location.href = '../copland-os.html';
+    else window.location.href = '/';
   },
 };
 

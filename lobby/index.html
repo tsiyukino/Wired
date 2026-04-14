@@ -169,8 +169,8 @@ html, body { height: 100%; overflow: hidden; }
   <div class="win-chrome-row1">
     <button class="win-btn" onclick="goHome()">← Terminal</button>
     <button class="win-btn" onclick="location.reload()">⟳ Refresh</button>
-    <button class="win-btn" onclick="window.location.href='../board/index.html'">[ /wired/ board ]</button>
-    <button class="win-btn" onclick="window.location.href='cli.html'">[ CLI mode ]</button>
+    <button class="win-btn" onclick="window.location.href='/board'">[ /wired/ board ]</button>
+    <button class="win-btn" onclick="window.location.href='/lobby/cli'">[ CLI mode ]</button>
     <span class="win-chrome-title">COPLAND OS NAVIGATOR v4.017</span>
   </div>
   <div class="win-chrome-row2">
@@ -200,11 +200,11 @@ html, body { height: 100%; overflow: hidden; }
   </div>
 
   <div id="lobby-nav">
-    <a onclick="window.location.href='../board/index.html'">[/wired/ board]</a>
+    <a onclick="window.location.href='/board'">[/wired/ board]</a>
     <span class="sep"> | </span>
     <a onclick="goHome()">[terminal]</a>
     <span class="sep"> | </span>
-    <a onclick="window.location.href='cli.html'">[CLI mode]</a>
+    <a onclick="window.location.href='/lobby/cli'">[CLI mode]</a>
     <span style="margin-left:auto;font-family:'Press Start 2P',monospace;font-size:7px;color:#6a0d91;opacity:0.4;">no accounts ∗ no logs ∗ rate limited</span>
   </div>
 
@@ -345,7 +345,7 @@ chatInput.addEventListener('keydown', e => {
 function goHome() {
   if (window.parent && window.parent !== window) {
     window.parent.postMessage({ action: 'navigate', section: 'terminal' }, '*');
-  } else { window.location.href = '../copland-os.html'; }
+  } else { window.location.href = '/'; }
 }
 
 initLobby();

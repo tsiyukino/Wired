@@ -196,12 +196,12 @@ function handleSlash(raw) {
       outEl.innerHTML = ''; msgCount = 0;
       sysMsg('∗ Screen cleared.');
       break;
-    case 'gui':   window.location.href = 'index.html'; break;
-    case 'board': window.location.href = '../board/cli.html'; break;
+    case 'gui':   window.location.href = '/lobby'; break;
+    case 'board': window.location.href = '/board/cli'; break;
     case 'exit':
       if (window.parent && window.parent !== window)
         window.parent.postMessage({ action: 'navigate', section: 'terminal' }, '*');
-      else window.location.href = '../copland-os.html';
+      else window.location.href = '/';
       break;
     default:
       sysMsg(`Unknown command: /${cmd}  — type /help`);

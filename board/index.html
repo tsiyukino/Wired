@@ -194,8 +194,8 @@ body { background-color: #fcd0fe; }
     <button class="win-btn" onclick="goHome()">🏠 Terminal</button>
     <span style="display:inline-block;width:1px;height:28px;background:#aaa;margin:0 4px;"></span>
     <button class="win-btn" onclick="showBoard()" id="btn-board">[ /wired/ ]</button>
-    <button class="win-btn" onclick="window.location.href='../lobby/index.html'">[ lobby ]</button>
-    <button class="win-btn" onclick="window.location.href='cli.html'">[ CLI mode ]</button>
+    <button class="win-btn" onclick="window.location.href='/lobby'">[ lobby ]</button>
+    <button class="win-btn" onclick="window.location.href='/board/cli'">[ CLI mode ]</button>
     <span class="win-chrome-title">COPLAND OS NAVIGATOR v4.017</span>
   </div>
   <div class="win-chrome-row2">
@@ -225,7 +225,7 @@ body { background-color: #fcd0fe; }
   <div id="counter-slot"></div>
 
   <div class="retro-nav">
-    <a onclick="showBoard()">[/wired/]</a><span class="sep"> | </span><a onclick="window.location.href='../lobby/index.html'">[lobby]</a><span class="sep"> | </span><a onclick="goHome()">[terminal]</a><span class="sep"> | </span><a onclick="window.location.href='cli.html'">[CLI mode]</a>
+    <a onclick="showBoard()">[/wired/]</a><span class="sep"> | </span><a onclick="window.location.href='/lobby'">[lobby]</a><span class="sep"> | </span><a onclick="goHome()">[terminal]</a><span class="sep"> | </span><a onclick="window.location.href='/board/cli'">[CLI mode]</a>
   </div>
 
   <div class="retro-marquee">
@@ -389,7 +389,7 @@ function renderThread(t, replies) {
     </div>
 
     <div class="retro-nav">
-      <a onclick="showBoard()">← back to /wired/</a><span class="sep"> | </span><a onclick="window.location.href='../lobby/index.html'">[lobby]</a><span class="sep"> | </span><a onclick="goHome()">[terminal]</a>
+      <a onclick="showBoard()">← back to /wired/</a><span class="sep"> | </span><a onclick="window.location.href='/lobby'">[lobby]</a><span class="sep"> | </span><a onclick="goHome()">[terminal]</a>
     </div>
 
     ${postsHtml}
@@ -493,7 +493,7 @@ async function submitReply(threadId) {
 function goHome() {
   if (window.parent && window.parent !== window) {
     window.parent.postMessage({ action: 'navigate', section: 'terminal' }, '*');
-  } else { window.location.href = '../copland-os.html'; }
+  } else { window.location.href = '/'; }
 }
 function goBack() {
   if (document.getElementById('view-thread').style.display !== 'none') showBoard();

@@ -1128,10 +1128,10 @@ const commands = {
     const cli = (args || '').trim() === '--cli';
     if (cli) {
       lnHTML('<span class="term-dim">launching board CLI...</span>');
-      setTimeout(() => { window.location.href = 'board/cli.html'; }, 300);
+      setTimeout(() => { window.location.href = '/board/cli'; }, 300);
     } else {
       lnHTML('<span class="term-dim">connecting to /wired/ board...</span>');
-      setTimeout(() => { window.location.href = 'board/index.html'; }, 300);
+      setTimeout(() => { window.location.href = '/board'; }, 300);
     }
   },
 
@@ -1139,10 +1139,10 @@ const commands = {
     const cli = (args || '').trim() === '--cli';
     if (cli) {
       lnHTML('<span class="term-dim">launching lobby CLI...</span>');
-      setTimeout(() => { window.location.href = 'lobby/cli.html'; }, 300);
+      setTimeout(() => { window.location.href = '/lobby/cli'; }, 300);
     } else {
       lnHTML('<span class="term-dim">connecting to wired lobby...</span>');
-      setTimeout(() => { window.location.href = 'lobby/index.html'; }, 300);
+      setTimeout(() => { window.location.href = '/lobby'; }, 300);
     }
   },
 
