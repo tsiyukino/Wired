@@ -140,7 +140,6 @@ document.querySelector('.win-nav-icon').innerHTML = ICON_GLOBE;
   </div>
 
   <div id="sparkle-slot"></div>
-  <div class="deco-dots">★ ☆ ★ ☆ ★</div>
 
   <!-- FRIENDS -->
   <div class="links-section">
@@ -185,7 +184,7 @@ document.querySelector('.win-nav-icon').innerHTML = ICON_GLOBE;
     <span class="kao">(っ＾▿＾)っ</span>
   </div>
 
-  <div class="deco-dots">★ ☆ ★ ☆ ★</div>
+  <div id="sparkle-slot-bottom"></div>
 
   <div class="retro-footer">
     リンクフリーです ∗ This page is link-free.<br>
@@ -198,6 +197,7 @@ document.querySelector('.win-nav-icon').innerHTML = ICON_GLOBE;
 <script>
   document.getElementById('counter-slot').innerHTML = counter();
   document.getElementById('sparkle-slot').innerHTML = sparkles(['★','☆','★','☆','★','☆','★','☆']);
+  document.getElementById('sparkle-slot-bottom').innerHTML = sparkles(['★','☆','★','☆','★','☆','★','☆']);
 
   function renderLinks(links, button) {
     const byKind = { friend: [], webring: [], resource: [] };

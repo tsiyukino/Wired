@@ -237,7 +237,6 @@ a:hover { text-decoration: underline; }
   border-bottom: 3px double currentColor;
   margin-bottom: 12px;
 }
-.retro-header .sparkle-row { margin: 6px 0 4px; }
 .retro-header h1 {
   font-family: 'Press Start 2P', monospace;
   font-size: 16px;

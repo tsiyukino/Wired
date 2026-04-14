@@ -80,7 +80,6 @@ async function renderList() {
   document.getElementById('root').innerHTML = `
     <div class="retro-header">
       <h1>■ 日記・雑記 ■</h1>
-      ${sparklesN('★', '∗', 12)}
       <div class="subtitle">blog // the wired remembers everything</div>
     </div>
 
@@ -96,7 +95,7 @@ async function renderList() {
 
     <div class="last-updated">Last updated: ${lastDate}</div>
 
-    <div class="deco-dots">・ ・ ・ ・ ・</div>
+    ${sparkles(['★','∗','☆','∗','★','∗','☆','∗'])}
 
     ${entries}
 
@@ -106,7 +105,7 @@ async function renderList() {
       <span class="kao">(｀・ω・´)</span>
     </div>
 
-    <div class="deco-dots">・ ・ ・ ・ ・</div>
+    ${sparkles(['★','∗','☆','∗','★','∗','☆','∗'])}
 
     <div class="retro-footer">
       Powered by copper, fiber, and protocol_7<br>

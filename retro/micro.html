@@ -69,7 +69,6 @@ async function renderMicro() {
   document.getElementById('root').innerHTML = `
     <div class="retro-header">
       <h1>■ 一言 ■</h1>
-      ${sparklesN('∗', '·', 12)}
       <div class="subtitle">micro-posts // short thoughts</div>
     </div>
 
@@ -82,7 +81,7 @@ async function renderMicro() {
       </div>
     </div>
 
-    <div class="deco-dots">∗ ∗ ∗ ∗ ∗</div>
+    ${sparkles(['∗','·','∗','·','∗','·','∗','·'])}
 
     ${items}
 
@@ -92,7 +91,7 @@ async function renderMicro() {
       <span class="kao blink-slow">(ﾟдﾟ)</span>
     </div>
 
-    <div class="deco-dots">∗ ∗ ∗ ∗ ∗</div>
+    ${sparkles(['∗','·','∗','·','∗','·','∗','·'])}
 
     <div class="retro-footer">
       ひとりごと ∗ <span class="blink">∗</span> monologue<br>
