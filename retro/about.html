@@ -16,11 +16,11 @@
     <button class="win-btn" onclick="location.reload()" title="reload"></button>
     <button class="win-btn" onclick="goTo('terminal')" title="home"></button>
     <span class="win-btn-sep"></span>
-    <button class="win-btn-link" onclick="goTo('blog')">diary</button>
-    <button class="win-btn-link" onclick="goTo('portfolio')">works</button>
-    <button class="win-btn-link" onclick="goTo('micro')">micro</button>
-    <button class="win-btn-link active" onclick="goTo('about')">about</button>
-    <button class="win-btn-link" onclick="goTo('links')">links</button>
+    <button class="win-btn-link" onclick="goTo('blog')" title="diary" id="nav-blog"></button>
+    <button class="win-btn-link" onclick="goTo('portfolio')" title="works" id="nav-works"></button>
+    <button class="win-btn-link" onclick="goTo('micro')" title="micro" id="nav-micro"></button>
+    <button class="win-btn-link active" onclick="goTo('about')" title="about" id="nav-about"></button>
+    <button class="win-btn-link" onclick="goTo('links')" title="links" id="nav-links"></button>
     <span class="win-chrome-title">COPLAND OS NAVIGATOR v4.017</span>
   </div>
   <div class="win-chrome-row2">
@@ -37,6 +37,11 @@
 document.querySelector('.win-chrome-row1 .win-btn:nth-child(1)').innerHTML = ICON_BACK;
 document.querySelector('.win-chrome-row1 .win-btn:nth-child(2)').innerHTML = ICON_REFRESH;
 document.querySelector('.win-chrome-row1 .win-btn:nth-child(3)').innerHTML = ICON_HOME;
+document.getElementById('nav-blog').innerHTML = ICON_DIARY;
+document.getElementById('nav-works').innerHTML = ICON_WORKS;
+document.getElementById('nav-micro').innerHTML = ICON_MICRO;
+document.getElementById('nav-about').innerHTML = ICON_ABOUT;
+document.getElementById('nav-links').innerHTML = ICON_LINKS;
 document.querySelector('.win-nav-icon').innerHTML = ICON_GLOBE;
 </script>
 

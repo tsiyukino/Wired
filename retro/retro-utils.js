@@ -61,7 +61,7 @@ function goTo(section) {
 // ── Pixel SVG icons ────────────────────────────────────────────────
 // Pixel art drawn as SVG rects, rendered at 22×22 for larger buttons.
 
-const ICON_BACK = `<svg width="22" height="22" viewBox="0 0 16 16" xmlns="http://www.w3.org/2000/svg" style="image-rendering:pixelated">
+const ICON_BACK = `<svg width="18" height="18" viewBox="0 0 16 16" xmlns="http://www.w3.org/2000/svg" style="image-rendering:pixelated">
   <rect x="2" y="7" width="8" height="2" fill="#333"/>
   <rect x="2" y="5" width="2" height="2" fill="#333"/>
   <rect x="4" y="3" width="2" height="2" fill="#333"/>
@@ -73,7 +73,7 @@ const ICON_BACK = `<svg width="22" height="22" viewBox="0 0 16 16" xmlns="http:/
   <rect x="8" y="9" width="2" height="2" fill="#333"/>
 </svg>`;
 
-const ICON_REFRESH = `<svg width="22" height="22" viewBox="0 0 16 16" xmlns="http://www.w3.org/2000/svg" style="image-rendering:pixelated">
+const ICON_REFRESH = `<svg width="18" height="18" viewBox="0 0 16 16" xmlns="http://www.w3.org/2000/svg" style="image-rendering:pixelated">
   <rect x="5" y="2" width="6" height="2" fill="#333"/>
   <rect x="3" y="4" width="2" height="2" fill="#333"/>
   <rect x="11" y="4" width="2" height="2" fill="#333"/>
@@ -86,7 +86,7 @@ const ICON_REFRESH = `<svg width="22" height="22" viewBox="0 0 16 16" xmlns="htt
   <rect x="11" y="3" width="2" height="2" fill="#333"/>
 </svg>`;
 
-const ICON_HOME = `<svg width="22" height="22" viewBox="0 0 16 16" xmlns="http://www.w3.org/2000/svg" style="image-rendering:pixelated">
+const ICON_HOME = `<svg width="18" height="18" viewBox="0 0 16 16" xmlns="http://www.w3.org/2000/svg" style="image-rendering:pixelated">
   <rect x="7" y="2" width="2" height="2" fill="#333"/>
   <rect x="5" y="4" width="6" height="2" fill="#333"/>
   <rect x="3" y="6" width="10" height="2" fill="#333"/>
@@ -106,6 +106,71 @@ const ICON_GLOBE = `<svg width="20" height="20" viewBox="0 0 14 14" xmlns="http:
   <rect x="2" y="6" width="10" height="1" fill="#336"/>
   <rect x="3" y="3" width="2" height="8" fill="#7aaad4"/>
   <rect x="9" y="3" width="2" height="8" fill="#7aaad4"/>
+</svg>`;
+
+// ── Section nav icons (18×18, purple theme) ───────────────────────
+// diary: open book
+const ICON_DIARY = `<svg width="18" height="18" viewBox="0 0 16 16" xmlns="http://www.w3.org/2000/svg" style="image-rendering:pixelated">
+  <rect x="2" y="3" width="5" height="10" fill="#6a0d91"/>
+  <rect x="9" y="3" width="5" height="10" fill="#6a0d91"/>
+  <rect x="7" y="3" width="2" height="10" fill="#c677d3"/>
+  <rect x="3" y="4" width="3" height="1" fill="#fcd0fe"/>
+  <rect x="3" y="6" width="3" height="1" fill="#fcd0fe"/>
+  <rect x="3" y="8" width="3" height="1" fill="#fcd0fe"/>
+  <rect x="10" y="4" width="3" height="1" fill="#fcd0fe"/>
+  <rect x="10" y="6" width="3" height="1" fill="#fcd0fe"/>
+  <rect x="10" y="8" width="3" height="1" fill="#fcd0fe"/>
+</svg>`;
+
+// works: pixel wrench
+const ICON_WORKS = `<svg width="18" height="18" viewBox="0 0 16 16" xmlns="http://www.w3.org/2000/svg" style="image-rendering:pixelated">
+  <rect x="4" y="2" width="4" height="2" fill="#6a0d91"/>
+  <rect x="3" y="4" width="2" height="2" fill="#6a0d91"/>
+  <rect x="7" y="4" width="2" height="2" fill="#6a0d91"/>
+  <rect x="3" y="6" width="6" height="2" fill="#6a0d91"/>
+  <rect x="5" y="8" width="2" height="2" fill="#6a0d91"/>
+  <rect x="6" y="9" width="2" height="2" fill="#6a0d91"/>
+  <rect x="7" y="10" width="2" height="2" fill="#6a0d91"/>
+  <rect x="8" y="11" width="2" height="2" fill="#6a0d91"/>
+  <rect x="9" y="12" width="3" height="2" fill="#6a0d91"/>
+  <rect x="5" y="4" width="2" height="2" fill="#c677d3"/>
+</svg>`;
+
+// micro: speech bubble
+const ICON_MICRO = `<svg width="18" height="18" viewBox="0 0 16 16" xmlns="http://www.w3.org/2000/svg" style="image-rendering:pixelated">
+  <rect x="2" y="3" width="10" height="7" fill="#6a0d91"/>
+  <rect x="3" y="4" width="8" height="5" fill="#fcd0fe"/>
+  <rect x="4" y="5" width="2" height="1" fill="#6a0d91"/>
+  <rect x="7" y="5" width="2" height="1" fill="#6a0d91"/>
+  <rect x="4" y="7" width="6" height="1" fill="#6a0d91"/>
+  <rect x="3" y="10" width="2" height="2" fill="#6a0d91"/>
+  <rect x="2" y="12" width="2" height="1" fill="#6a0d91"/>
+</svg>`;
+
+// about: pixel person
+const ICON_ABOUT = `<svg width="18" height="18" viewBox="0 0 16 16" xmlns="http://www.w3.org/2000/svg" style="image-rendering:pixelated">
+  <rect x="6" y="2" width="4" height="4" fill="#6a0d91"/>
+  <rect x="5" y="3" width="1" height="2" fill="#6a0d91"/>
+  <rect x="10" y="3" width="1" height="2" fill="#6a0d91"/>
+  <rect x="5" y="6" width="6" height="2" fill="#6a0d91"/>
+  <rect x="4" y="8" width="8" height="5" fill="#6a0d91"/>
+  <rect x="3" y="9" width="2" height="4" fill="#6a0d91"/>
+  <rect x="11" y="9" width="2" height="4" fill="#6a0d91"/>
+  <rect x="6" y="3" width="4" height="2" fill="#c677d3"/>
+</svg>`;
+
+// links: chain link
+const ICON_LINKS = `<svg width="18" height="18" viewBox="0 0 16 16" xmlns="http://www.w3.org/2000/svg" style="image-rendering:pixelated">
+  <rect x="2" y="5" width="6" height="2" fill="#6a0d91"/>
+  <rect x="2" y="9" width="6" height="2" fill="#6a0d91"/>
+  <rect x="2" y="7" width="2" height="2" fill="#6a0d91"/>
+  <rect x="6" y="7" width="2" height="2" fill="#6a0d91"/>
+  <rect x="8" y="5" width="6" height="2" fill="#6a0d91"/>
+  <rect x="8" y="9" width="6" height="2" fill="#6a0d91"/>
+  <rect x="12" y="7" width="2" height="2" fill="#6a0d91"/>
+  <rect x="3" y="6" width="4" height="4" fill="#fcd0fe"/>
+  <rect x="9" y="6" width="4" height="4" fill="#fcd0fe"/>
+  <rect x="6" y="7" width="4" height="2" fill="#6a0d91"/>
 </svg>`;
 
 // Simple markdown renderer (shared)
