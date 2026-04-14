@@ -49,8 +49,8 @@ function goTo(section) {
   if (window.parent && window.parent !== window) {
     window.parent.postMessage({ action: 'navigate', section }, '*');
   } else {
-    // standalone: redirect to copland-os.html and trigger the section
-    window.location.href = `../copland-os.html#${section}`;
+    // standalone: redirect to root and let the shell handle the section
+    window.location.href = `/#${section}`;
   }
 }
 
