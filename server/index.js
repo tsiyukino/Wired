@@ -69,6 +69,10 @@ app.get('/u/:username', (req, res) => res.sendFile(path.join(ROOT, 'retro/profil
 registerAdminStatic(app, config.adminPath);
 registerAdminRoutes(app);
 
+// Board and lobby — serve index.html from their subdirectory
+app.get('/board',     (req, res) => res.sendFile(path.join(ROOT, 'board/index.html')));
+app.get('/lobby',     (req, res) => res.sendFile(path.join(ROOT, 'lobby/index.html')));
+
 // Clean URLs — /foo serves /foo.html, /foo/bar serves /foo/bar.html
 // Skips paths that already have an extension, API routes, and WS upgrades.
 app.use((req, res, next) => {
