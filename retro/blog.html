@@ -123,11 +123,15 @@ async function renderList(pushState = false) {
 
     <div class="last-updated">Last updated: ${lastDate}</div>
 
-    <div id="search-wrap" style="margin:10px 0;">
-      <div style="display:flex;gap:6px;align-items:center;">
-        <input type="text" id="search-input" placeholder="search posts…" maxlength="100"
-          style="flex:1;background:#fff8ff;border:2px groove #dbb6af;color:#2a0a3a;font-family:'IBM Plex Mono',monospace;font-size:13px;padding:5px 8px;outline:none;">
-        <button onclick="runSearch()" style="background:#dddde1;border:2px groove #c8c9ce;box-shadow:1px 1px 3px rgba(0,0,0,0.3);color:#2a0a3a;font-family:'Press Start 2P',monospace;font-size:8px;letter-spacing:1px;padding:5px 12px;cursor:pointer;">[ SEARCH ]</button>
+    <div id="search-wrap">
+      <div class="blog-entry-head" style="display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap;">
+        <span style="font-family:'Press Start 2P',monospace;font-size:7px;color:#6a0d91;letter-spacing:2px;">// SEARCH //</span>
+        <div style="display:flex;gap:6px;align-items:center;flex:1;min-width:0;">
+          <input type="text" id="search-input" placeholder="keyword…" maxlength="100"
+            style="flex:1;min-width:0;background:#fff8ff;border:2px groove #dbb6af;color:#2a0a3a;font-family:'IBM Plex Mono',monospace;font-size:12px;padding:3px 7px;outline:none;">
+          <button onclick="runSearch()"
+            style="background:#dddde1;border:2px groove #c8c9ce;box-shadow:1px 1px 3px rgba(0,0,0,0.25);color:#2a0a3a;font-family:'Press Start 2P',monospace;font-size:7px;letter-spacing:1px;padding:4px 10px;cursor:pointer;white-space:nowrap;flex-shrink:0;">[ GO ]</button>
+        </div>
       </div>
       <div id="search-results"></div>
     </div>
@@ -196,7 +200,10 @@ async function runSearch() {
   if (!out) return;
   if (!q) { out.innerHTML = ''; return; }
 
-  out.innerHTML = '<div style="font-family:\'Silkscreen\',monospace;font-size:10px;color:#6a0d91;opacity:0.6;padding:6px 0;">searching…</div>';
+  out.innerHTML = `
+    <div class="blog-entry-body" style="font-family:'Silkscreen',monospace;font-size:10px;color:#6a0d91;opacity:0.6;border-top:none;">
+      searching…
+    </div>`;
 
   let data;
   try {
@@ -204,19 +211,30 @@ async function runSearch() {
     data = await r.json();
     if (!r.ok) throw new Error(data.error);
   } catch (e) {
-    out.innerHTML = `<div style="font-family:'Silkscreen',monospace;font-size:10px;color:#b30000;padding:6px 0;">∗ ${e.message || 'search error'}</div>`;
+    out.innerHTML = `
+      <div class="blog-entry-body" style="font-family:'Silkscreen',monospace;font-size:10px;color:#b30000;border-top:none;">
+        ∗ ${e.message || 'search error'}
+      </div>`;
     return;
   }
 
   if (!data.results.length) {
-    out.innerHTML = '<div style="font-family:\'Silkscreen\',monospace;font-size:10px;color:#6a0d91;opacity:0.5;padding:6px 0;">∗ no results</div>';
+    out.innerHTML = `
+      <div class="blog-entry-body" style="font-family:'Silkscreen',monospace;font-size:10px;color:#6a0d91;opacity:0.5;border-top:none;">
+        ∗ no results for that query
+      </div>`;
     return;
   }
 
   out.innerHTML = data.results.map(r => `
-    <div style="padding:6px 0;border-bottom:1px solid rgba(219,182,175,0.4);cursor:pointer;" onclick="renderDetail('${r.slug}', true)">
-      <div style="font-family:'Silkscreen',monospace;font-size:12px;color:#6a0d91;font-weight:700;">${r.title}</div>
-      <div style="font-size:11px;color:#2a0a3a;opacity:0.7;margin-top:2px;">${r.snippet}</div>
+    <div class="blog-entry" onclick="renderDetail('${r.slug}', true)">
+      <div class="blog-entry-head" style="border-top:none;">
+        <div class="blog-date">■ result</div>
+      </div>
+      <div class="blog-entry-body">
+        <div class="blog-title">${r.title}</div>
+        <div style="font-size:11px;color:#2a0a3a;opacity:0.65;margin-top:4px;font-weight:300;line-height:1.6;">${r.snippet}</div>
+      </div>
     </div>
   `).join('');
 }
