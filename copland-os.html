@@ -509,7 +509,14 @@ function restoreState() {
     output.innerHTML = s.html || '';
     commandHistory = Array.isArray(s.history) ? s.history : [];
     historyIndex = commandHistory.length;
-    if (s.bannerVisible) welcomeBanner.style.display = 'block';
+    if (s.bannerVisible) {
+      welcomeBanner.innerHTML = `<span class="term-bright">  welcome to the wired.</span>
+<span class="term-dim">  no matter where you go, everyone is always connected.</span>
+
+<span class="term-dim">  type </span><span class="term-accent">help</span><span class="term-dim"> to see available commands.</span>
+`;
+      welcomeBanner.style.display = 'block';
+    }
     scrollArea.scrollTop = scrollArea.scrollHeight;
     return true;
   } catch {
