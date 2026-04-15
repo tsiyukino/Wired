@@ -117,7 +117,19 @@ curl http://localhost:3000/Reference/fauux.neocities.org/index.html
 curl http://localhost:3000/copland-os-legacy.html
 # → 404
 
+curl http://localhost:3000/server/index.js
+# → 404
+
+curl http://localhost:3000/deploy/wired.service
+# → 404
+
 curl http://localhost:3000/copland-os.html
+# → 200
+
+curl http://localhost:3000/copland-os.css
+# → 200
+
+curl http://localhost:3000/copland-os.js
 # → 200
 ```
 

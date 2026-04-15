@@ -1,9 +1,15 @@
 <!DOCTYPE html>
-<html lang="ja">
+<html lang="en">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>日記・雑記 // wired</title>
+<title>blog // wired</title>
+<meta name="description" content="Personal blog — notes, thoughts, and writing from the wired.">
+<meta property="og:site_name" content="wired">
+<meta property="og:type" content="website">
+<meta property="og:title" content="blog // wired">
+<meta property="og:description" content="Personal blog — notes, thoughts, and writing from the wired.">
+<meta property="og:url" content="/blog">
 <link rel="stylesheet" href="/retro/retro.css">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.9/katex.min.css">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.9/katex.min.js"></script>
@@ -30,7 +36,7 @@
   </div>
   <div class="win-chrome-row2">
     <span class="win-addr-label">アドレス ▼</span>
-    <input type="text" class="win-addr-bar" value="http://www.wired.local/blog/" readonly>
+    <input type="text" class="win-addr-bar" id="addr-bar" value="/blog" readonly>
   </div>
   <div class="win-chrome-row3">
     <span class="win-nav-icon"></span>
@@ -51,7 +57,29 @@ document.querySelector('.win-nav-icon').innerHTML = ICON_GLOBE;
 <div class="retro-container" id="root"></div>
 
 <script>
-async function renderList() {
+function setAddr(path) {
+  document.getElementById('addr-bar').value = path;
+}
+
+function updateMeta(title, description, url) {
+  document.title = title;
+  document.querySelector('meta[property="og:title"]').setAttribute('content', title);
+  document.querySelector('meta[property="og:description"]').setAttribute('content', description);
+  document.querySelector('meta[property="og:url"]').setAttribute('content', url);
+  document.querySelector('meta[name="description"]').setAttribute('content', description);
+}
+
+async function renderList(pushState = false) {
+  if (pushState) {
+    history.pushState({ view: 'list' }, '', '/blog');
+  }
+  setAddr('/blog');
+  updateMeta(
+    'blog // wired',
+    'Personal blog — notes, thoughts, and writing from the wired.',
+    '/blog'
+  );
+
   let posts = [];
   try {
     const r = await fetch('/api/posts');
@@ -60,7 +88,7 @@ async function renderList() {
   } catch (e) {}
 
   const entries = posts.length ? posts.map(p => `
-    <div class="blog-entry" onclick="renderDetail('${p.slug}')">
+    <div class="blog-entry" onclick="renderDetail('${p.slug}', true)">
       <div class="blog-entry-head">
         <div class="blog-date">■ ${p.created_at.slice(0,10).replace(/-/g,'.')}</div>
         <div style="display:flex;align-items:center;gap:4px;">
@@ -115,20 +143,33 @@ async function renderList() {
   `;
 }
 
-async function renderDetail(slug) {
+async function renderDetail(slug, pushState = false) {
+  if (pushState) {
+    history.pushState({ view: 'detail', slug }, '', `/blog/${slug}`);
+  }
+  setAddr(`/blog/${slug}`);
+
   let post;
   try {
     const r = await fetch(`/api/posts/${slug}`);
     const data = await r.json();
     post = data.post;
   } catch (e) {}
-  if (!post) return;
+  if (!post) {
+    document.getElementById('root').innerHTML = '<div style="opacity:0.4;padding:24px 0;text-align:center;">∗ post not found ∗</div>';
+    return;
+  }
 
   const date = post.created_at.slice(0,10).replace(/-/g,'.');
+  updateMeta(
+    `${post.title} // wired`,
+    post.body ? post.body.replace(/[#*`>\-]/g, '').trim().slice(0, 155) : `${post.title} — from the wired.`,
+    `/blog/${slug}`
+  );
 
   document.getElementById('root').innerHTML = `
     ${NAV_HTML}
-    <a class="detail-back" onclick="renderList()">← back to 日記</a>
+    <a class="detail-back" onclick="renderList(true)" style="cursor:pointer;">← back to 日記</a>
     <div class="detail-date">■ ${date}</div>
     <div class="detail-title">${post.title} ${post.is_new ? '<span class="badge-new">NEW</span>' : ''}</div>
     <div class="pixel-hr"></div>
@@ -140,7 +181,22 @@ async function renderDetail(slug) {
   window.scrollTo(0, 0);
 }
 
-renderList();
+// Handle browser back/forward
+window.addEventListener('popstate', (e) => {
+  if (e.state?.view === 'detail') {
+    renderDetail(e.state.slug, false);
+  } else {
+    renderList(false);
+  }
+});
+
+// Boot: check URL path to decide what to render
+const slug = window.location.pathname.match(/^\/blog\/(.+)/)?.[1];
+if (slug) {
+  renderDetail(slug, false);
+} else {
+  renderList(false);
+}
 </script>
 </body>
 </html>

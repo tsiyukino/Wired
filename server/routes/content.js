@@ -91,4 +91,48 @@ export function registerContentRoutes(app) {
     const row = db.prepare(`SELECT visitor_count FROM site_stats WHERE id = 1`).get();
     res.json({ count: row.visitor_count });
   });
+
+  // GET /sitemap.xml
+  app.get('/sitemap.xml', (req, res) => {
+    const base = `${req.protocol}://${req.get('host')}`;
+    const db = getDb();
+
+    const postSlugs = db.prepare(`SELECT slug, updated_at FROM blog_posts ORDER BY id DESC`).all();
+    const workSlugs = db.prepare(`SELECT slug, updated_at FROM works ORDER BY id DESC`).all();
+
+    const staticPages = [
+      { loc: `${base}/`,       changefreq: 'weekly',  priority: '1.0' },
+      { loc: `${base}/blog`,   changefreq: 'weekly',  priority: '0.9' },
+      { loc: `${base}/works`,  changefreq: 'monthly', priority: '0.8' },
+      { loc: `${base}/micro`,  changefreq: 'weekly',  priority: '0.7' },
+      { loc: `${base}/about`,  changefreq: 'monthly', priority: '0.6' },
+      { loc: `${base}/links`,  changefreq: 'monthly', priority: '0.5' },
+    ];
+
+    const postUrls = postSlugs.map(p => ({
+      loc: `${base}/blog/${p.slug}`,
+      lastmod: p.updated_at ? p.updated_at.slice(0, 10) : undefined,
+      changefreq: 'monthly',
+      priority: '0.7',
+    }));
+
+    const workUrls = workSlugs.map(w => ({
+      loc: `${base}/works/${w.slug}`,
+      lastmod: w.updated_at ? w.updated_at.slice(0, 10) : undefined,
+      changefreq: 'monthly',
+      priority: '0.6',
+    }));
+
+    const allUrls = [...staticPages, ...postUrls, ...workUrls];
+
+    const urlTags = allUrls.map(u => {
+      const lastmod = u.lastmod ? `\n    <lastmod>${u.lastmod}</lastmod>` : '';
+      return `  <url>\n    <loc>${u.loc}</loc>${lastmod}\n    <changefreq>${u.changefreq}</changefreq>\n    <priority>${u.priority}</priority>\n  </url>`;
+    }).join('\n');
+
+    const xml = `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n${urlTags}\n</urlset>`;
+
+    res.set('Content-Type', 'application/xml');
+    res.send(xml);
+  });
 }

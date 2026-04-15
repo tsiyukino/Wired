@@ -51,6 +51,7 @@ conventions:
   file_size_limit: 150        # soft ceiling; many current files exceed this (see gotchas)
   function_size_limit: 30
   naming: kebab-case for files, camelCase for JS identifiers
+  urls: clean path-based only — no .html extensions, no hash fragments; structure is site.com/A/B/C; server must have explicit routes for every URL shape; client navigation uses history.pushState
   css: retro.css holds all shared styles; page-specific rules go in inline <style> blocks
   content: data lives in content/*.js arrays; blog/portfolio bodies optionally in content/posts/*.md
   navigation: retro/ pages post {action: navigate, section} to parent; copland-os.html routes via iframe
@@ -61,7 +62,7 @@ gotchas:
   - board-data.js and lobby-data.js are mock stubs; comments mark where server/DB calls will go
   - retro-utils.js includes a hand-rolled Markdown renderer with custom @[video] and @[youtube] syntax
   - Reference/ is a large local archive; do not treat it as deployable source
-  - lang="ja" on some pages, lang="en" on others — intentional per-page choice
+  - all pages use lang="en" (site is bilingual but targeting English indexing)
 
 deploy:
   hosting: Personal server behind Cloudflare (CDN + reverse proxy)

@@ -45,11 +45,13 @@ app.use((req, res, next) => {
 app.get('/', (req, res) => res.sendFile(path.join(ROOT, 'copland-os.html')));
 
 // Direct retro page URLs
-app.get('/blog',      (req, res) => res.sendFile(path.join(ROOT, 'retro/blog.html')));
-app.get('/works',     (req, res) => res.sendFile(path.join(ROOT, 'retro/portfolio.html')));
-app.get('/micro',     (req, res) => res.sendFile(path.join(ROOT, 'retro/micro.html')));
-app.get('/about',     (req, res) => res.sendFile(path.join(ROOT, 'retro/about.html')));
-app.get('/links',     (req, res) => res.sendFile(path.join(ROOT, 'retro/links.html')));
+app.get('/blog',        (req, res) => res.sendFile(path.join(ROOT, 'retro/blog.html')));
+app.get('/blog/:slug',  (req, res) => res.sendFile(path.join(ROOT, 'retro/blog.html')));
+app.get('/works',       (req, res) => res.sendFile(path.join(ROOT, 'retro/portfolio.html')));
+app.get('/works/:slug', (req, res) => res.sendFile(path.join(ROOT, 'retro/portfolio.html')));
+app.get('/micro',       (req, res) => res.sendFile(path.join(ROOT, 'retro/micro.html')));
+app.get('/about',       (req, res) => res.sendFile(path.join(ROOT, 'retro/about.html')));
+app.get('/links',       (req, res) => res.sendFile(path.join(ROOT, 'retro/links.html')));
 
 // User-facing pages
 app.get('/login',     (req, res) => res.sendFile(path.join(ROOT, 'retro/login.html')));
@@ -84,11 +86,11 @@ app.use((req, res, next) => {
   });
 });
 
+// Public API routes (registered before static so /sitemap.xml is handled dynamically)
+registerContentRoutes(app);
+
 // Static files — directory indexes disabled so /admin never serves admin/index.html directly.
 app.use(express.static(ROOT, { index: false }));
-
-// Public API routes
-registerContentRoutes(app);
 registerBoardRoutes(app);
 registerUserAuthRoutes(app);
 registerUserProfileRoutes(app);
