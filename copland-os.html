@@ -488,6 +488,35 @@ const startTime = Date.now();
 
 let currentUser = null; // null = visitor; object = logged-in user
 
+// ========== SESSION STATE ==========
+const STATE_KEY = 'wired_term_state';
+
+function saveState() {
+  try {
+    sessionStorage.setItem(STATE_KEY, JSON.stringify({
+      html: output.innerHTML,
+      history: commandHistory,
+      bannerVisible: welcomeBanner.style.display !== 'none',
+    }));
+  } catch {}
+}
+
+function restoreState() {
+  try {
+    const raw = sessionStorage.getItem(STATE_KEY);
+    if (!raw) return false;
+    const s = JSON.parse(raw);
+    output.innerHTML = s.html || '';
+    commandHistory = Array.isArray(s.history) ? s.history : [];
+    historyIndex = commandHistory.length;
+    if (s.bannerVisible) welcomeBanner.style.display = 'block';
+    scrollArea.scrollTop = scrollArea.scrollHeight;
+    return true;
+  } catch {
+    return false;
+  }
+}
+
 function promptStr() {
   return currentUser ? `${currentUser.username}@wired:~$` : 'visitor@wired:~$';
 }
@@ -537,6 +566,14 @@ function escapeHtml(s) {
 
 // ========== BOOT ==========
 async function boot() {
+  if (restoreState()) {
+    bootDone = true;
+    await refreshSession();
+    input.focus();
+    scheduleIdle();
+    return;
+  }
+
   const lines = [
     ['', ''],
     ['TACHIBANA LABS NAVI — BIOS v2.31', 'dim'],
@@ -712,24 +749,24 @@ const commands = {
   },
   blog() {
     lnHTML('<span class="term-dim">connecting to blog...</span>');
-    setTimeout(() => { window.location.href = '/blog'; }, 250);
+    setTimeout(() => { saveState(); window.location.href = '/blog'; }, 250);
   },
   works() {
     lnHTML('<span class="term-dim">loading portfolio...</span>');
-    setTimeout(() => { window.location.href = '/works'; }, 250);
+    setTimeout(() => { saveState(); window.location.href = '/works'; }, 250);
   },
   portfolio() { commands.works(); },
   micro() {
     lnHTML('<span class="term-dim">loading micro-posts...</span>');
-    setTimeout(() => { window.location.href = '/micro'; }, 250);
+    setTimeout(() => { saveState(); window.location.href = '/micro'; }, 250);
   },
   about() {
     lnHTML('<span class="term-dim">loading about...</span>');
-    setTimeout(() => { window.location.href = '/about'; }, 250);
+    setTimeout(() => { saveState(); window.location.href = '/about'; }, 250);
   },
   links() {
     lnHTML('<span class="term-dim">loading link collection...</span>');
-    setTimeout(() => { window.location.href = '/links'; }, 250);
+    setTimeout(() => { saveState(); window.location.href = '/links'; }, 250);
   },
   login() {
     if (currentUser) {
@@ -738,7 +775,7 @@ const commands = {
       return;
     }
     lnHTML('<span class="term-dim">opening login...</span>');
-    setTimeout(() => { window.location.href = '/login'; }, 250);
+    setTimeout(() => { saveState(); window.location.href = '/login'; }, 250);
   },
   async logout() {
     if (!currentUser) {
@@ -757,9 +794,9 @@ const commands = {
   me() {
     lnHTML('<span class="term-dim">loading user panel...</span>');
     fetch('/api/user/me').then(r => {
-      if (r.ok) { setTimeout(() => { window.location.href = '/me'; }, 250); }
-      else       { setTimeout(() => { window.location.href = '/login'; }, 250); }
-    }).catch(() => setTimeout(() => { window.location.href = '/login'; }, 250));
+      if (r.ok) { saveState(); setTimeout(() => { window.location.href = '/me'; }, 250); }
+      else       { saveState(); setTimeout(() => { window.location.href = '/login'; }, 250); }
+    }).catch(() => { saveState(); setTimeout(() => { window.location.href = '/login'; }, 250); });
   },
   de() {
     lnHTML('<span class="term-yellow">[WARN]</span> <span class="term-dim">desktop environment not yet available.</span>');
@@ -769,7 +806,7 @@ const commands = {
     const arg = (args || '').trim();
     if (arg === '--cli') {
       lnHTML('<span class="term-dim">launching board CLI...</span>');
-      setTimeout(() => { window.location.href = '/board/cli'; }, 300);
+      setTimeout(() => { saveState(); window.location.href = '/board/cli'; }, 300);
     } else if (arg === 'help') {
       ln('');
       lnHTML('<span class="term-bright">board</span>');
@@ -778,7 +815,7 @@ const commands = {
       ln('');
     } else {
       lnHTML('<span class="term-dim">connecting to /wired/ board...</span>');
-      setTimeout(() => { window.location.href = '/board'; }, 300);
+      setTimeout(() => { saveState(); window.location.href = '/board'; }, 300);
     }
   },
 
@@ -786,7 +823,7 @@ const commands = {
     const arg = (args || '').trim();
     if (arg === '--cli') {
       lnHTML('<span class="term-dim">launching lobby CLI...</span>');
-      setTimeout(() => { window.location.href = '/lobby/cli'; }, 300);
+      setTimeout(() => { saveState(); window.location.href = '/lobby/cli'; }, 300);
     } else if (arg === 'help') {
       ln('');
       lnHTML('<span class="term-bright">lobby</span>');
@@ -795,7 +832,7 @@ const commands = {
       ln('');
     } else {
       lnHTML('<span class="term-dim">connecting to wired lobby...</span>');
-      setTimeout(() => { window.location.href = '/lobby'; }, 300);
+      setTimeout(() => { saveState(); window.location.href = '/lobby'; }, 300);
     }
   },
 
@@ -1142,6 +1179,10 @@ function flashTransition(cb) {
 }
 
 // ========== INIT ==========
+// Save state on any unload so the back button always restores correctly,
+// even if the user navigates away without going through a command handler.
+window.addEventListener('pagehide', saveState);
+
 window.addEventListener('load', () => setTimeout(() => { boot(); }, 300));
 </script>
 </body>
