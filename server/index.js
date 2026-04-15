@@ -35,7 +35,7 @@ app.use(userSessionMiddleware);
 
 // Block Reference/, legacy files, and direct access to admin/ source files
 app.use((req, res, next) => {
-  if (req.path.startsWith('/Reference/') || req.path.startsWith('/admin/') || EXCLUDED.has(req.path)) {
+  if (req.path.startsWith('/Reference/') || req.path.startsWith('/admin/') || req.path.startsWith('/server/') || req.path.startsWith('/deploy/') || EXCLUDED.has(req.path)) {
     return res.status(404).end();
   }
   next();
