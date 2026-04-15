@@ -16,7 +16,9 @@ stack:
   - ws (WebSocket server for lobby)
 
 layout:
-  copland-os.html:        Terminal-emulator entry point; iframe-navigates to retro/ pages via postMessage
+  copland-os.html:        Terminal-emulator entry point — structure only (~34 lines)
+  copland-os.css:         Terminal styles, parallax backgrounds, CRT effect, color variables
+  copland-os.js:          Terminal engine — boot sequence, commands, input handling, idle system
   copland-os-legacy.html: Previous iteration kept for reference, not live
   retro/:                 Personal site pages (blog, portfolio, micro, about, links)
   retro/retro.css:        Shared Y2K stylesheet — all themes, Windows XP chrome, scrollbars
@@ -55,7 +57,7 @@ conventions:
   themes: each retro/ page uses a .theme-* class (theme-blog, theme-portfolio, etc.) defined in retro.css
 
 gotchas:
-  - copland-os.html is 57 KB of inline CSS+JS — will need extraction as the project grows
+  - copland-os.html is now structure-only; styles in copland-os.css, logic in copland-os.js
   - board-data.js and lobby-data.js are mock stubs; comments mark where server/DB calls will go
   - retro-utils.js includes a hand-rolled Markdown renderer with custom @[video] and @[youtube] syntax
   - Reference/ is a large local archive; do not treat it as deployable source

@@ -1,0 +1,203 @@
+@import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@300;400;500&family=Press+Start+2P&family=Silkscreen:wght@400;700&display=swap');
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+/* ========== FAUUX-STYLE PARALLAX BACKGROUNDS ========== */
+/* Three fixed layers behind everything, each drifting at a different speed/direction.
+   Technique directly from fauux.neocities.org login page. */
+
+.bg-layer-1 {
+  position: fixed; inset: 0; z-index: 0;
+  background-color: #06060a;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='32' height='32'%3E%3Crect width='32' height='32' fill='%2306060a'/%3E%3Crect x='0' y='0' width='32' height='1' fill='%230e0e18' opacity='0.9'/%3E%3Crect x='0' y='0' width='1' height='32' fill='%230e0e18' opacity='0.9'/%3E%3Crect x='15' y='15' width='2' height='2' fill='%2314142a' opacity='0.5'/%3E%3C/svg%3E");
+  background-size: 32px 32px;
+  animation: bg1-drift 80s linear infinite;
+  pointer-events: none;
+}
+
+.bg-layer-2 {
+  position: fixed; inset: 0; z-index: 1;
+  background-color: transparent;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='8' height='8'%3E%3Crect width='8' height='8' fill='transparent'/%3E%3Crect x='3' y='3' width='1' height='1' fill='%23162030' opacity='0.8'/%3E%3C/svg%3E");
+  background-size: 8px 8px;
+  animation: bg2-drift 60s linear infinite;
+  pointer-events: none;
+}
+
+.bg-layer-3 {
+  position: fixed; inset: 0; z-index: 2;
+  background-color: transparent;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='6' height='6'%3E%3Crect width='6' height='6' fill='transparent'/%3E%3Crect x='0' y='0' width='2' height='2' fill='%23180a10' opacity='0.55'/%3E%3Crect x='3' y='2' width='1' height='1' fill='%230a1020' opacity='0.45'/%3E%3Crect x='1' y='4' width='2' height='1' fill='%23100818' opacity='0.4'/%3E%3C/svg%3E");
+  background-size: 6px 6px;
+  animation: bg3-drift 20s linear infinite;
+  pointer-events: none;
+}
+
+/* Dark overlay fades in over the drifting patterns */
+.bg-overlay {
+  position: fixed; inset: 0; z-index: 3;
+  background-color: rgba(0,0,0,0);
+  animation: overlay-in 0.3s linear forwards;
+  animation-delay: 0.6s;
+  pointer-events: none;
+}
+
+/* Vignette — edge darkening */
+.bg-vignette {
+  position: fixed; inset: 0; z-index: 4;
+  background: radial-gradient(ellipse at center, transparent 70%, rgba(0,0,0,0.25) 100%);
+  pointer-events: none;
+}
+
+@keyframes bg1-drift {
+  from { background-position: center center; }
+  to   { background-position: calc(50% + 1024px) calc(50% + 1024px); }
+}
+@keyframes bg2-drift {
+  from { background-position: calc(50% + 1024px) calc(50% + 1024px); }
+  to   { background-position: center center; }
+}
+@keyframes bg3-drift {
+  from { background-position: center center; }
+  to   { background-position: calc(50% - 512px) center; }
+}
+@keyframes overlay-in {
+  from { background-color: rgba(0,0,0,0); }
+  to   { background-color: rgba(0,0,0,0.68); }
+}
+
+/* Terminal fades in after backgrounds settle */
+@keyframes term-appear {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+:root {
+  --term-bg: #0a0a0a;
+  --term-fg: #b0b0b0;
+  --term-dim: #555;
+  --term-bright: #e0e0e0;
+  --term-accent: #7a9ec2;
+  --term-green: #6a9a5a;
+  --term-red: #9a4a4a;
+  --term-yellow: #9a8a4a;
+}
+
+html, body {
+  width: 100%; height: 100%;
+  background: var(--term-bg);
+  font-family: 'IBM Plex Mono', monospace;
+  color: var(--term-fg);
+  overflow: hidden;
+}
+
+/* ========== CRT ========== */
+#crt {
+  position: fixed; inset: 0;
+  pointer-events: none; z-index: 9999;
+  animation: crt-flicker 8s step-end infinite;
+}
+#crt::before {
+  content: '';
+  position: absolute; inset: 0;
+  background: repeating-linear-gradient(0deg, transparent, transparent 1px, rgba(0,0,0,0.07) 1px, rgba(0,0,0,0.07) 2px);
+}
+#crt::after {
+  content: '';
+  position: absolute; inset: 0;
+  background: radial-gradient(ellipse at center, transparent 75%, rgba(0,0,0,0.15) 100%);
+}
+@keyframes crt-flicker {
+  0%,100% { opacity: 1; }
+  92%      { opacity: 1; }
+  93%      { opacity: 0.85; }
+  94%      { opacity: 1; }
+  96%      { opacity: 0.92; }
+  97%      { opacity: 1; }
+}
+
+/* ========== TERMINAL ========== */
+#terminal-page {
+  width: 100%; height: 100%;
+  display: flex; flex-direction: column;
+  overflow: hidden;
+  position: relative; z-index: 10;
+  background: transparent;
+}
+
+/* Persistent welcome banner */
+#welcome-banner {
+  padding: 20px 40px 12px;
+  border-bottom: 1px solid #1a1a1a;
+  flex-shrink: 0;
+  font-size: 14px;
+  line-height: 1.65;
+  letter-spacing: 0.3px;
+  white-space: pre-wrap;
+  display: none;
+  /* Keep a solid bg here so it reads cleanly over parallax layers */
+  background: rgba(10, 10, 10, 0.92);
+}
+
+#term-scroll-area {
+  flex: 1;
+  overflow-y: auto;
+  padding: 8px 40px 0;
+  scrollbar-width: thin;
+  scrollbar-color: #222 transparent;
+  background: rgba(10, 10, 10, 0.88);
+}
+
+.term-output {
+  white-space: pre-wrap;
+  word-wrap: break-word;
+  font-size: 14px;
+  font-weight: 400;
+  line-height: 1.65;
+  letter-spacing: 0.3px;
+}
+
+.term-input-line {
+  display: flex;
+  align-items: center;
+  padding: 4px 40px 20px;
+  flex-shrink: 0;
+  background: rgba(10, 10, 10, 0.95);
+  border-top: 1px solid #1a1a1a;
+}
+.term-prompt {
+  color: var(--term-green);
+  margin-right: 8px;
+  white-space: nowrap;
+  font-size: 14px;
+}
+#term-input {
+  background: none;
+  border: none;
+  color: var(--term-bright);
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 14px;
+  font-weight: 400;
+  letter-spacing: 0.3px;
+  outline: none;
+  flex: 1;
+  caret-color: var(--term-bright);
+}
+
+.term-line { display: block; min-height: 1.65em; }
+.term-dim { color: var(--term-dim); }
+.term-bright { color: var(--term-bright); }
+.term-accent { color: var(--term-accent); }
+.term-green { color: var(--term-green); }
+.term-red { color: var(--term-red); }
+.term-yellow { color: var(--term-yellow); }
+
+.term-link {
+  color: var(--term-accent);
+  cursor: pointer;
+  text-decoration: none;
+  border-bottom: 1px solid transparent;
+}
+.term-link:hover { border-bottom-color: var(--term-accent); }
+
+::selection { background: var(--term-accent); color: #fff; }
