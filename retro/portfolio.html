@@ -33,7 +33,7 @@
   </div>
   <div class="win-chrome-row2">
     <span class="win-addr-label">アドレス ▼</span>
-    <input type="text" class="win-addr-bar" id="addr-bar" value="/works" readonly>
+    <input type="text" class="win-addr-bar" id="addr-bar" value="http://www.wired.local/works/" readonly style="background:#f4ffe8;">
   </div>
   <div class="win-chrome-row3">
     <span class="win-nav-icon"></span>
@@ -55,7 +55,7 @@ document.querySelector('.win-nav-icon').innerHTML = ICON_GLOBE;
 
 <script>
 function setAddr(path) {
-  document.getElementById('addr-bar').value = path;
+  document.getElementById('addr-bar').value = 'http://www.wired.local' + path + (path.endsWith('/') ? '' : '/');
 }
 
 function updateMeta(title, description, url) {
