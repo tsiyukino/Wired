@@ -167,24 +167,33 @@ html, body { height: 100%; overflow: hidden; }
 <!-- WINDOWS XP CHROME -->
 <div class="win-chrome">
   <div class="win-chrome-row1">
-    <button class="win-btn" onclick="goHome()">← Terminal</button>
-    <button class="win-btn" onclick="location.reload()">⟳ Refresh</button>
-    <button class="win-btn" onclick="window.location.href='/board'">[ /wired/ board ]</button>
-    <button class="win-btn" onclick="window.location.href='/lobby/cli'">[ CLI mode ]</button>
+    <button class="win-btn" onclick="history.back()" title="back"></button>
+    <button class="win-btn" onclick="location.reload()" title="reload"></button>
+    <button class="win-btn" onclick="goTo('terminal')" title="home"></button>
+    <span class="win-btn-sep"></span>
+    <button class="win-btn-link" onclick="goTo('blog')" title="diary"><svg width="14" height="14" viewBox="0 0 16 16" xmlns="http://www.w3.org/2000/svg" style="image-rendering:pixelated"><rect x="2" y="3" width="5" height="10" fill="#6a0d91"/><rect x="9" y="3" width="5" height="10" fill="#6a0d91"/><rect x="7" y="3" width="2" height="10" fill="#c677d3"/><rect x="3" y="4" width="3" height="1" fill="#fcd0fe"/><rect x="3" y="6" width="3" height="1" fill="#fcd0fe"/><rect x="3" y="8" width="3" height="1" fill="#fcd0fe"/><rect x="10" y="4" width="3" height="1" fill="#fcd0fe"/><rect x="10" y="6" width="3" height="1" fill="#fcd0fe"/><rect x="10" y="8" width="3" height="1" fill="#fcd0fe"/></svg></button>
+    <button class="win-btn-link" onclick="goTo('portfolio')" title="works"><svg width="14" height="14" viewBox="0 0 16 16" xmlns="http://www.w3.org/2000/svg" style="image-rendering:pixelated"><rect x="4" y="2" width="4" height="2" fill="#6a0d91"/><rect x="3" y="4" width="2" height="2" fill="#6a0d91"/><rect x="7" y="4" width="2" height="2" fill="#6a0d91"/><rect x="3" y="6" width="6" height="2" fill="#6a0d91"/><rect x="5" y="8" width="2" height="2" fill="#6a0d91"/><rect x="6" y="9" width="2" height="2" fill="#6a0d91"/><rect x="7" y="10" width="2" height="2" fill="#6a0d91"/><rect x="8" y="11" width="2" height="2" fill="#6a0d91"/><rect x="9" y="12" width="3" height="2" fill="#6a0d91"/><rect x="5" y="4" width="2" height="2" fill="#c677d3"/></svg></button>
+    <button class="win-btn-link" onclick="goTo('micro')" title="micro"><svg width="14" height="14" viewBox="0 0 16 16" xmlns="http://www.w3.org/2000/svg" style="image-rendering:pixelated"><rect x="2" y="3" width="10" height="7" fill="#6a0d91"/><rect x="3" y="4" width="8" height="5" fill="#fcd0fe"/><rect x="4" y="5" width="2" height="1" fill="#6a0d91"/><rect x="7" y="5" width="2" height="1" fill="#6a0d91"/><rect x="4" y="7" width="6" height="1" fill="#6a0d91"/><rect x="3" y="10" width="2" height="2" fill="#6a0d91"/><rect x="2" y="12" width="2" height="1" fill="#6a0d91"/></svg></button>
+    <button class="win-btn-link" onclick="goTo('about')" title="about"><svg width="14" height="14" viewBox="0 0 16 16" xmlns="http://www.w3.org/2000/svg" style="image-rendering:pixelated"><rect x="6" y="2" width="4" height="4" fill="#6a0d91"/><rect x="5" y="3" width="1" height="2" fill="#6a0d91"/><rect x="10" y="3" width="1" height="2" fill="#6a0d91"/><rect x="5" y="6" width="6" height="2" fill="#6a0d91"/><rect x="4" y="8" width="8" height="5" fill="#6a0d91"/><rect x="3" y="9" width="2" height="4" fill="#6a0d91"/><rect x="11" y="9" width="2" height="4" fill="#6a0d91"/><rect x="6" y="3" width="4" height="2" fill="#c677d3"/></svg></button>
+    <button class="win-btn-link" onclick="goTo('links')" title="links"><svg width="14" height="14" viewBox="0 0 16 16" xmlns="http://www.w3.org/2000/svg" style="image-rendering:pixelated"><rect x="2" y="5" width="6" height="2" fill="#6a0d91"/><rect x="2" y="9" width="6" height="2" fill="#6a0d91"/><rect x="2" y="7" width="2" height="2" fill="#6a0d91"/><rect x="6" y="7" width="2" height="2" fill="#6a0d91"/><rect x="8" y="5" width="6" height="2" fill="#6a0d91"/><rect x="8" y="9" width="6" height="2" fill="#6a0d91"/><rect x="12" y="7" width="2" height="2" fill="#6a0d91"/><rect x="3" y="6" width="4" height="4" fill="#fcd0fe"/><rect x="9" y="6" width="4" height="4" fill="#fcd0fe"/><rect x="6" y="7" width="4" height="2" fill="#6a0d91"/></svg></button>
     <span class="win-chrome-title">COPLAND OS NAVIGATOR v4.017</span>
   </div>
   <div class="win-chrome-row2">
-    <span class="win-addr-label">Address ▼</span>
+    <span class="win-addr-label">アドレス ▼</span>
     <input type="text" class="win-addr-bar" value="wired://lobby/" readonly>
   </div>
   <div class="win-chrome-row3">
-    <span class="win-nav-icon">📡</span>
+    <span class="win-nav-icon"></span>
     <button class="win-nav-btn">∗ WIRED LOBBY — anonymous instant messaging</button>
-    <span style="opacity:0.3">|</span>
-    <button class="win-nav-btn" onclick="goHome()">[ terminal ]</button>
     <span class="blink" style="margin-left:auto;margin-right:8px;font-family:'Press Start 2P',monospace;font-size:8px;color:#6a0d91;">∗ CONNECTED ∗</span>
   </div>
 </div>
+<script>
+document.querySelector('.win-chrome-row1 .win-btn:nth-child(1)').innerHTML = ICON_BACK;
+document.querySelector('.win-chrome-row1 .win-btn:nth-child(2)').innerHTML = ICON_REFRESH;
+document.querySelector('.win-chrome-row1 .win-btn:nth-child(3)').innerHTML = ICON_HOME;
+document.querySelector('.win-nav-icon').innerHTML = ICON_GLOBE;
+</script>
 
 <div class="retro-deco-left"></div>
 <div class="retro-deco-right"></div>
@@ -202,7 +211,7 @@ html, body { height: 100%; overflow: hidden; }
   <div id="lobby-nav">
     <a onclick="window.location.href='/board'">[/wired/ board]</a>
     <span class="sep"> | </span>
-    <a onclick="goHome()">[terminal]</a>
+    <a onclick="goTo('terminal')">[terminal]</a>
     <span class="sep"> | </span>
     <a onclick="window.location.href='/lobby/cli'">[CLI mode]</a>
     <span style="margin-left:auto;font-family:'Press Start 2P',monospace;font-size:7px;color:#6a0d91;opacity:0.4;">no accounts ∗ no logs ∗ rate limited</span>
@@ -342,11 +351,6 @@ chatInput.addEventListener('keydown', e => {
   if (e.key === 'Enter') { e.preventDefault(); sendMessage(); }
 });
 
-function goHome() {
-  if (window.parent && window.parent !== window) {
-    window.parent.postMessage({ action: 'navigate', section: 'terminal' }, '*');
-  } else { window.location.href = '/'; }
-}
 
 initLobby();
 chatInput.focus();
