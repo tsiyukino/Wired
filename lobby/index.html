@@ -221,12 +221,12 @@ document.querySelector('.win-nav-icon').innerHTML = ICON_GLOBE;
 
   <div id="input-area">
     <div class="input-row">
-      <input type="text" id="chat-name" placeholder="Anonymous" maxlength="20">
+      <span id="my-handle" style="font-family:'Silkscreen',monospace;font-size:11px;font-weight:700;color:#6a0d91;white-space:nowrap;flex-shrink:0;padding:0 6px;opacity:0.7;">…</span>
       <input type="text" id="chat-input" placeholder="say something..." maxlength="500" autocomplete="off">
       <button class="send-btn" onclick="sendMessage()">[ SEND ]</button>
     </div>
     <div id="rate-msg"></div>
-    <div class="input-hint">Enter to send  ∗  no account needed  ∗  rate limited</div>
+    <div class="input-hint">Enter to send  ∗  anonymous  ∗  rate limited</div>
   </div>
 
 </div>
@@ -238,10 +238,11 @@ const MAX_VISIBLE = 120;  // trim message history in DOM
 
 let ws = null;
 let msgCount = 0;
+let myHandle = null;  // set from first echoed message back from server
 
 const msgArea    = document.getElementById('msg-area');
 const chatInput  = document.getElementById('chat-input');
-const chatName   = document.getElementById('chat-name');
+const handleEl   = document.getElementById('my-handle');
 const rateMsg    = document.getElementById('rate-msg');
 const onlinePill = document.getElementById('online-pill');
 
@@ -308,13 +309,20 @@ function connectWs() {
 
   ws.addEventListener('open', () => {
     onlinePill.textContent = '● CONNECTED';
-    sysMsg('connected to the wired. say something.');
+    myHandle = null;
+    handleEl.textContent = '…';
+    sysMsg('connected to the wired. your handle appears when you send your first message.');
     reconnectDelay = 2000;
   });
 
   ws.addEventListener('message', (event) => {
     let msg;
     try { msg = JSON.parse(event.data); } catch { return; }
+    // Server echoes our own messages back — capture our handle on first receipt
+    if (!myHandle && msg.name) {
+      myHandle = msg.name;
+      handleEl.textContent = myHandle;
+    }
     renderMsg(msg, false);
   });
 
@@ -342,8 +350,7 @@ function sendMessage() {
   }
 
   rateMsg.textContent = '';
-  const name = chatName.value.trim() || 'Anonymous';
-  ws.send(JSON.stringify({ name, text }));
+  ws.send(JSON.stringify({ text }));
   chatInput.value = '';
 }
 

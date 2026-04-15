@@ -92,6 +92,83 @@ export function registerContentRoutes(app) {
     res.json({ count: row.visitor_count });
   });
 
+  // GET /feed  (also /feed.xml) — Atom 1.0 feed for blog posts
+  function atomFeed(req, res) {
+    const base  = `${req.protocol}://${req.get('host')}`;
+    const posts = getDb()
+      .prepare(`SELECT slug, title, body, created_at, updated_at FROM blog_posts ORDER BY id DESC LIMIT 20`)
+      .all();
+
+    const updated = posts.length ? posts[0].updated_at ?? posts[0].created_at : new Date().toISOString();
+
+    const entries = posts.map(p => {
+      const url     = `${base}/blog/${p.slug}`;
+      const pubDate = p.created_at;
+      const updDate = p.updated_at ?? p.created_at;
+      // Plain-text summary: strip markdown-ish characters, truncate
+      const summary = (p.body ?? '').replace(/[#*`>_~\[\]]/g, '').trim().slice(0, 280);
+      return [
+        `  <entry>`,
+        `    <id>${url}</id>`,
+        `    <title>${escapeXml(p.title)}</title>`,
+        `    <link href="${url}"/>`,
+        `    <published>${pubDate}</published>`,
+        `    <updated>${updDate}</updated>`,
+        `    <summary>${escapeXml(summary)}</summary>`,
+        `  </entry>`,
+      ].join('\n');
+    }).join('\n');
+
+    const xml = [
+      `<?xml version="1.0" encoding="UTF-8"?>`,
+      `<feed xmlns="http://www.w3.org/2005/Atom">`,
+      `  <id>${base}/feed</id>`,
+      `  <title>wired — blog</title>`,
+      `  <link href="${base}/blog"/>`,
+      `  <link rel="self" href="${base}/feed"/>`,
+      `  <updated>${updated}</updated>`,
+      entries,
+      `</feed>`,
+    ].join('\n');
+
+    res.set('Content-Type', 'application/atom+xml; charset=utf-8');
+    res.send(xml);
+  }
+
+  function escapeXml(s) {
+    return String(s)
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;')
+      .replace(/'/g, '&apos;');
+  }
+
+  app.get('/feed',     atomFeed);
+  app.get('/feed.xml', atomFeed);
+
+  // GET /api/search?q=<query> — full-text search over blog posts
+  app.get('/api/search', (req, res) => {
+    const q = (req.query.q ?? '').trim();
+    if (!q) return res.json({ results: [] });
+
+    try {
+      const rows = getDb().prepare(`
+        SELECT p.slug, p.title,
+               snippet(blog_posts_fts, 1, '<mark>', '</mark>', '…', 24) AS snippet
+        FROM blog_posts_fts
+        JOIN blog_posts p ON p.id = blog_posts_fts.rowid
+        WHERE blog_posts_fts MATCH ?
+        ORDER BY rank
+        LIMIT 20
+      `).all(q);
+      res.json({ results: rows });
+    } catch {
+      // MATCH syntax errors return 400 so the client can surface them cleanly
+      res.status(400).json({ error: 'invalid search query' });
+    }
+  });
+
   // GET /sitemap.xml
   app.get('/sitemap.xml', (req, res) => {
     const base = `${req.protocol}://${req.get('host')}`;

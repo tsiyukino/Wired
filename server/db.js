@@ -161,6 +161,30 @@ export function initSchema() {
   for (const sql of migrations) {
     try { db.prepare(sql).run(); } catch { /* column already exists */ }
   }
+
+  // FTS5 full-text search index for blog posts.
+  // content= makes it a content table — FTS data mirrors blog_posts.
+  // Triggers keep the index in sync on insert/update/delete.
+  db.exec(`
+    CREATE VIRTUAL TABLE IF NOT EXISTS blog_posts_fts
+      USING fts5(title, body, content=blog_posts, content_rowid=id);
+
+    CREATE TRIGGER IF NOT EXISTS blog_posts_fts_ai
+      AFTER INSERT ON blog_posts BEGIN
+        INSERT INTO blog_posts_fts(rowid, title, body) VALUES (new.id, new.title, new.body);
+      END;
+
+    CREATE TRIGGER IF NOT EXISTS blog_posts_fts_au
+      AFTER UPDATE ON blog_posts BEGIN
+        INSERT INTO blog_posts_fts(blog_posts_fts, rowid, title, body) VALUES ('delete', old.id, old.title, old.body);
+        INSERT INTO blog_posts_fts(rowid, title, body) VALUES (new.id, new.title, new.body);
+      END;
+
+    CREATE TRIGGER IF NOT EXISTS blog_posts_fts_ad
+      AFTER DELETE ON blog_posts BEGIN
+        INSERT INTO blog_posts_fts(blog_posts_fts, rowid, title, body) VALUES ('delete', old.id, old.title, old.body);
+      END;
+  `);
 }
 
 // Purge bin rows whose expires_at is in the past.

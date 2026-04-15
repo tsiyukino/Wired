@@ -28,17 +28,22 @@ function checkCooldown(ip) {
 }
 
 export function registerBoardRoutes(app) {
-  // GET /api/board/threads — list threads, reverse-chronological
+  // GET /api/board/threads — list threads, reverse-chronological, paginated
+  // Query params: offset (default 0), limit (default 20, max boardMaxThreads)
   app.get('/api/board/threads', (req, res) => {
-    const db = getDb();
+    const db     = getDb();
+    const limit  = Math.min(parseInt(req.query.limit  ?? '20', 10), config.boardMaxThreads);
+    const offset = Math.max(parseInt(req.query.offset ?? '0',  10), 0);
     const threads = db.prepare(`
       SELECT t.*,
         (SELECT COUNT(*) FROM replies r WHERE r.thread_id = t.id) AS replyCount
       FROM threads t
       ORDER BY t.pinned DESC, t.id DESC
-      LIMIT ?
-    `).all(config.boardMaxThreads);
-    res.json({ threads });
+      LIMIT ? OFFSET ?
+    `).all(limit, offset);
+    const total   = db.prepare(`SELECT COUNT(*) AS n FROM threads`).get().n;
+    const hasMore = offset + threads.length < total;
+    res.json({ threads, hasMore, total });
   });
 
   // GET /api/board/threads/:id — thread + replies
@@ -56,7 +61,7 @@ export function registerBoardRoutes(app) {
     const wait = checkCooldown(ip);
     if (wait) return res.status(429).json({ error: `wait ${wait}s before posting again` });
 
-    const { name, subject, body } = req.body ?? {};
+    const { subject, body } = req.body ?? {};
     if (!body?.trim()) return res.status(400).json({ error: 'body is required' });
 
     const db = getDb();
@@ -64,7 +69,7 @@ export function registerBoardRoutes(app) {
     const info = db.prepare(`
       INSERT INTO threads (no, time, name, subject, body)
       VALUES (?, ?, ?, ?, ?)
-    `).run(no, now(), (name?.trim() || 'Anonymous'), subject?.trim() || null, body.trim());
+    `).run(no, now(), 'Anonymous', subject?.trim() || null, body.trim());
 
     lastPost.set(ip, Date.now());
     const thread = db.prepare('SELECT * FROM threads WHERE id = ?').get(info.lastInsertRowid);
@@ -81,14 +86,14 @@ export function registerBoardRoutes(app) {
     const thread = db.prepare('SELECT id FROM threads WHERE id = ?').get(req.params.id);
     if (!thread) return res.status(404).json({ error: 'thread not found' });
 
-    const { name, body } = req.body ?? {};
+    const { body } = req.body ?? {};
     if (!body?.trim()) return res.status(400).json({ error: 'body is required' });
 
     const no = nextNo();
     const info = db.prepare(`
       INSERT INTO replies (thread_id, no, time, name, body)
       VALUES (?, ?, ?, ?, ?)
-    `).run(thread.id, no, now(), (name?.trim() || 'Anonymous'), body.trim());
+    `).run(thread.id, no, now(), 'Anonymous', body.trim());
 
     lastPost.set(ip, Date.now());
     const reply = db.prepare('SELECT * FROM replies WHERE id = ?').get(info.lastInsertRowid);

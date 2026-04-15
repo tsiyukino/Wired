@@ -161,8 +161,14 @@ body { background-color: #fcd0fe; }
   color: #2a0a3a; white-space: pre-wrap;
 }
 .post-quote {
-  color: #6a0d91; font-weight: 500;
+  color: #6a0d91; font-weight: 500; cursor: pointer;
 }
+.post-quote:hover { text-decoration: underline; }
+@keyframes post-flash {
+  0%   { background: rgba(106,13,145,0.18); }
+  100% { background: transparent; }
+}
+.post-highlight { animation: post-flash 1.5s ease-out; }
 
 /* Reply form in thread */
 .reply-box {
@@ -246,13 +252,10 @@ document.querySelector('.win-nav-icon').innerHTML = ICON_GLOBE;
   <div class="post-form-box">
     <div class="post-form-title">// START A NEW THREAD //</div>
     <div class="post-form">
-      <div class="post-form-row">
-        <input type="text" id="nt-name" placeholder="Name  (leave blank for Anonymous)" maxlength="32">
-        <input type="text" id="nt-subject" placeholder="Subject  (optional)" maxlength="64">
-      </div>
+      <input type="text" id="nt-subject" placeholder="Subject  (optional)" maxlength="64">
       <textarea id="nt-body" placeholder="What's on your mind?" maxlength="2000"></textarea>
       <div class="post-form-footer">
-        <span class="post-form-note">∗ no account needed  ∗  rate limited  ∗  be excellent to each other</span>
+        <span class="post-form-note">∗ anonymous  ∗  rate limited  ∗  be excellent to each other</span>
         <button class="post-btn" onclick="submitThread()">[ POST ]</button>
       </div>
       <div class="post-error" id="nt-error"></div>
@@ -262,6 +265,8 @@ document.querySelector('.win-nav-icon').innerHTML = ICON_GLOBE;
   <div class="pixel-hr"></div>
 
   <div id="thread-list"></div>
+  <div id="scroll-sentinel" style="height:1px;"></div>
+  <div id="load-more-status" style="font-family:'Silkscreen',monospace;font-size:10px;color:#6a0d91;opacity:0.5;text-align:center;padding:8px 0;display:none;"></div>
 
   <div class="kaomoji-strip">
     <span class="kao">(´・ω・`)</span>
@@ -290,6 +295,11 @@ document.querySelector('.win-nav-icon').innerHTML = ICON_GLOBE;
 
 <script>
 const API = '';  // same-origin; no base URL needed
+const PAGE_SIZE = 20;
+
+let threadOffset = 0;
+let isLoadingThreads = false;
+let noMoreThreads = false;
 
 function esc(s) {
   return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
@@ -302,30 +312,48 @@ function showBoard() {
   document.getElementById('view-list').style.display = '';
   document.getElementById('view-thread').style.display = 'none';
   document.getElementById('addr-bar').value = 'wired://board/wired/';
-  loadThreads();
+  resetThreads();
   window.scrollTo(0,0);
 }
 
-async function loadThreads() {
-  const list = document.getElementById('thread-list');
-  const stats = document.getElementById('stats-bar');
-  list.innerHTML = '<div style="font-family:\'Silkscreen\',monospace;font-size:10px;color:#6a0d91;opacity:0.6;padding:8px 0;">loading...</div>';
+function resetThreads() {
+  threadOffset = 0;
+  noMoreThreads = false;
+  document.getElementById('thread-list').innerHTML =
+    '<div style="font-family:\'Silkscreen\',monospace;font-size:10px;color:#6a0d91;opacity:0.6;padding:8px 0;">loading...</div>';
+  document.getElementById('load-more-status').style.display = 'none';
+  loadMoreThreads();
+}
+
+async function loadMoreThreads() {
+  if (isLoadingThreads || noMoreThreads) return;
+  isLoadingThreads = true;
+
+  const list   = document.getElementById('thread-list');
+  const status = document.getElementById('load-more-status');
 
   let data;
   try {
-    const r = await fetch(`${API}/api/board/threads`);
+    const r = await fetch(`${API}/api/board/threads?limit=${PAGE_SIZE}&offset=${threadOffset}`);
     if (!r.ok) throw new Error(`${r.status}`);
     data = await r.json();
   } catch (e) {
-    list.innerHTML = '<div style="font-family:\'Silkscreen\',monospace;font-size:10px;color:#b30000;padding:8px 0;">∗ could not load threads. try refreshing.</div>';
+    if (threadOffset === 0) {
+      list.innerHTML = '<div style="font-family:\'Silkscreen\',monospace;font-size:10px;color:#b30000;padding:8px 0;">∗ could not load threads. try refreshing.</div>';
+    }
+    isLoadingThreads = false;
     return;
   }
 
   const threads = data.threads;
-  const postCount = threads.reduce((a, t) => a + (t.replyCount ?? 0) + 1, 0);
-  stats.textContent = `threads: ${threads.length}  ∗  posts: ${postCount}  ∗  anonymous`;
 
-  list.innerHTML = threads.map(t => `
+  if (threadOffset === 0) {
+    list.innerHTML = '';
+    const stats = document.getElementById('stats-bar');
+    stats.textContent = `threads: ${data.total}  ∗  anonymous`;
+  }
+
+  list.insertAdjacentHTML('beforeend', threads.map(t => `
     <div class="thread-entry" onclick="openThread(${t.id})">
       <div class="thread-entry-head">
         <span class="thread-no">No.${t.no}</span>
@@ -339,8 +367,25 @@ async function loadThreads() {
       </div>
     </div>
     <div class="pixel-hr"></div>
-  `).join('');
+  `).join(''));
+
+  threadOffset += threads.length;
+
+  if (!data.hasMore) {
+    noMoreThreads = true;
+    if (threadOffset > PAGE_SIZE) {
+      status.textContent = '∗ end of board ∗';
+      status.style.display = 'block';
+    }
+  }
+
+  isLoadingThreads = false;
 }
+
+// Infinite scroll — watch the sentinel at the bottom of thread-list
+const scrollObserver = new IntersectionObserver((entries) => {
+  if (entries[0].isIntersecting) loadMoreThreads();
+}, { rootMargin: '200px' });
 
 // ── Thread detail ──
 async function openThread(id) {
@@ -374,7 +419,7 @@ function renderThread(t, replies) {
   ];
 
   const postsHtml = allPosts.map(p => `
-    <div class="post-block">
+    <div class="post-block" data-no="${p.no}">
       <div class="post-block-head${p.isOP ? ' op' : ''}">
         <span class="post-name">${esc(p.name)}</span>
         <span class="post-num">No.${p.no}</span>
@@ -405,10 +450,9 @@ function renderThread(t, replies) {
     <div class="reply-box">
       <div class="reply-box-title">// POST A REPLY //</div>
       <div class="post-form">
-        <input type="text" id="reply-name" placeholder="Name  (Anonymous)" maxlength="32">
         <textarea id="reply-body" placeholder="Reply..." maxlength="1000"></textarea>
         <div class="post-form-footer">
-          <span class="post-form-note">∗ &gt;&gt;No to quote a post</span>
+          <span class="post-form-note">∗ &gt;&gt;No to quote a post  ∗  anonymous</span>
           <button class="post-btn" onclick="submitReply(${t.id})">[ POST REPLY ]</button>
         </div>
         <div class="post-error" id="reply-error"></div>
@@ -420,7 +464,17 @@ function renderThread(t, replies) {
 }
 
 function renderPostBody(html) {
-  return html.replace(/&gt;&gt;(\d+)/g, '<span class="post-quote">&gt;&gt;$1</span>');
+  // >>N becomes a clickable link that scrolls to the post with that number
+  return html.replace(/&gt;&gt;(\d+)/g,
+    '<a class="post-quote" href="#" onclick="jumpToPost($1);return false;">&gt;&gt;$1</a>');
+}
+
+function jumpToPost(no) {
+  const target = document.querySelector(`.post-block[data-no="${no}"]`);
+  if (!target) return;
+  target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  target.classList.add('post-highlight');
+  setTimeout(() => target.classList.remove('post-highlight'), 1500);
 }
 
 function quotePost(no) {
@@ -435,7 +489,6 @@ function quotePost(no) {
 async function submitThread() {
   const body    = document.getElementById('nt-body').value.trim();
   const subject = document.getElementById('nt-subject').value.trim();
-  const name    = document.getElementById('nt-name').value.trim();
   const err     = document.getElementById('nt-error');
 
   if (!body) { showError(err, 'Post body is required.'); return; }
@@ -448,15 +501,14 @@ async function submitThread() {
     const r = await fetch(`${API}/api/board/threads`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ name: name || undefined, subject: subject || undefined, body }),
+      body: JSON.stringify({ subject: subject || undefined, body }),
     });
     const data = await r.json();
     if (!r.ok) { showError(err, data.error || `error ${r.status}`); return; }
 
     document.getElementById('nt-body').value = '';
     document.getElementById('nt-subject').value = '';
-    document.getElementById('nt-name').value = '';
-    loadThreads();
+    resetThreads();
   } catch (e) {
     showError(err, 'network error — try again');
   } finally {
@@ -467,7 +519,6 @@ async function submitThread() {
 // ── Submit reply ──
 async function submitReply(threadId) {
   const body = document.getElementById('reply-body').value.trim();
-  const name = document.getElementById('reply-name').value.trim();
   const err  = document.getElementById('reply-error');
 
   if (!body) { showError(err, 'Reply body is required.'); return; }
@@ -480,13 +531,12 @@ async function submitReply(threadId) {
     const r = await fetch(`${API}/api/board/threads/${threadId}/reply`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ name: name || undefined, body }),
+      body: JSON.stringify({ body }),
     });
     const data = await r.json();
     if (!r.ok) { showError(err, data.error || `error ${r.status}`); return; }
 
     document.getElementById('reply-body').value = '';
-    document.getElementById('reply-name').value = '';
     openThread(threadId);
   } catch (e) {
     showError(err, 'network error — try again');
@@ -503,7 +553,8 @@ function goBack() {
 
 // ── Init ──
 document.getElementById('counter-slot').innerHTML = counter();
-loadThreads();
+scrollObserver.observe(document.getElementById('scroll-sentinel'));
+resetThreads();
 </script>
 </body>
 </html>

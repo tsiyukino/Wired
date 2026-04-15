@@ -6,16 +6,26 @@ const ANON_COLORS = [
   '#6a8a9a', '#9a6a6a', '#7a8a6a', '#8a7a9a',
 ];
 
-// Active WebSocket connections: ws → { color }
+const ANON_ADJECTIVES = ['quiet','static','signal','lost','echo','null','void','relay','ghost','proxy'];
+const ANON_NOUNS      = ['node','wire','pulse','gate','packet','frame','layer','socket','port','trace'];
+
+// Active WebSocket connections: ws → { handle }
 const clients = new Map();
 
 function now() {
   return new Date().toISOString().replace('T', ' ').slice(11, 16);
 }
 
-function assignColor() {
-  const used = new Set([...clients.values()].map(c => c.color));
-  return ANON_COLORS.find(c => !used.has(c)) ?? ANON_COLORS[Math.floor(Math.random() * ANON_COLORS.length)];
+// Random color, independent of identity
+function randomColor() {
+  return ANON_COLORS[Math.floor(Math.random() * ANON_COLORS.length)];
+}
+
+// Session handle: Anon#adjective-noun, e.g. "Anon#ghost-port"
+function randomHandle() {
+  const adj  = ANON_ADJECTIVES[Math.floor(Math.random() * ANON_ADJECTIVES.length)];
+  const noun = ANON_NOUNS[Math.floor(Math.random() * ANON_NOUNS.length)];
+  return `Anon#${adj}-${noun}`;
 }
 
 function broadcast(message) {
@@ -53,8 +63,8 @@ export function registerLobbyRoutes(app, wss) {
 
   // WebSocket upgrade at /ws/lobby
   wss.on('connection', (ws) => {
-    const color = assignColor();
-    clients.set(ws, { color });
+    const handle = randomHandle();
+    clients.set(ws, { handle });
 
     ws.on('message', (data) => {
       let parsed;
@@ -66,8 +76,8 @@ export function registerLobbyRoutes(app, wss) {
       const msg = {
         id:    Date.now(),
         time:  now(),
-        name:  parsed.name?.trim() || 'Anonymous',
-        color,
+        name:  handle,
+        color: randomColor(),
         text,
       };
 

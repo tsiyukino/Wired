@@ -110,6 +110,18 @@ server.on('upgrade', (req, socket, head) => {
   }
 });
 
+// 404 handler — must come after all routes
+app.use((req, res) => {
+  res.status(404).sendFile(path.join(ROOT, 'retro/404.html'));
+});
+
+// 500 handler — four-argument signature required by Express
+// eslint-disable-next-line no-unused-vars
+app.use((err, req, res, next) => {
+  console.error(err);
+  res.status(500).sendFile(path.join(ROOT, 'retro/500.html'));
+});
+
 // Graceful shutdown — finish in-flight requests, then close DB and exit
 const SHUTDOWN_TIMEOUT_MS = 5000;
 
